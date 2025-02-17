@@ -2,3 +2,4 @@
 **/venv
 pkmn_api/target
 **/Cargo.lock
+**/*.db

@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS Users (
 
 CREATE TABLE IF NOT EXISTS Pokemon (
     pokemon_id   INTEGER PRIMARY KEY,
-    number       INTEGER,
     name         TEXT NOT NULL,
     description  TEXT,
     height       REAL,
@@ -18,7 +17,7 @@ CREATE TABLE IF NOT EXISTS Pokemon (
 
 CREATE TABLE IF NOT EXISTS FoundPokemon (
     found_id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id        INTEGER NOT NULL,
+    user_id        TEXT NOT NULL,
     pokemon_id     INTEGER NOT NULL,
     found_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     photo_path     TEXT, 
@@ -28,8 +27,52 @@ CREATE TABLE IF NOT EXISTS FoundPokemon (
     FOREIGN KEY (pokemon_id) REFERENCES Pokemon(pokemon_id)
 );
 
-CREATE TABLE IF NOT EXISTS PokemonDiscoveryCode (
-    code        TEXT PRIMARY KEY,
-    pokemon_id  INTEGER,
-    FOREIGN KEY (pokemon_id) REFERENCES Pokemon(pokemon_id)
-)
+-- view to show found pokemon with user name
+CREATE VIEW IF NOT EXISTS ViewFoundPokemon AS
+SELECT 
+    Users.user_id AS UserId,
+    Users.name AS User, 
+    Pokemon.name AS Pokemon, 
+    Pokemon.pokemon_id AS Number, 
+    FoundPokemon.found_timestamp AS TimeStamp, 
+    FoundPokemon.photo_path AS PhotoPath, 
+    FoundPokemon.comment AS Comment, 
+    FoundPokemon.rating AS Rating
+FROM FoundPokemon
+JOIN Users ON FoundPokemon.user_id = Users.user_id
+JOIN Pokemon ON FoundPokemon.pokemon_id = Pokemon.pokemon_id;
+
+-- latest found pokemon
+CREATE VIEW IF NOT EXISTS ViewLatestFoundPokemon AS
+SELECT 
+    Users.name AS User, 
+    Pokemon.name AS Pokemon, 
+    FoundPokemon.found_timestamp AS TimeStamp, 
+    FoundPokemon.photo_path AS PhotoPath, 
+    FoundPokemon.comment AS Comment, 
+    FoundPokemon.rating AS Rating
+FROM FoundPokemon
+JOIN Users ON FoundPokemon.user_id = Users.user_id
+JOIN Pokemon ON FoundPokemon.pokemon_id = Pokemon.pokemon_id
+ORDER BY FoundPokemon.found_timestamp DESC 
+LIMIT 10;
+
+-- view number of pokemon found by user
+CREATE VIEW IF NOT EXISTS ViewNumPokemonFound AS
+SELECT 
+    Users.name AS User, 
+    COUNT(FoundPokemon.pokemon_id) AS PokemonCaught
+FROM FoundPokemon
+JOIN Users ON FoundPokemon.user_id = Users.user_id
+GROUP BY Users.name;
+
+-- top 10 finders
+CREATE VIEW IF NOT EXISTS ViewTopFinders AS
+SELECT 
+    Users.name AS User, 
+    COUNT(FoundPokemon.pokemon_id) AS PokemonCaught
+FROM FoundPokemon
+JOIN Users ON FoundPokemon.user_id = Users.user_id
+GROUP BY Users.name
+ORDER BY PokemonCaught DESC
+LIMIT 10;

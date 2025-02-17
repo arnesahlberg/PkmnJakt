@@ -12,9 +12,9 @@ with open('/Users/arnesahlberg/Kod/Projects/PkmnJakt/Pkmn/pkmn.csv', newline='',
     reader = csv.DictReader(csvfile)
     for row in reader:
         cursor.execute('''
-        INSERT INTO Pokemon (pokemon_id, number, name, description, height)
-        VALUES (?, ?, ?, ?, ?)
-        ''', (row['Nr'], row['Nr'], row['Name'], row['Info'], float(row['Size'].replace(' m', ''))))
+        INSERT INTO Pokemon (pokemon_id, name, description, height)
+        VALUES (?, ?, ?, ?)
+        ''', (row['Nr'], row['Name'], row['Info'], float(row['Size'].replace(' m', ''))))
 
 conn.commit()
 conn.close()

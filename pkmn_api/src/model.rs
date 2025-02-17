@@ -1,0 +1,29 @@
+use serde::{Deserialize, Serialize};
+use chrono::{DateTime, Utc};
+use chrono_tz::{Europe::Berlin, Tz}; // CET is represented by Berlin timezone
+
+
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct User {
+    pub user_id: String,
+    pub name: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct FoundPkmn {
+    pub found_by_user: User,
+    pub name: String,
+    pub number: u32,
+    pub time_found: DateTime<Utc>,
+    pub photo_path: Option<String>,
+    pub comment: Option<String>,
+    pub rating: Option<i32>
+}
+
+impl FoundPkmn {
+    pub fn cet_time(&self) -> DateTime<Tz> {
+        let cet_timezone: Tz = Berlin;
+        self.time_found.with_timezone(&cet_timezone)
+    }
+}
