@@ -1,0 +1,35 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS Users (
+    user_id    TEXT PRIMARY KEY,
+    name       TEXT NOT NULL,
+    phone      TEXT,
+    email      TEXT
+);
+
+CREATE TABLE IF NOT EXISTS Pokemon (
+    pokemon_id   INTEGER PRIMARY KEY,
+    number       INTEGER,
+    name         TEXT NOT NULL,
+    description  TEXT,
+    height       REAL,
+    active       BOOLEAN DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS FoundPokemon (
+    found_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id        INTEGER NOT NULL,
+    pokemon_id     INTEGER NOT NULL,
+    found_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    photo_path     TEXT, 
+    comment        TEXT,
+    rating         INTEGER CHECK (rating >= 0 AND rating <= 4),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    FOREIGN KEY (pokemon_id) REFERENCES Pokemon(pokemon_id)
+);
+
+CREATE TABLE IF NOT EXISTS PokemonDiscoveryCode (
+    code        TEXT PRIMARY KEY,
+    pokemon_id  INTEGER,
+    FOREIGN KEY (pokemon_id) REFERENCES Pokemon(pokemon_id)
+)

@@ -1,0 +1,4 @@
+**/.DS_Store
+**/venv
+pkmn_api/target
+**/Cargo.lock
