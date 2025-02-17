@@ -77,7 +77,6 @@ pub fn view_found_pokemon(user_id: &str, n: i32, conn: &Connection) -> Result<Ve
     // use view ViewFoundPokemon
     let mut stmt = conn.prepare("SELECT Pokemon, Number, TimeStamp, PhotoPath, Comment, Rating FROM ViewFoundPokemon WHERE UserId = ?1 ORDER BY TimeStamp DESC LIMIT ?2")?;
     let rows = stmt.query_map(params![user_id, n], |row| {
-        println!("row: {:?}", row);
         Ok(FoundPkmn {
             found_by_user: User {
                 user_id: user_id.to_string(),
