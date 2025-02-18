@@ -15,7 +15,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.red, Colors.deepOrange],
+            colors: [Colors.deepPurple, Colors.blue, Colors.yellow],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

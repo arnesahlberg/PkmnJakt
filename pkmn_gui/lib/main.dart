@@ -111,9 +111,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Stensund Pkmn-Jakt 2025!',
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.deepPurple,
         colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.red,
+          primarySwatch: Colors.deepPurple,
         ).copyWith(secondary: Colors.yellowAccent),
       ),
       home: const WelcomeScreen(),
@@ -284,7 +284,6 @@ class DataMatrixScannerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Scan Data Matrix Code')),
       body: Column(
         children: [
           Expanded(
