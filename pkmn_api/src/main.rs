@@ -1,6 +1,7 @@
 use model::FoundPkmn;
 use serde::{Deserialize, Serialize};
 use actix_web::{web, App, HttpResponse, HttpServer};
+use actix_cors::Cors;
 
 mod model;
 mod databaseconnection;
@@ -218,6 +219,12 @@ async fn view_found_pokemon(info: web::Json<ViewFoundPokemonRequest>) -> HttpRes
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
+            .wrap(
+                Cors::default()
+                    .allow_any_origin()
+                    .allowed_methods(["GET", "POST"])
+                    .allow_any_header()
+            )
             .route("/login", web::post().to(login)) 
             .route("/logout", web::post().to(logout))
             .route("/create_user", web::post().to(create_user))
