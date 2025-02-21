@@ -3,3 +3,5 @@
 pkmn_api/target
 **/Cargo.lock
 **/*.db
+
+**/*.avif

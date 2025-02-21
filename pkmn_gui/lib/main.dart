@@ -75,20 +75,49 @@ class UserSession extends ChangeNotifier {
   String? userId;
   String? userName;
 
+  UserSession() {
+    _loadFromCookies();
+  }
+
+  void _loadFromCookies() {
+    final cookies = html.document.cookie;
+    if (cookies != null) {
+      final parts = cookies.split(';');
+      for (var part in parts) {
+        final trimmed = part.trim();
+        if (trimmed.startsWith("userId=")) {
+          userId = trimmed.substring("userId=".length);
+        } else if (trimmed.startsWith("userName=")) {
+          userName = trimmed.substring("userName=".length);
+        }
+      }
+      notifyListeners();
+    }
+  }
+
   void login(String id, String name) {
     userId = id;
     userName = name;
-    // Save cookie to keep user logged in
-    html.document.cookie = "userId=$id; path=/";
+    // Set cookie expiration to 30 days from now
+    final expDate = DateTime.now().add(const Duration(days: 30));
+    final expDateStr =
+        expDate
+            .toUtc()
+            .toIso8601String(); // ISO8601 string may work in many cases
+    // Alternatively, for strict cookie format use: DateFormat('EEE, dd MMM yyyy HH:mm:ss').format(expDate.toUtc()) + ' GMT'
+    html.document.cookie = "userId=$id; expires=$expDateStr; path=/";
+    html.document.cookie = "userName=$name; expires=$expDateStr; path=/";
     notifyListeners();
   }
 
   void logout() {
     userId = null;
     userName = null;
-    // Remove cookie
+    // Clear cookies
     html.document.cookie =
         "userId=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    html.document.cookie =
+        "userName=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
     notifyListeners();
   }
 

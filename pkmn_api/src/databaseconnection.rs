@@ -1,6 +1,6 @@
 
 use rusqlite::{params, Connection, Result};
-use crate::model::{FoundPkmn, User};
+use crate::model::{FoundPkmn, User, UserScore};
 pub fn get_conn (path : String) -> Result<Connection> {
     Connection::open(path)
 }
@@ -99,24 +99,35 @@ pub fn view_found_pokemon(user_id: &str, n: i32, conn: &Connection) -> Result<Ve
 }
 
 
-pub fn statistics_top_n_caught(n: i32, conn: &Connection) -> Result<Vec<(String, i32)>> {
-    let mut stmt = conn.prepare("SELECT Pokemon_Id, COUNT(*) FROM FoundPokemon GROUP BY Pokemon_Id ORDER BY COUNT(*) DESC LIMIT ?1")?;
+// highscore
+pub fn statistics_users_most_found(n : i32, conn : &Connection) -> Result<Vec<UserScore>> {
+    let mut stmt = conn.prepare("SELECT UserID, User, PokemonFound FROM ViewTopFinders LIMIT ?1")?;
     let rows = stmt.query_map(params![n], |row| {
-        Ok((row.get(0)?, row.get(1)?))
+        Ok(UserScore{id : row.get(0)?, name: row.get(1)?, score: row.get(2)?})
     })?;
-
     let mut result = Vec::new();
     for row in rows {
-        result.push(row?);
+        result.push(row?)
     }
     Ok(result)
 }
 
 
-pub fn statistics_latest_pokemon_found(n: i32, conn: &Connection) -> Result<Vec<(String, String)>> {
-    let mut stmt = conn.prepare("SELECT User_Id, Pokemon_Id FROM FoundPokemon ORDER BY ROWID DESC LIMIT ?1")?;
+pub fn statistics_latest_pokemon_found(n: i32, conn: &Connection) -> Result<Vec<FoundPkmn>> {
+    let mut stmt = conn.prepare("Select UserID, User, Pokemon, PokemonNumber, TimeStamp, PhotoPath, Comment, Rating FROM ViewLatestFoundPokemon LIMIT ?1")?;
     let rows = stmt.query_map(params![n], |row| {
-        Ok((row.get(0)?, row.get(1)?))
+        Ok(FoundPkmn { 
+            found_by_user : User {
+                user_id: row.get(0)?,
+                name: row.get(1)?,
+            },
+            name: row.get(2)?,
+            number: row.get(3)?,
+            time_found: row.get(4)?,
+            photo_path: row.get(5)?,
+            comment: row.get(6)?,
+            rating: row.get(7)?
+        })
     })?;
 
     let mut result = Vec::new();

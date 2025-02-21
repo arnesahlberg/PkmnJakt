@@ -1,3 +1,6 @@
+-- Data model for Pokemon finding game riksläger
+---------------------------------------------------
+
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS Users (
@@ -45,8 +48,10 @@ JOIN Pokemon ON FoundPokemon.pokemon_id = Pokemon.pokemon_id;
 -- latest found pokemon
 CREATE VIEW IF NOT EXISTS ViewLatestFoundPokemon AS
 SELECT 
+    Users.user_id AS UserId,
     Users.name AS User, 
     Pokemon.name AS Pokemon, 
+    Pokemon.pokemon_id AS PokemonNumber,
     FoundPokemon.found_timestamp AS TimeStamp, 
     FoundPokemon.photo_path AS PhotoPath, 
     FoundPokemon.comment AS Comment, 
@@ -54,25 +59,21 @@ SELECT
 FROM FoundPokemon
 JOIN Users ON FoundPokemon.user_id = Users.user_id
 JOIN Pokemon ON FoundPokemon.pokemon_id = Pokemon.pokemon_id
-ORDER BY FoundPokemon.found_timestamp DESC 
-LIMIT 10;
+ORDER BY FoundPokemon.found_timestamp DESC ;
+
 
 -- view number of pokemon found by user
 CREATE VIEW IF NOT EXISTS ViewNumPokemonFound AS
 SELECT 
+    Users.user_id AS UserID,
     Users.name AS User, 
-    COUNT(FoundPokemon.pokemon_id) AS PokemonCaught
+    COUNT(FoundPokemon.pokemon_id) AS PokemonFound
 FROM FoundPokemon
 JOIN Users ON FoundPokemon.user_id = Users.user_id
 GROUP BY Users.name;
 
--- top 10 finders
+-- Top finders
 CREATE VIEW IF NOT EXISTS ViewTopFinders AS
-SELECT 
-    Users.name AS User, 
-    COUNT(FoundPokemon.pokemon_id) AS PokemonCaught
-FROM FoundPokemon
-JOIN Users ON FoundPokemon.user_id = Users.user_id
-GROUP BY Users.name
-ORDER BY PokemonCaught DESC
-LIMIT 10;
+SELECT UserID, User, PokemonFound FROM ViewNumPokemonFound
+ORDER BY PokemonFound DESC;
+

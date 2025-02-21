@@ -27,3 +27,12 @@ impl FoundPkmn {
         self.time_found.with_timezone(&cet_timezone)
     }
 }
+
+
+#[derive(Debug, Serialize)]
+pub struct UserScore {
+    pub id : String,
+    pub name : String,
+    pub score : u32
+}
+
