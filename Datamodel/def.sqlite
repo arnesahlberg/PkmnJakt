@@ -3,12 +3,25 @@
 
 PRAGMA foreign_keys = ON;
 
+
 CREATE TABLE IF NOT EXISTS Users (
-    user_id    TEXT PRIMARY KEY,
-    name       TEXT NOT NULL,
-    phone      TEXT,
-    email      TEXT
+    user_id       TEXT PRIMARY KEY,
+    name          TEXT NOT NULL,
+    phone         TEXT,
+    email         TEXT,
+    password_hash TEXT NOT NULL,
+    password_salt TEXT NOT NULL,
+    admin         BOOLEAN DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS Token (
+    token_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+    token       TEXT NOT NULL,
+    user_id     TEXT NOT NULL,
+    expiry      DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+
 
 CREATE TABLE IF NOT EXISTS Pokemon (
     pokemon_id   INTEGER PRIMARY KEY,
@@ -48,7 +61,7 @@ JOIN Pokemon ON FoundPokemon.pokemon_id = Pokemon.pokemon_id;
 -- latest found pokemon
 CREATE VIEW IF NOT EXISTS ViewLatestFoundPokemon AS
 SELECT 
-    Users.user_id AS UserId,
+    Users.user_id AS UserID,
     Users.name AS User, 
     Pokemon.name AS Pokemon, 
     Pokemon.pokemon_id AS PokemonNumber,

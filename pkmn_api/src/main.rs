@@ -1,14 +1,15 @@
 use actix_web::{App, HttpServer};
 use actix_cors::Cors;
 
+mod misc;
 mod model;
 mod databaseconnection;
-mod api; // new module for api endpoints
+mod api; 
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     match std::env::var("DATABASE_PATH") {
-        Ok (value) => (),
+        Ok (_) => (),
         Err(_) => {
             println!("Environment variable DATABASE_PATH is not set. Must be set to run.");
             std::process::exit(1);

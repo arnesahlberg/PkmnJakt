@@ -1,6 +1,10 @@
 
+use chrono::{Utc, Duration};
 use rusqlite::{params, Connection, Result};
-use crate::model::{FoundPkmn, User, UserScore};
+use crate::model::{FoundPkmn, Token, User, UserScore};
+use crate::misc::{self, create_token};
+
+
 pub fn get_conn (path : String) -> Result<Connection> {
     Connection::open(path)
 }
@@ -12,15 +16,53 @@ pub fn user_exists(user_id : &str, conn : &Connection) -> Result<bool> {
 }
 
 
+pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection) -> Result<Option<(User, Token)>> {
+
+    // need to fetch user's password salt from database and then hash the password
+    let mut stmt = conn.prepare (
+        "SELECT password_salt FROM Users WHERE user_id = ?1"
+    )?;
+    let salt : String = stmt.query_row(params![user_id], |row| row.get(0))?;
+    let hashed = misc::hash_password_with_salt(pwd, &salt);
+
+    let mut stmt = conn.prepare(
+        "SELECT user_id, name, email, phone FROM Users WHERE user_id = ?1 AND password_hash = ?2"
+    )?;
+
+    let user_iter = stmt.query_map(params![user_id, hashed],  |row| {
+        Ok(User{
+            user_id: row.get(0)?,
+            name: row.get(1)?,
+            email: row.get(2)?,
+            phone: row.get(3)?,
+        })
+    })?;
+
+    for user in user_iter {
+        // create token and return
+        let valid_until = Utc::now() + Duration::days(7);
+        let encoded_token = create_token(user_id, valid_until, conn).unwrap();
+        let token = Token {
+            encoded_token : encoded_token,
+            valid_until : valid_until,
+        };
+
+        return Ok(Some((user?, token)));
+    }
+    Ok(None)
+}
+
 pub fn get_user_by_id_str(user_id: &str, conn: &Connection) -> Result<Option<User>> {
     let mut stmt = conn.prepare(
-        "SELECT user_id, name FROM Users WHERE user_id = ?1",
+        "SELECT user_id, name, email, phone FROM Users WHERE user_id = ?1",
     )?;
 
     let user_iter = stmt.query_map(params![user_id], |row| {
         Ok(User {
             user_id: row.get(0)?,
             name: row.get(1)?,
+            email: row.get(2)?,
+            phone: row.get(3)?,
         })
     })?;
 
@@ -31,12 +73,26 @@ pub fn get_user_by_id_str(user_id: &str, conn: &Connection) -> Result<Option<Use
     Ok(None)
 }
 
-pub fn create_user(user_id: &str, name: &str, conn: &Connection) -> Result<()> {
+pub fn create_user(user_id: &str, name: &str, password : &str, conn: &Connection) -> Result<(User,Token)> {
+    let (password_hash, password_salt) = misc::hash_password(password);
     conn.execute(
-        "INSERT INTO Users (user_id, name) VALUES (?1, ?2)",
-        params![user_id, name],
+        "INSERT INTO Users (user_id, name, password_hash, password_salt) VALUES (?1, ?2, ?3, ?4)",
+        params![user_id, name, password_hash, password_salt],
     )?;
-    Ok(())
+
+    let valid_until = Utc::now() + Duration::days(7);
+    let encoded_token = create_token(user_id, valid_until, conn).unwrap();
+    let token = Token {
+        encoded_token: encoded_token,
+        valid_until: valid_until,
+    };
+    let user = User {
+        user_id: user_id.to_string(),
+        name: name.to_string(),
+        email: None,
+        phone: None,
+    };
+    Ok((user, token))
 }
 
 pub fn set_user_name(user_id: &str, name: &str, conn: &Connection) -> Result<()> {
@@ -81,6 +137,8 @@ pub fn view_found_pokemon(user_id: &str, n: i32, conn: &Connection) -> Result<Ve
             found_by_user: User {
                 user_id: user_id.to_string(),
                 name: get_user_by_id_str(user_id, conn)?.unwrap().name,
+                email : None,
+                phone: None,
             },
             name: row.get(0)?,
             number: row.get(1)?,
@@ -120,13 +178,15 @@ pub fn statistics_latest_pokemon_found(n: i32, conn: &Connection) -> Result<Vec<
             found_by_user : User {
                 user_id: row.get(0)?,
                 name: row.get(1)?,
+                email : None,
+                phone : None,
             },
             name: row.get(2)?,
             number: row.get(3)?,
             time_found: row.get(4)?,
             photo_path: row.get(5)?,
             comment: row.get(6)?,
-            rating: row.get(7)?
+            rating: row.get(7)?,
         })
     })?;
 

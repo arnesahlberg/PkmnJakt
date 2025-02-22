@@ -1,3 +1,5 @@
+use std::string;
+
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
 use chrono_tz::{Europe::Berlin, Tz}; // CET is represented by Berlin timezone
@@ -8,6 +10,14 @@ use chrono_tz::{Europe::Berlin, Tz}; // CET is represented by Berlin timezone
 pub struct User {
     pub user_id: String,
     pub name: String,
+    pub email: Option<String>,
+    pub phone : Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Token {
+    pub encoded_token : String,
+    pub valid_until : DateTime<Utc>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
