@@ -1,6 +1,5 @@
 use actix_web::{App, HttpServer};
 use actix_cors::Cors;
-
 mod misc;
 mod model;
 mod databaseconnection;

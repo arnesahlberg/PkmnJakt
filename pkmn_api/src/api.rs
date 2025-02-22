@@ -1,7 +1,7 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpResponse, HttpRequest};
 use serde::{Deserialize, Serialize};
 use crate::misc::validate_token;
-use crate::model::{FoundPkmn, Token, UserScore};
+use crate::model::{FoundPkmn, Token, User, UserScore};
 use crate::databaseconnection;
 
 fn get_env_dbpath() -> String {
@@ -93,7 +93,6 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
 pub struct SetUserNameRequest {
     pub id: String,
     pub name: String,
-    pub token: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -103,9 +102,12 @@ pub struct SetUserNameResponse {
     pub message: String,
 }
 
-pub async fn set_user_name(info: web::Json<SetUserNameRequest>) -> HttpResponse {
+pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>) -> HttpResponse {
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    if !validate_token(&info.id, &info.token, &conn) {
+    let token = req.headers().get("Authorization")
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    if !validate_token(&info.id, token, &conn) {
         let response = SetUserNameResponse {
             id: info.id.clone(),
             name: None,
@@ -150,7 +152,6 @@ pub async fn logout() -> HttpResponse {
 pub struct FoundPokemonRequest {
     pub user_id: String,
     pub pokemon_id: String,
-    pub token: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -160,9 +161,12 @@ pub struct FoundPokemonResponse {
     pub message: String,
 }
 
-pub async fn found_pokemon(info: web::Json<FoundPokemonRequest>) -> HttpResponse {
+pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokemonRequest>) -> HttpResponse {
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    if !validate_token(&info.user_id, &info.token, &conn) {
+    let token = req.headers().get("Authorization")
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    if !validate_token(&info.user_id, token, &conn) {
         let response = FoundPokemonResponse {
             user_id: info.user_id.clone(),
             pokemon_id: info.pokemon_id.clone(),
@@ -211,7 +215,6 @@ pub async fn found_pokemon(info: web::Json<FoundPokemonRequest>) -> HttpResponse
 pub struct ViewFoundPokemonRequest {
     pub user_id: String,
     pub n: i32,
-    pub token: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -221,9 +224,12 @@ pub struct ViewFoundPokemonResponse {
     pub message: String,
 }
 
-pub async fn view_found_pokemon(info: web::Json<ViewFoundPokemonRequest>) -> HttpResponse {
+pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokemonRequest>) -> HttpResponse {
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    if !validate_token(&info.user_id, &info.token, &conn) {
+    let token = req.headers().get("Authorization")
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    if !validate_token(&info.user_id, token, &conn) {
         let response = ViewFoundPokemonResponse {
             id: info.user_id.clone(),
             pokemon_found: vec![],
@@ -280,7 +286,39 @@ pub async fn get_statistics_latest_pokemon_found() -> HttpResponse {
     HttpResponse::Ok().json(res)
 }
 
+// get user request
+#[derive(Debug, Deserialize)]
+pub struct GetUserRequest {
+    pub user_id: String,
+}
 
+#[derive(Debug, Serialize)]
+pub struct GetUserResponse {
+    pub user: Option<User>,
+    pub message: String,
+}
+
+pub async fn get_user(path: web::Path<String>) -> HttpResponse {
+    let user_id = path.into_inner();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let user = databaseconnection::get_user_by_id(&user_id, &conn).unwrap();
+    match user {
+        Some(user) => {
+            let res = GetUserResponse {
+                user: Some(user),
+                message: format!("User found {}", user_id),
+            };
+            HttpResponse::Ok().json(res)
+        },
+        None => {
+            let res = GetUserResponse {
+                user: None,
+                message: format!("User not found {}", user_id),
+            };
+            HttpResponse::NotFound().json(res)
+        }
+    }
+}
 
 // registers all routes.
 pub fn config(cfg: &mut web::ServiceConfig) {
@@ -288,10 +326,11 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .route("/logout", web::post().to(logout))
        .route("/create_user", web::post().to(create_user))
        .route("/set_user_name", web::post().to(set_user_name))
-       .route("/found_pokemon", web::post().to(found_pokemon))
+       .route("/register_found_pokemon", web::post().to(register_found_pokemon))
        .route("/view_found_pokemon", web::post().to(view_found_pokemon))
        .route("/statistics_highscore", web::get().to(get_statistics_highscore))
-         .route("/statistics_latest_pokemon_found", web::get().to(get_statistics_latest_pokemon_found))
+        .route("/statistics_latest_pokemon_found", web::get().to(get_statistics_latest_pokemon_found))
+        .route("/get_user/{user_id}", web::get().to(get_user))
        ;
 }
 

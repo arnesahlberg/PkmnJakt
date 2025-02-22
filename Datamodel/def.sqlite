@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS Pokemon (
     name         TEXT NOT NULL,
     description  TEXT,
     height       REAL,
-    active       BOOLEAN DEFAULT 0
+    active       BOOLEAN DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS FoundPokemon (

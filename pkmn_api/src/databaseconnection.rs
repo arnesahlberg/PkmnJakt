@@ -157,6 +157,24 @@ pub fn view_found_pokemon(user_id: &str, n: i32, conn: &Connection) -> Result<Ve
 }
 
 
+// get user by id
+pub fn get_user_by_id(user_id: &str, conn: &Connection) -> Result<Option<User>> {
+    let mut stmt = conn.prepare("SELECT user_id, name, email, phone FROM Users WHERE user_id = ?1")?;
+    let user_iter = stmt.query_map(params![user_id], |row| {
+        Ok(User {
+            user_id: row.get(0)?,
+            name: row.get(1)?,
+            email: row.get(2)?,
+            phone: row.get(3)?,
+        })
+    })?;
+
+    for user in user_iter {
+        return Ok(Some(user?));
+    }
+    Ok(None)
+}
+
 // highscore
 pub fn statistics_users_most_found(n : i32, conn : &Connection) -> Result<Vec<UserScore>> {
     let mut stmt = conn.prepare("SELECT UserID, User, PokemonFound FROM ViewTopFinders LIMIT ?1")?;
