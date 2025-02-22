@@ -1,7 +1,9 @@
 
+use core::panic;
+
 use chrono::{Utc, Duration};
 use rusqlite::{params, Connection, Result};
-use crate::model::{FoundPkmn, Token, User, UserScore};
+use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore};
 use crate::misc::{self, create_token};
 
 
@@ -175,6 +177,27 @@ pub fn get_user_by_id(user_id: &str, conn: &Connection) -> Result<Option<User>> 
     Ok(None)
 }
 
+// check if user has caught pokemon
+pub fn check_if_user_has_caught_pokemon(user_id: &str, pokemon_id: &str, conn: &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM FoundPokemon WHERE user_id = ?1 AND pokemon_id = ?2")?;
+    let count : i32 = stmt.query_row(params![user_id, pokemon_id], |row| row.get(0))?;
+    Ok(count > 0)
+}
+
+// check if user has uploaded a picture of pokemon
+pub fn check_if_user_has_uploaded_photo_of_pokemon(user_id: &str, pokemon_id: &str, conn: &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM FoundPokemon WHERE user_id = ?1 AND pokemon_id = ?2 AND photo_path IS NOT NULL")?;
+    let count : i32 = stmt.query_row(params![user_id, pokemon_id], |row| row.get(0))?;
+    Ok(count > 0)
+}
+
+// upload photo of pokemon user has caught and add comment and rating
+pub fn upload_photo_of_pokemon(user_id: &str, pokemon_id: &str, photo_path: &str, comment: &str, rating: i32, conn: &Connection) -> Result<()> {
+    panic!("Not implemented yet.");
+    Ok(())
+}
+
+
 // highscore
 pub fn statistics_users_most_found(n : i32, conn : &Connection) -> Result<Vec<UserScore>> {
     let mut stmt = conn.prepare("SELECT UserID, User, PokemonFound FROM ViewTopFinders LIMIT ?1")?;
@@ -215,3 +238,23 @@ pub fn statistics_latest_pokemon_found(n: i32, conn: &Connection) -> Result<Vec<
     Ok(result)
 }
 
+
+
+// just get stuff
+pub fn get_pokemon(number: u32, conn: &Connection) -> Result<Option<Pkmn>> {
+    let mut stmt = conn.prepare("SELECT name, pokemon_id, description, height FROM Pokemon WHERE pokemon_id = ?1")?;
+    let rows = stmt.query_map(params![number], |row| {
+        Ok(Pkmn {
+            name: row.get(0)?,
+            number: row.get(1)?,
+            photo_path: None,
+            description: row.get(2)?,
+            height: row.get(3)?,
+        })
+    })?;
+
+    for row in rows {
+        return Ok(Some(row?));
+    }
+    Ok(None)
+}

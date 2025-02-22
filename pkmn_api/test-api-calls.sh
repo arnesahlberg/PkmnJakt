@@ -76,3 +76,5 @@ curl -X POST http://127.0.0.1:8080/view_found_pokemon \
 curl -X GET http://127.0.0.1:8080/statistics_highscore 
 
 curl -X GET http://127.0.0.1:8080/statistics_latest_pokemon_found
+
+curl -X GET http://127.0.0.1:8080/get_pokemon/1

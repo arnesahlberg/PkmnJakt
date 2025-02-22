@@ -320,17 +320,35 @@ pub async fn get_user(path: web::Path<String>) -> HttpResponse {
     }
 }
 
+
+// get pokemon request
+pub async fn get_pokemon(path: web::Path<u32>) -> HttpResponse {
+    let number = path.into_inner();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let pokemon = databaseconnection::get_pokemon(number, &conn).unwrap();
+    match pokemon {
+        Some(pokemon) => {
+            let res = pokemon;
+            HttpResponse::Ok().json(res)
+        },
+        None => {
+            HttpResponse::NotFound().finish()
+        }
+    }
+}
+
 // registers all routes.
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.route("/login", web::post().to(login))
-       .route("/logout", web::post().to(logout))
-       .route("/create_user", web::post().to(create_user))
-       .route("/set_user_name", web::post().to(set_user_name))
-       .route("/register_found_pokemon", web::post().to(register_found_pokemon))
-       .route("/view_found_pokemon", web::post().to(view_found_pokemon))
-       .route("/statistics_highscore", web::get().to(get_statistics_highscore))
+        .route("/logout", web::post().to(logout))
+        .route("/create_user", web::post().to(create_user))
+        .route("/set_user_name", web::post().to(set_user_name))
+        .route("/register_found_pokemon", web::post().to(register_found_pokemon))
+        .route("/view_found_pokemon", web::post().to(view_found_pokemon))
+        .route("/statistics_highscore", web::get().to(get_statistics_highscore))
         .route("/statistics_latest_pokemon_found", web::get().to(get_statistics_latest_pokemon_found))
         .route("/get_user/{user_id}", web::get().to(get_user))
-       ;
+        .route("/get_pokemon/{number}", web::get().to(get_pokemon))
+        ;
 }
 

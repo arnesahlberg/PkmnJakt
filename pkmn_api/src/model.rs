@@ -31,11 +31,22 @@ pub struct FoundPkmn {
     pub rating: Option<i32>
 }
 
+
 impl FoundPkmn {
-    pub fn cet_time(&self) -> DateTime<Tz> {
+    pub fn cet_time_found(&self) -> DateTime<Tz> {
         let cet_timezone: Tz = Berlin;
         self.time_found.with_timezone(&cet_timezone)
     }
+}
+
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Pkmn {
+    pub name: String,
+    pub number: u32,
+    pub photo_path: Option<String>,
+    pub description: Option<String>,
+    pub height: f32,
 }
 
 
