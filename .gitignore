@@ -5,3 +5,5 @@ pkmn_api/target
 **/*.db
 
 **/*.avif
+**/*.png
+**/*.jpg
