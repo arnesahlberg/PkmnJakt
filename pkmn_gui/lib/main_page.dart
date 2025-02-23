@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'main.dart'; // for ApiService and UserSession
+import 'main.dart'; // for user session
 import 'widgets/common_app_bar.dart';
 import 'package:intl/intl.dart';
+import 'api_calls.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -17,7 +18,7 @@ class _MainPageState extends State<MainPage> {
   Future<void> _loadData() async {
     final session = Provider.of<UserSession>(context, listen: false);
     try {
-      final result = await ApiService.viewFoundPokemon(session.userId!, 10);
+      final result = await ApiService.viewFoundPokemon(10, session.token!);
       setState(() {
         _pokemonList = result['pokemon_found'] as List<dynamic>;
         _isLoading = false;

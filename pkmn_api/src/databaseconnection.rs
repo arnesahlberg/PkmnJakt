@@ -22,6 +22,17 @@ pub fn remove_token(user_id : &str, token : &str, conn : &Connection) -> Result<
     Ok(())
 }
 
+pub fn remove_all_tokens_for_user(user_id : &str, conn : &Connection) -> Result<()> {
+    conn.execute("DELETE FROM Tokens WHERE User_Id = ?1", params![user_id])?;
+    Ok(())
+}
+
+pub fn token_in_database(user_id : &str, token : &str, conn : &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Tokens WHERE Token = ?1 AND User_Id = ?2")?;
+    let count : i32 = stmt.query_row(params![token, user_id], |row| row.get(0))?;
+    Ok(count > 0)
+}
+
 pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection) -> Result<Option<(User, Token)>> {
 
     // need to fetch user's password salt from database and then hash the password

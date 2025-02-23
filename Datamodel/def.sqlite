@@ -14,9 +14,8 @@ CREATE TABLE IF NOT EXISTS Users (
     admin         BOOLEAN DEFAULT 0
 );
 
-CREATE TABLE IF NOT EXISTS Token (
-    token_id    INTEGER PRIMARY KEY AUTOINCREMENT,
-    token       TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS Tokens (
+    token       TEXT PRIMARY KEY,
     user_id     TEXT NOT NULL,
     expiry      DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES Users(user_id)

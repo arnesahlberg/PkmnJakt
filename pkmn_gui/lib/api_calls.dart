@@ -1,0 +1,93 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+class ApiService {
+  static const String baseUrl = 'http://127.0.0.1:8080';
+
+  static Map<String, String> _headers([String? token]) => {
+    "Content-Type": "application/json",
+    if (token != null) "Authorization": token,
+  };
+
+  static Future<Map<String, dynamic>> login(String id, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/login'),
+      body: jsonEncode({'id': id, 'password': password}),
+      headers: _headers(),
+    );
+    return jsonDecode(response.body);
+  }
+
+  static Future<bool> checkUserExists(String id) async {
+    final response = await http.get(Uri.parse('$baseUrl/user_exists/$id'));
+    final json = jsonDecode(response.body);
+    return json['exists'];
+  }
+
+  static Future<Map<String, dynamic>> createUser(
+    String id,
+    String name,
+    String password,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/create_user'),
+      body: jsonEncode({'id': id, 'name': name, 'password': password}),
+      headers: _headers(),
+    );
+    return jsonDecode(response.body);
+  }
+
+  static Future<Map<String, dynamic>> setUserName(
+    String name,
+    String token,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/set_user_name'),
+      body: jsonEncode({'name': name}),
+      headers: _headers(token),
+    );
+    return jsonDecode(response.body);
+  }
+
+  static Future<Map<String, dynamic>> foundPokemon(
+    String pokemonId,
+    String token,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/found_pokemon'),
+      body: jsonEncode({'pokemon_id': pokemonId}),
+      headers: _headers(token),
+    );
+    return jsonDecode(response.body);
+  }
+
+  static Future<Map<String, dynamic>> viewFoundPokemon(
+    int n,
+    String token,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/view_found_pokemon'),
+      body: jsonEncode({'n': n}),
+      headers: _headers(token),
+    );
+    return jsonDecode(response.body);
+  }
+
+  // New: Get statistics (no Authorization required)
+  static Future<Map<String, dynamic>> getStatisticsHighscore() async {
+    final response = await http.get(Uri.parse('$baseUrl/statistics_highscore'));
+    return jsonDecode(response.body);
+  }
+
+  static Future<Map<String, dynamic>> getStatisticsLatestPokemonFound() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/statistics_latest_pokemon_found'),
+    );
+    return jsonDecode(response.body);
+  }
+
+  static Future<Map<String, dynamic>> getPokemon(String id) async {
+    final response = await http.get(Uri.parse('$baseUrl/get_pokemon/$id'));
+    return jsonDecode(response.body);
+  }
+}

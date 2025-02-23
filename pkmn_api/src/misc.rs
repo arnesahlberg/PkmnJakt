@@ -60,7 +60,7 @@ pub fn create_token(user_id : &str, valid_until : DateTime<Utc>, conn : &Connect
 
     // and put in database
     conn.execute(
-        "INSERT INTO Token(token, user_id, expiry) VALUES(?1, ?2, ?3)",
+        "INSERT INTO Tokens(token, user_id, expiry) VALUES(?1, ?2, ?3)",
         params![encoded_token, user_id, valid_until.to_rfc3339()]
     ).expect("Failed to insert token into database.");
 
@@ -104,7 +104,7 @@ pub fn validate_token(user_id : &str, token : &str, conn : &Connection) -> bool 
     // check if token exists in database with user_id. don't check the validuntil field here
     // it seems to not work for some reason. 
     let mut stmt = conn.prepare(
-        "SELECT token FROM Token WHERE token = ?1 AND user_id = ?2"
+        "SELECT token FROM Tokens WHERE token = ?1 AND user_id = ?2"
     ).expect("Failed to prepare statement for token validation.");
 
 

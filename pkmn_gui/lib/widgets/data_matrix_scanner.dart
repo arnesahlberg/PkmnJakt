@@ -7,17 +7,24 @@ class DataMatrixScanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AiBarcodeScanner(
-      controller: MobileScannerController(
-        detectionSpeed: DetectionSpeed.noDuplicates,
+    return SafeArea(
+      child: Container(
+        child: AiBarcodeScanner(
+          controller: MobileScannerController(
+            detectionSpeed: DetectionSpeed.noDuplicates,
+          ),
+          onDetect: (BarcodeCapture capture) {
+            if (capture.barcodes.isNotEmpty) {
+              final barcode = capture.barcodes.first;
+              final scannedValue = barcode.rawValue;
+              debugPrint('Scanned: $scannedValue');
+              if (scannedValue != null) {
+                onCodeScanned(scannedValue);
+              }
+            }
+          },
+        ),
       ),
-      onDetect: (BarcodeCapture capture) {
-        final barcode = capture.barcodes.first;
-        final scannedValue = barcode.rawValue;
-        if (scannedValue != null) {
-          onCodeScanned(scannedValue);
-        }
-      },
     );
   }
 }

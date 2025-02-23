@@ -111,7 +111,7 @@ pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>
         let response = SetUserNameResponse {
             id: user_id.clone(),
             name: None,
-            message: "Invalid token".to_string(),
+            message: "Invalid token.".to_string(),
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -129,7 +129,7 @@ pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>
     let response = SetUserNameResponse {
         id: user_id.clone(),
         name: Some(info.name.clone()),
-        message: format!("Updated user name {}", info.name),
+        message: format!("Updated user name to '{}'", info.name),
     };
     HttpResponse::Ok().json(response)
 }
@@ -145,8 +145,16 @@ pub async fn logout(req: HttpRequest) -> HttpResponse {
     let token = req.headers().get("Authorization")
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
+
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     let user_id = misc::get_user_id_from_token(token).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        let response = LogoutResponse {
+            logged_out: false,
+            message: "Invalid token. Already logged out, it seems.".to_string(),
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
     databaseconnection::remove_token(&user_id, token, &conn).unwrap();
     let response = LogoutResponse {
         logged_out: true,
@@ -154,6 +162,30 @@ pub async fn logout(req: HttpRequest) -> HttpResponse {
     };
     HttpResponse::Ok().json(response)
 }
+
+
+// logout everywhere (remove all tokens for user)
+pub async fn logout_everywhere(req: HttpRequest) -> HttpResponse {
+    let token = req.headers().get("Authorization")
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        let response = LogoutResponse {
+            logged_out: false,
+            message: "Invalid token.".to_string(),
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+    databaseconnection::remove_all_tokens_for_user(&user_id, &conn).unwrap();
+    let response = LogoutResponse {
+        logged_out: true,
+        message: "Logged out everywhere".to_string(),
+    };
+    HttpResponse::Ok().json(response)
+}
+
 
 #[derive(Debug, Deserialize)]
 pub struct FoundPokemonRequest {
@@ -361,6 +393,7 @@ pub async fn get_pokemon(path: web::Path<u32>) -> HttpResponse {
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.route("/login", web::post().to(login))
         .route("/logout", web::post().to(logout))
+        .route("/logout_everywhere", web::post().to(logout_everywhere))
         .route("/create_user", web::post().to(create_user))
         .route("/set_user_name", web::post().to(set_user_name))
         .route("/found_pokemon", web::post().to(register_found_pokemon))

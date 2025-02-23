@@ -13,16 +13,26 @@ curl -X POST http://127.0.0.1:8080/login \
     -H "Content-Type: application/json" \
     -d '{"id" : "11111", "password" : "1234"}'
 
+
 # set from previous before continue
-export TOKEN="W1RPS0VOLS10Y1hIRlNrYVFQUi0tMTExMTEtLTIwMjUtMDMtMDEgMTQ6MDQ6MDUuNzQ1ODQyIFVUQy0tcFlFXQ=="
+export TOKEN="W1RPS0VOLS1vUm1Nc0VZYm9nUS0tMTExMTEtLTIwMjUtMDMtMDIgMDc6MTI6MDIuNjMyMTYwIFVUQy0tR3RyXQ=="
 
 # create other user too
 curl -X POST http://127.0.0.1:8080/create_user \
     -H "Content-Type: application/json" \
     -d '{"id": "22222", "name": "Sture Stur", "password": "stur-pass"}'
 
+
+
 # Set token for user 2
-export TOKEN2="W1RPS0VOLS12dFlYYllQcEpiUy0tMjIyMjItLTIwMjUtMDMtMDEgMTQ6MDc6MjMuMjQxMTc4IFVUQy0tbWFhXQ=="
+export TOKEN2="W1RPS0VOLS1iUVd0RlVvUEdBaS0tMjIyMjItLTIwMjUtMDMtMDIgMDc6MTI6MzAuNjcyNDQxIFVUQy0tVnlDXQ=="
+
+
+curl -X POST http://127.0.0.1:8080/logout \
+    -H "Content-Type: application/json" \
+    -H "Authorization: $TOKEN"
+
+
 
 # change user name using Authorization header
 curl -X POST http://127.0.0.1:8080/set_user_name \
