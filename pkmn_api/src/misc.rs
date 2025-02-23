@@ -67,6 +67,16 @@ pub fn create_token(user_id : &str, valid_until : DateTime<Utc>, conn : &Connect
     Ok(encoded_token)
 }
 
+pub fn get_user_id_from_token(token : &str) -> Result<String,String> {
+    let decoded_token = decode_string_base64(token.to_string());
+    let token_parts : Vec<&str> = decoded_token.split("--").collect();
+    if token_parts.len() != 5 {
+        return Err("Invalid token format.".to_string());
+    }
+    let token_user_id = token_parts[2];
+    Ok(token_user_id.to_string())
+}
+
 pub fn validate_token(user_id : &str, token : &str, conn : &Connection) -> bool {
     let decoded_token = decode_string_base64(token.to_string());
     let token_parts : Vec<&str> = decoded_token.split("--").collect();
@@ -91,9 +101,8 @@ pub fn validate_token(user_id : &str, token : &str, conn : &Connection) -> bool 
     if expiry < Utc::now() {
         return false;
     }
-
-
-
+    // check if token exists in database with user_id. don't check the validuntil field here
+    // it seems to not work for some reason. 
     let mut stmt = conn.prepare(
         "SELECT token FROM Token WHERE token = ?1 AND user_id = ?2"
     ).expect("Failed to prepare statement for token validation.");
@@ -103,7 +112,7 @@ pub fn validate_token(user_id : &str, token : &str, conn : &Connection) -> bool 
         .expect("Failed to query token for validation.");
 
     let mut count = 0;
-    while let Some(a_) = rows.next().unwrap() {
+    while let Some(_) = rows.next().unwrap() {
         count += 1;
     }
 

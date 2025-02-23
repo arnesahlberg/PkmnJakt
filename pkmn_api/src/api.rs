@@ -1,6 +1,6 @@
 use actix_web::{web, HttpResponse, HttpRequest};
 use serde::{Deserialize, Serialize};
-use crate::misc::validate_token;
+use crate::misc::{self, validate_token};
 use crate::model::{FoundPkmn, Token, User, UserScore};
 use crate::databaseconnection;
 
@@ -91,7 +91,6 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
 
 #[derive(Debug, Deserialize)]
 pub struct SetUserNameRequest {
-    pub id: String,
     pub name: String,
 }
 
@@ -107,32 +106,34 @@ pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>
     let token = req.headers().get("Authorization")
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    if !validate_token(&info.id, token, &conn) {
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    if !validate_token(&user_id, token, &conn) {
         let response = SetUserNameResponse {
-            id: info.id.clone(),
+            id: user_id.clone(),
             name: None,
             message: "Invalid token".to_string(),
         };
         return HttpResponse::BadRequest().json(response);
     }
 
-    let user_exists = databaseconnection::user_exists(&info.id, &conn).unwrap();
+    let user_exists = databaseconnection::user_exists(&user_id, &conn).unwrap();
     if !user_exists {
         let response = SetUserNameResponse {
-            id: info.id.clone(),
+            id: user_id.clone(),
             name: None,
-            message: format!("User does not exist {}", info.id),
+            message: format!("User does not exist {}", user_id),
         };
         return HttpResponse::BadRequest().json(response);
     }
-    databaseconnection::set_user_name(&info.id, &info.name, &conn).unwrap();
+    databaseconnection::set_user_name(&user_id, &info.name, &conn).unwrap();
     let response = SetUserNameResponse {
-        id: info.id.clone(),
+        id: user_id.clone(),
         name: Some(info.name.clone()),
         message: format!("Updated user name {}", info.name),
     };
     HttpResponse::Ok().json(response)
 }
+
 
 #[derive(Debug, Serialize)]
 pub struct LogoutResponse {
@@ -140,7 +141,13 @@ pub struct LogoutResponse {
     pub message: String,
 }
 
-pub async fn logout() -> HttpResponse {
+pub async fn logout(req: HttpRequest) -> HttpResponse {
+    let token = req.headers().get("Authorization")
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    databaseconnection::remove_token(&user_id, token, &conn).unwrap();
     let response = LogoutResponse {
         logged_out: true,
         message: "Logged out".to_string(),
@@ -150,7 +157,6 @@ pub async fn logout() -> HttpResponse {
 
 #[derive(Debug, Deserialize)]
 pub struct FoundPokemonRequest {
-    pub user_id: String,
     pub pokemon_id: String,
 }
 
@@ -166,45 +172,48 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
     let token = req.headers().get("Authorization")
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    if !validate_token(&info.user_id, token, &conn) {
+    println!("token: {}", token);
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    println!("user_id: {}", user_id);
+    if !validate_token(&user_id, token, &conn) {
         let response = FoundPokemonResponse {
-            user_id: info.user_id.clone(),
+            user_id: user_id.clone(),
             pokemon_id: info.pokemon_id.clone(),
             message: "Invalid token".to_string(),
         };
         return HttpResponse::BadRequest().json(response);
     }
-    let user_exists = databaseconnection::user_exists(&info.user_id, &conn).unwrap();
+    let user_exists = databaseconnection::user_exists(&user_id, &conn).unwrap();
     if !user_exists {
         let response = FoundPokemonResponse {
-            user_id: info.user_id.clone(),
+            user_id: user_id.clone(),
             pokemon_id: info.pokemon_id.clone(),
-            message: format!("User does not exist {}", info.user_id),
+            message: format!("User does not exist {}", user_id),
         };
         return HttpResponse::BadRequest().json(response);
     }
     let pokemon_exists = databaseconnection::check_if_pokemon_exists(&info.pokemon_id, &conn).unwrap();
     if !pokemon_exists {
         let response = FoundPokemonResponse {
-            user_id: info.user_id.clone(),
+            user_id: user_id.clone(),
             pokemon_id: info.pokemon_id.clone(),
             message: format!("Pokemon does not exist {}", info.pokemon_id),
         };
         return HttpResponse::BadRequest().json(response);
     }
     let found_before =
-        databaseconnection::check_if_you_found_pokemon_before(&info.user_id, &info.pokemon_id, &conn).unwrap();
+        databaseconnection::check_if_you_found_pokemon_before(&user_id, &info.pokemon_id, &conn).unwrap();
     if found_before {
         let response = FoundPokemonResponse {
-            user_id: info.user_id.clone(),
+            user_id: user_id.clone(),
             pokemon_id: info.pokemon_id.clone(),
             message: format!("Already found pokemon {}", info.pokemon_id),
         };
         return HttpResponse::Ok().json(response);
     }
-    databaseconnection::found_pokemon(&info.user_id, &info.pokemon_id, &conn).unwrap();
+    databaseconnection::found_pokemon(&user_id, &info.pokemon_id, &conn).unwrap();
     let response = FoundPokemonResponse {
-        user_id: info.user_id.clone(),
+        user_id: user_id.clone(),
         pokemon_id: info.pokemon_id.clone(),
         message: format!("Caught pokemon {}", info.pokemon_id),
     };
@@ -213,7 +222,6 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
 
 #[derive(Debug, Deserialize)]
 pub struct ViewFoundPokemonRequest {
-    pub user_id: String,
     pub n: i32,
 }
 
@@ -229,28 +237,29 @@ pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokem
     let token = req.headers().get("Authorization")
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    if !validate_token(&info.user_id, token, &conn) {
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    if !validate_token(&user_id, token, &conn) {
         let response = ViewFoundPokemonResponse {
-            id: info.user_id.clone(),
+            id: user_id.clone(),
             pokemon_found: vec![],
             message: "Invalid token".to_string(),
         };
         return HttpResponse::BadRequest().json(response);
     }
-    let user_exists = databaseconnection::user_exists(&info.user_id, &conn).unwrap();
+    let user_exists = databaseconnection::user_exists(&user_id, &conn).unwrap();
     if !user_exists {
         let response = ViewFoundPokemonResponse {
-            id: info.user_id.clone(),
+            id: user_id.clone(),
             pokemon_found: vec![],
-            message: format!("User does not exist {}", info.user_id),
+            message: format!("User does not exist {}", user_id),
         };
         return HttpResponse::BadRequest().json(response);
     }
-    let pokemon = databaseconnection::view_found_pokemon(&info.user_id, info.n, &conn).unwrap();
+    let pokemon = databaseconnection::view_found_pokemon(&user_id, info.n, &conn).unwrap();
     let response = ViewFoundPokemonResponse {
-        id: info.user_id.clone(),
+        id: user_id.clone(),
         pokemon_found: pokemon,
-        message: format!("Found pokemon {}", info.user_id),
+        message: format!("Found pokemon {}", user_id),
     };
     HttpResponse::Ok().json(response)
 }
@@ -286,12 +295,6 @@ pub async fn get_statistics_latest_pokemon_found() -> HttpResponse {
     HttpResponse::Ok().json(res)
 }
 
-// get user request
-#[derive(Debug, Deserialize)]
-pub struct GetUserRequest {
-    pub user_id: String,
-}
-
 #[derive(Debug, Serialize)]
 pub struct GetUserResponse {
     pub user: Option<User>,
@@ -320,6 +323,23 @@ pub async fn get_user(path: web::Path<String>) -> HttpResponse {
     }
 }
 
+// user exists request
+#[derive(Debug, Serialize)]
+pub struct UserExistsResponse {
+    pub exists: bool,
+}
+
+pub async fn user_exists(path: web::Path<String>) -> HttpResponse {
+    let user_id = path.into_inner();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let exists = databaseconnection::user_exists(&user_id, &conn).unwrap();
+    let res = UserExistsResponse {
+        exists: exists,
+    };
+    HttpResponse::Ok().json(res)
+}
+
+
 
 // get pokemon request
 pub async fn get_pokemon(path: web::Path<u32>) -> HttpResponse {
@@ -343,12 +363,13 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/logout", web::post().to(logout))
         .route("/create_user", web::post().to(create_user))
         .route("/set_user_name", web::post().to(set_user_name))
-        .route("/register_found_pokemon", web::post().to(register_found_pokemon))
+        .route("/found_pokemon", web::post().to(register_found_pokemon))
         .route("/view_found_pokemon", web::post().to(view_found_pokemon))
         .route("/statistics_highscore", web::get().to(get_statistics_highscore))
         .route("/statistics_latest_pokemon_found", web::get().to(get_statistics_latest_pokemon_found))
         .route("/get_user/{user_id}", web::get().to(get_user))
         .route("/get_pokemon/{number}", web::get().to(get_pokemon))
+        .route("/user_exists/{user_id}", web::get().to(user_exists))
         ;
 }
 

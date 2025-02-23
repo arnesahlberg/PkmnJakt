@@ -28,49 +28,49 @@ export TOKEN2="W1RPS0VOLS12dFlYYllQcEpiUy0tMjIyMjItLTIwMjUtMDMtMDEgMTQ6MDc6MjMuM
 curl -X POST http://127.0.0.1:8080/set_user_name \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN2" \
-    -d '{"id": "22222", "name": "Sture Stör"}'
+    -d '{"name": "Sture Stör"}'
 
 # find some pokemon using header for token
 curl -X POST http://127.0.0.1:8080/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN" \
-    -d '{"user_id": "11111", "pokemon_id": "1"}'
+    -d '{"pokemon_id": "1"}'
 
 curl -X POST http://127.0.0.1:8080/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN2" \
-    -d '{"user_id": "22222", "pokemon_id": "6"}'
+    -d '{"pokemon_id": "6"}'
 
 curl -X POST http://127.0.0.1:8080/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN" \
-    -d '{"user_id": "11111", "pokemon_id": "92"}'
+    -d '{"pokemon_id": "92"}'
 
 curl -X POST http://127.0.0.1:8080/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN" \
-    -d '{"user_id": "11111", "pokemon_id": "111"}'
+    -d '{"pokemon_id": "111"}'
 
 curl -X POST http://127.0.0.1:8080/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN2" \
-    -d '{"user_id": "22222", "pokemon_id": "121"}'
+    -d '{"pokemon_id": "121"}'
 
 curl -X POST http://127.0.0.1:8080/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN" \
-    -d '{"user_id": "11111", "pokemon_id": "31"}'
+    -d '{"pokemon_id": "31"}'
 
 curl -X POST http://127.0.0.1:8080/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN" \
-    -d '{"user_id": "11111", "pokemon_id": "32"}'
+    -d '{"pokemon_id": "32"}'
 
 # view pokemon found by user using header
 curl -X POST http://127.0.0.1:8080/view_found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN" \
-    -d '{"user_id": "11111", "n": 10}'
+    -d '{"n": 10}'
 
 # Get Statistics
 curl -X GET http://127.0.0.1:8080/statistics_highscore 

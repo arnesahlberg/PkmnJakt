@@ -17,6 +17,10 @@ pub fn user_exists(user_id : &str, conn : &Connection) -> Result<bool> {
     Ok(count > 0)
 }
 
+pub fn remove_token(user_id : &str, token : &str, conn : &Connection) -> Result<()> {
+    conn.execute("DELETE FROM Tokens WHERE Token = ?1 AND User_Id = ?2", params![token, user_id])?;
+    Ok(())
+}
 
 pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection) -> Result<Option<(User, Token)>> {
 
