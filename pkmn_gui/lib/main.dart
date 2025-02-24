@@ -43,7 +43,9 @@ Future<String?> promptForPassword(BuildContext context) async {
 class UserSession extends ChangeNotifier {
   String? userId;
   String? userName;
-  String? token;
+  String? token; // this will hold the encoded token only
+  String? validUntil; // new field to store validity info
+
   UserSession() {
     _loadFromCookies();
   }
@@ -58,21 +60,31 @@ class UserSession extends ChangeNotifier {
           userName = trimmed.substring("userName=".length);
         } else if (trimmed.startsWith("token=")) {
           token = trimmed.substring("token=".length);
+        } else if (trimmed.startsWith("valid_until=")) {
+          validUntil = trimmed.substring("valid_until=".length);
         }
       }
       notifyListeners();
     }
   }
 
-  void login(String id, String name, String newToken) {
+  void login(
+    String id,
+    String name,
+    String encodedToken,
+    String validUntilValue,
+  ) {
     userId = id;
     userName = name;
-    token = newToken;
+    token = encodedToken;
+    validUntil = validUntilValue;
     final expDate = DateTime.now().add(const Duration(days: 30));
     final expDateStr = expDate.toUtc().toIso8601String();
     html.document.cookie = "userId=$id; expires=$expDateStr; path=/";
     html.document.cookie = "userName=$name; expires=$expDateStr; path=/";
-    html.document.cookie = "token=$newToken; expires=$expDateStr; path=/";
+    html.document.cookie = "token=$encodedToken; expires=$expDateStr; path=/";
+    html.document.cookie =
+        "valid_until=$validUntilValue; expires=$expDateStr; path=/";
     notifyListeners();
   }
 
@@ -105,7 +117,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Stensund Pkmn-Jakt 2025!',
+      title: 'Stensund Pokemon-Jakt 2025!',
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
         colorScheme: ColorScheme.fromSwatch(
@@ -122,5 +134,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-// ...other shared code remains...

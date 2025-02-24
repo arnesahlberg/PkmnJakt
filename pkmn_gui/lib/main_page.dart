@@ -21,6 +21,9 @@ class _MainPageState extends State<MainPage> {
       final result = await ApiService.viewFoundPokemon(10, session.token!);
       setState(() {
         _pokemonList = result['pokemon_found'] as List<dynamic>;
+        debugPrint("Loaded ${_pokemonList.length} Pokémon");
+        debugPrint("First: ${_pokemonList.first}");
+        debugPrint("Last: ${_pokemonList.last}");
         _isLoading = false;
       });
     } catch (e) {

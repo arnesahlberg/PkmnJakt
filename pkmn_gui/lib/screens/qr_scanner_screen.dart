@@ -24,7 +24,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       });
       final scannedId = result;
       String name;
-      String token;
+      String encodedToken;
+      String validUntil;
       try {
         // Check if the user exists
         final exists = await ApiService.checkUserExists(scannedId);
@@ -39,21 +40,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             return;
           }
           final loginResult = await ApiService.login(scannedId, password);
-          if (loginResult['message']?.toString().contains(
-                "Create new user first",
-              ) ==
-              true) {
-            final createResult = await ApiService.createUser(
-              scannedId,
-              "Ny Användare",
-              password,
-            );
-            name = "Ny Användare";
-            token = createResult['token']?.toString() ?? "";
-          } else {
-            name = loginResult['name'] ?? "Okänt";
-            token = loginResult['token']?.toString() ?? "";
-          }
+          debugPrint("Login result: $loginResult");
+          name = loginResult['name'] ?? "Error fetching name";
+          encodedToken =
+              loginResult['token']?['encoded_token'].toString() ?? "";
+          validUntil = loginResult['token']?['valid_until']?.toString() ?? "";
         } else {
           // New user: prompt for username, password and confirmation.
           final credentials = await promptForUserCredentials(
@@ -71,19 +62,24 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             });
             return;
           }
-          name = credentials['username'] ?? "Unnamed User";
+          name = credentials['username'] ?? "Could not fetch name";
           final password = credentials['password'] ?? "";
           final createResult = await ApiService.createUser(
             scannedId,
             name,
             password,
           );
-          token = createResult['token']?.toString() ?? "";
+          debugPrint("Create user result: $createResult");
+          encodedToken =
+              createResult['token']?['encoded_token']?.toString() ?? "";
+          validUntil = createResult['token']?['valid_until']?.toString() ?? "";
         }
+        // Debug: print token to verify correctness
+        debugPrint("Encoded token received: $encodedToken");
         Provider.of<UserSession>(
           context,
           listen: false,
-        ).login(scannedId, name, token);
+        ).login(scannedId, name, encodedToken, validUntil);
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, '/home');
       } catch (e) {

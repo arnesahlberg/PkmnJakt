@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
@@ -65,6 +66,8 @@ class ApiService {
     int n,
     String token,
   ) async {
+    debugPrint('viewFoundPokemon: $n');
+    debugPrint("token: $token");
     final response = await http.post(
       Uri.parse('$baseUrl/view_found_pokemon'),
       body: jsonEncode({'n': n}),
