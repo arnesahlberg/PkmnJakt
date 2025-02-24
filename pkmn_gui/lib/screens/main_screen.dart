@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'main.dart'; // for user session
-import 'widgets/common_app_bar.dart';
+import '../main.dart'; // for user session
+import '../widgets/common_app_bar.dart';
 import 'package:intl/intl.dart';
-import 'api_calls.dart';
+import '../api_calls.dart';
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+class UserHomeScreen extends StatefulWidget {
+  const UserHomeScreen({super.key});
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<UserHomeScreen> createState() => _UserHomeScreenState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _UserHomeScreenState extends State<UserHomeScreen> {
   List<dynamic> _pokemonList = [];
   bool _isLoading = true;
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_html/html.dart' as html;
-import 'main_page.dart';
+import 'screens/main_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/qr_scanner_screen.dart';
 import 'screens/profile_screen.dart';
@@ -129,7 +129,7 @@ class MyApp extends StatelessWidget {
         '/scanner': (_) => const QRScannerScreen(),
         '/profile': (_) => const ProfileScreen(),
         '/highscore': (_) => const HighScoreScreen(),
-        '/home': (_) => const MainPage(),
+        '/home': (_) => const UserHomeScreen(),
       },
     );
   }

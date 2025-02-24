@@ -41,6 +41,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           }
           final loginResult = await ApiService.login(scannedId, password);
           debugPrint("Login result: $loginResult");
+          if (loginResult['message'] == "Invalid password") {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Fel lösenord, försök igen")),
+            );
+            _scanned = false;
+            setState(() {
+              _isProcessing = false;
+            });
+            return;
+          }
           name = loginResult['name'] ?? "Error fetching name";
           encodedToken =
               loginResult['token']?['encoded_token'].toString() ?? "";

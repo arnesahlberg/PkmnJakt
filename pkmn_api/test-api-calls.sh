@@ -33,7 +33,6 @@ curl -X POST http://127.0.0.1:8080/logout \
     -H "Authorization: $TOKEN"
 
 
-
 # change user name using Authorization header
 curl -X POST http://127.0.0.1:8080/set_user_name \
     -H "Content-Type: application/json" \
