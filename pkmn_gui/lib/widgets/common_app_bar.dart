@@ -4,7 +4,7 @@ import '../../main.dart'; // import UserSession from main.dart
 
 class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  const CommonAppBar({Key? key, required this.title}) : super(key: key);
+  const CommonAppBar({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {

@@ -89,3 +89,12 @@ CREATE VIEW IF NOT EXISTS ViewTopFinders AS
 SELECT UserID, User, PokemonFound FROM ViewNumPokemonFound
 ORDER BY PokemonFound DESC;
 
+-- view where we get user's ranking in ViewTopFinders
+CREATE VIEW IF NOT EXISTS ViewUserRanking AS
+SELECT 
+    UserID, 
+    User, 
+    PokemonFound, 
+    (SELECT COUNT(*) FROM ViewTopFinders WHERE PokemonFound > t.PokemonFound) + 1 AS Ranking
+FROM ViewTopFinders AS t;
+

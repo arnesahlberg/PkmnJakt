@@ -14,6 +14,8 @@ curl -X POST http://127.0.0.1:8080/login \
     -d '{"id" : "11111", "password" : "1234"}'
 
 
+
+
 # set from previous before continue
 export TOKEN="W1RPS0VOLS1vUm1Nc0VZYm9nUS0tMTExMTEtLTIwMjUtMDMtMDIgMDc6MTI6MDIuNjMyMTYwIFVUQy0tR3RyXQ=="
 
@@ -22,11 +24,15 @@ curl -X POST http://127.0.0.1:8080/create_user \
     -H "Content-Type: application/json" \
     -d '{"id": "22222", "name": "Sture Stur", "password": "stur-pass"}'
 
+curl -X POST http://127.0.0.1:8080/create_user \
+    -H "Content-Type: application/json" \
+    -d '{"id": "33333", "name": "Lisa Lis", "password": "lis-pass"}'
 
 
-# Set token for user 2
-export TOKEN2="W1RPS0VOLS1iUVd0RlVvUEdBaS0tMjIyMjItLTIwMjUtMDMtMDIgMDc6MTI6MzAuNjcyNDQxIFVUQy0tVnlDXQ=="
 
+# Set token for user 2 and 3
+export TOKEN2="W1RPS0VOLS1Xc3VrTk9scERXWS0tMjIyMjItLTIwMjUtMDMtMDQgMDc6MTM6NDYuODYxNzgwIFVUQy0taUdsXQ=="
+export TOKEN3="W1RPS0VOLS1FdkRQanp0ZVNTYS0tMzMzMzMtLTIwMjUtMDMtMDQgMDc6MzI6MTAuODA3MTc1IFVUQy0tZFFMXQ=="
 
 curl -X POST http://127.0.0.1:8080/logout \
     -H "Content-Type: application/json" \

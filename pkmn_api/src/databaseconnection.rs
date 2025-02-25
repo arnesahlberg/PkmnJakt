@@ -17,6 +17,12 @@ pub fn user_exists(user_id : &str, conn : &Connection) -> Result<bool> {
     Ok(count > 0)
 }
 
+pub fn get_num_users(conn : &Connection) -> Result<i32> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Users")?;
+    let count : i32 = stmt.query_row([], |row| row.get(0))?;
+    Ok(count)
+}
+
 pub fn remove_token(user_id : &str, token : &str, conn : &Connection) -> Result<()> {
     conn.execute("DELETE FROM Tokens WHERE Token = ?1 AND User_Id = ?2", params![token, user_id])?;
     Ok(())
@@ -32,6 +38,8 @@ pub fn token_in_database(user_id : &str, token : &str, conn : &Connection) -> Re
     let count : i32 = stmt.query_row(params![token, user_id], |row| row.get(0))?;
     Ok(count > 0)
 }
+
+
 
 pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection) -> Result<Option<(User, Token)>> {
 
@@ -210,6 +218,13 @@ pub fn check_if_user_has_uploaded_photo_of_pokemon(user_id: &str, pokemon_id: &s
 pub fn upload_photo_of_pokemon(user_id: &str, pokemon_id: &str, photo_path: &str, comment: &str, rating: i32, conn: &Connection) -> Result<()> {
     panic!("Not implemented yet.");
     Ok(())
+}
+
+// get user ranking
+pub fn user_ranking(user_id : &str, conn : &Connection) -> Result<u32> {
+    let mut stmt = conn.prepare("SELECT Ranking FROM ViewUserRanking WHERE UserId = ?1")?;
+    let ranking : u32 = stmt.query_row(params![user_id], |row| row.get(0)).unwrap_or(get_num_users(conn)? as u32);
+    Ok(ranking)
 }
 
 

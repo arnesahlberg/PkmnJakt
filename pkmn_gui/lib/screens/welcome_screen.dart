@@ -44,7 +44,7 @@ class WelcomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Välkommen till Stensund Pkmn-Jakt 2025!',
+                        'Välkommen till Stensund Pokemon-Jakt 2025!',
                         style: Theme.of(context).textTheme.headlineLarge
                             ?.copyWith(color: Colors.redAccent),
                         textAlign: TextAlign.center,

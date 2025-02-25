@@ -25,6 +25,11 @@ class ApiService {
     return json['exists'];
   }
 
+  static Future<int> checkUserRanking(String id) async {
+    final response = await http.get(Uri.parse('$baseUrl/user_ranking/$id'));
+    return int.parse(response.body);
+  }
+
   static Future<Map<String, dynamic>> createUser(
     String id,
     String name,

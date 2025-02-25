@@ -389,6 +389,20 @@ pub async fn get_pokemon(path: web::Path<u32>) -> HttpResponse {
     }
 }
 
+
+// get user ranking
+pub async fn get_user_ranking(path: web::Path<String>) -> HttpResponse {
+    let user_id = path.into_inner();
+    // first check if user exists
+    if !databaseconnection::user_exists(&user_id, &databaseconnection::get_conn(get_env_dbpath()).unwrap()).unwrap() {
+        return HttpResponse::NotFound().finish();
+    }
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let ranking = databaseconnection::user_ranking(&user_id, &conn).unwrap();
+    HttpResponse::Ok().json(ranking)
+}
+
+
 // registers all routes.
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.route("/login", web::post().to(login))
@@ -403,6 +417,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/get_user/{user_id}", web::get().to(get_user))
         .route("/get_pokemon/{number}", web::get().to(get_pokemon))
         .route("/user_exists/{user_id}", web::get().to(user_exists))
+        .route("/user_ranking/{user_id}", web::get().to(get_user_ranking))
         ;
 }
 
