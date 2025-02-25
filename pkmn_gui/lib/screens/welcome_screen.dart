@@ -19,7 +19,7 @@ class WelcomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Välkommen tillbaka, ${session.userName}!',
+                        'Välkommen tillbaka, ${session.userName}! Du är redan inloggad.',
                         style: Theme.of(context).textTheme.headlineLarge
                             ?.copyWith(color: Colors.redAccent),
                         textAlign: TextAlign.center,
@@ -31,12 +31,15 @@ class WelcomeScreen extends StatelessWidget {
                             horizontal: 40,
                             vertical: 20,
                           ),
-                          textStyle: const TextStyle(fontSize: 20),
+                          textStyle: const TextStyle(
+                            fontSize: 20,
+                            fontFamily: 'PixelFont',
+                          ),
                         ),
                         onPressed: () {
                           Navigator.pushReplacementNamed(context, '/home');
                         },
-                        child: const Text('Gå till startsidan'),
+                        child: const Text('Fortsätt'),
                       ),
                     ],
                   )

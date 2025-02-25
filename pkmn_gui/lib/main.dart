@@ -120,6 +120,7 @@ class MyApp extends StatelessWidget {
       title: 'Stensund Pokemon-Jakt 2025!',
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
+        fontFamily: 'PixelFont',
         colorScheme: ColorScheme.fromSwatch(
           primarySwatch: Colors.deepPurple,
         ).copyWith(secondary: Colors.yellowAccent),

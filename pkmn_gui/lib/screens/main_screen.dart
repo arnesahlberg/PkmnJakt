@@ -86,6 +86,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'PixelFont',
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -106,6 +107,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'PixelFont',
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -133,6 +135,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'PixelFont',
                         ),
                       ),
                       _isExtraLoading
@@ -164,6 +167,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'PixelFont',
                         ),
                       ),
                       _isExtraLoading
