@@ -10,7 +10,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final session = Provider.of<UserSession>(context);
     return AppBar(
-      title: Text(title, style: const TextStyle(fontFamily: 'PixelFont')),
+      title: Text(title, style: const TextStyle(fontFamily: 'PixelFontTitle')),
       // Added a gradient background
       flexibleSpace: Container(
         decoration: const BoxDecoration(

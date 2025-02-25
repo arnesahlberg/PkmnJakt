@@ -65,7 +65,10 @@ class WelcomeScreen extends StatelessWidget {
                             horizontal: 40,
                             vertical: 20,
                           ),
-                          textStyle: const TextStyle(fontSize: 20),
+                          textStyle: const TextStyle(
+                            fontSize: 20,
+                            fontFamily: 'PixelFont',
+                          ),
                         ),
                         onPressed: () {
                           Navigator.pushNamed(context, '/scanner');

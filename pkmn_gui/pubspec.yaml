@@ -82,9 +82,12 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-      - family: PixelFont
+      - family: PixelFontTitle
         fonts:
           - asset: assets/fonts/salty9.ttf
+      - family: PixelFont
+        fonts:
+          - asset: assets/fonts/compass9.ttf
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf
