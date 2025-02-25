@@ -17,7 +17,6 @@ class DataMatrixScanner extends StatelessWidget {
             if (capture.barcodes.isNotEmpty) {
               final barcode = capture.barcodes.first;
               final scannedValue = barcode.rawValue;
-              debugPrint('Scanned: $scannedValue');
               if (scannedValue != null) {
                 onCodeScanned(scannedValue);
               }
