@@ -1,7 +1,7 @@
 use actix_web::{web, HttpResponse, HttpRequest};
 use serde::{Deserialize, Serialize};
 use crate::misc::{self, validate_token};
-use crate::model::{FoundPkmn, Token, User, UserScore};
+use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore};
 use crate::databaseconnection;
 
 fn get_env_dbpath() -> String {
@@ -402,6 +402,35 @@ pub async fn get_user_ranking(path: web::Path<String>) -> HttpResponse {
     HttpResponse::Ok().json(ranking)
 }
 
+// get my pokedex
+#[derive(Debug, Serialize)]
+struct MyPokedexResponse {
+    pokedex: Vec<Pkmn>,
+}
+
+pub async fn get_my_pokedex(req: HttpRequest) -> HttpResponse {
+    let token = req.headers().get("Authorization")
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        let response = SetUserNameResponse {
+            id: user_id.clone(),
+            name: None,
+            message: "Invalid token.".to_string(),
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+    let pokedex = databaseconnection::user_pokedex(&user_id, &conn).unwrap();
+    let res = MyPokedexResponse {
+        pokedex: pokedex,
+    };
+    HttpResponse::Ok().json(res)
+}
+
 
 // registers all routes.
 pub fn config(cfg: &mut web::ServiceConfig) {
@@ -418,6 +447,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/get_pokemon/{number}", web::get().to(get_pokemon))
         .route("/user_exists/{user_id}", web::get().to(user_exists))
         .route("/user_ranking/{user_id}", web::get().to(get_user_ranking))
+        .route("/my_pokedex", web::get().to(get_my_pokedex))
         ;
 }
 

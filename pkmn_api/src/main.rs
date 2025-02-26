@@ -16,9 +16,28 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    let cert_path = match std::env::var("CERT") {
+        Ok(path) => path,
+        Err(_) => {
+            println!("Environment variable CERT is not set. Must be set to run.");
+            std::process::exit(1);
+        }
+    };
+
+    let cert_key_path = match std::env::var("CERT_KEY") {
+        Ok(path) => path,
+        Err(_) => {
+            println!("Environment variable CERT_KEY is not set. Must be set to run.");
+            std::process::exit(1);
+        }
+    };
+
     let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls())?;
-    builder.set_private_key_file("dev-certs/localhost+2-key.pem", SslFiletype::PEM)?;
-    builder.set_certificate_chain_file("dev-certs/localhost+2.pem")?;
+    builder.set_private_key_file(cert_key_path, SslFiletype::PEM)?;
+    builder.set_certificate_chain_file(cert_path)?;
+
+
+    
     HttpServer::new(|| {
         App::new()
             .wrap(

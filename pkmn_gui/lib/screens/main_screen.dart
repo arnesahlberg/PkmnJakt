@@ -4,6 +4,7 @@ import '../main.dart'; // for user session
 import '../widgets/common_app_bar.dart';
 import 'package:intl/intl.dart';
 import '../api_calls.dart';
+import 'pokedex_screen.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -81,6 +82,21 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const PokedexScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          textStyle: const TextStyle(fontFamily: 'PixelFont'),
+                        ),
+                        child: const Text("Mitt pokedex"),
+                      ),
+                      const SizedBox(height: 16),
                       Text(
                         "Välkommen ${session.userName}",
                         style: const TextStyle(
@@ -183,7 +199,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                   "${pokemon['name']} (Nr. ${pokemon['number']})",
                                 ),
                                 subtitle: Text(
-                                  "Found by: ${pokemon['found_by_user']['name']} - Tid: ${_formatTime(pokemon['time_found'])}",
+                                  "Hittad av: ${pokemon['found_by_user']['name']} - Tid: ${_formatTime(pokemon['time_found'])}",
                                 ),
                               );
                             },

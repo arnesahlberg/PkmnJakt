@@ -288,3 +288,26 @@ pub fn get_pokemon(number: u32, conn: &Connection) -> Result<Option<Pkmn>> {
     }
     Ok(None)
 }
+
+// get all info from pokemon caught by the user
+pub fn user_pokedex(user_id: &str, conn: &Connection) -> Result<Vec<Pkmn>> {
+    let mut stmt = conn.prepare(
+        "SELECT name, description, height, pokemon_id FROM Pokemon WHERE pokemon_id IN (SELECT pokemon_id FROM FoundPokemon WHERE User_Id = ?1)"
+    )?;
+    let rows = stmt.query_map(params![user_id], |row| {
+        Ok(Pkmn {
+            name: row.get(0)?,
+            number: row.get(3)?,
+            photo_path: None,
+            description: row.get(1)?,
+            height: row.get(2)?,
+        })
+    })?;
+
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?);
+    }
+
+    Ok(result)
+}

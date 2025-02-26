@@ -15,7 +15,7 @@ curl -X POST https://127.0.0.1:8081/login \
 
 
 # set from previous before continue
-export TOKEN="W1RPS0VOLS1vUm1Nc0VZYm9nUS0tMTExMTEtLTIwMjUtMDMtMDIgMDc6MTI6MDIuNjMyMTYwIFVUQy0tR3RyXQ=="
+export TOKEN="W1RPS0VOLS1GU05lR2dJR3d5Yi0tMTExMTEtLTIwMjUtMDMtMDUgMTU6MTk6MjIuNzgwNTAzIFVUQy0tQW9YXQ=="
 
 # create other user too
 curl -X POST https://127.0.0.1:8081/create_user \
@@ -84,9 +84,15 @@ curl -X POST https://127.0.0.1:8081/view_found_pokemon \
     -H "Authorization: $TOKEN" \
     -d '{"n": 10}'
 
+# user's pokedex
+curl -X GET https://127.0.0.1:8081/my_pokedex \
+    -H "Content-Type: application/json" \
+    -H "Authorization: $TOKEN"
+
 # Get Statistics
 curl -X GET https://127.0.0.1:8081/statistics_highscore 
 
 curl -X GET https://127.0.0.1:8081/statistics_latest_pokemon_found
 
 curl -X GET https://127.0.0.1:8081/get_pokemon/1
+

@@ -98,4 +98,12 @@ class ApiService {
     final response = await http.get(Uri.parse('$baseUrl/get_pokemon/$id'));
     return jsonDecode(response.body);
   }
+
+  static Future<Map<String, dynamic>> getMyPokedex(String token) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/my_pokedex'),
+      headers: _headers(token),
+    );
+    return jsonDecode(response.body);
+  }
 }

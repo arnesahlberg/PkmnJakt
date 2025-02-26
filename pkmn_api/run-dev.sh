@@ -1,0 +1,1 @@
+DATABASE_PATH=../Database/base.db CERT=dev-certs/localhost+2.pem CERT_KEY=dev-certs/localhost+2-key.pem cargo run
