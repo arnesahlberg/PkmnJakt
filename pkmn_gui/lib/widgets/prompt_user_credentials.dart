@@ -14,22 +14,24 @@ Future<Map<String, String>?> promptForUserCredentials(
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: Text("Register New User\n(ID: $scannedId)"),
+            title: Text("Registrera ny användare\n(ID: $scannedId)"),
             content: SingleChildScrollView(
               child: Column(
                 children: [
                   TextField(
-                    decoration: const InputDecoration(labelText: "Username"),
+                    decoration: const InputDecoration(
+                      labelText: "Namn att visa",
+                    ),
                     onChanged: (value) => username = value,
                   ),
                   TextField(
-                    decoration: const InputDecoration(labelText: "Password"),
+                    decoration: const InputDecoration(labelText: "Lösenord"),
                     obscureText: true,
                     onChanged: (value) => password = value,
                   ),
                   TextField(
                     decoration: const InputDecoration(
-                      labelText: "Confirm Password",
+                      labelText: "Bekräfta lösenord",
                     ),
                     obscureText: true,
                     onChanged: (value) => confirm = value,
@@ -40,7 +42,7 @@ Future<Map<String, String>?> promptForUserCredentials(
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, null),
-                child: const Text("Cancel"),
+                child: const Text("Avbryt"),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -54,7 +56,7 @@ Future<Map<String, String>?> promptForUserCredentials(
                     });
                   }
                 },
-                child: const Text("Submit"),
+                child: const Text("Skapa användare"),
               ),
             ],
           );

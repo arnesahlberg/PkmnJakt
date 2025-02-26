@@ -7,3 +7,5 @@ pkmn_api/target
 **/*.avif
 **/*.png
 **/*.jpg
+
+**/*.pem

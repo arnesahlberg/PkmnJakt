@@ -13,6 +13,8 @@ class DataMatrixScanner extends StatelessWidget {
           controller: MobileScannerController(
             detectionSpeed: DetectionSpeed.noDuplicates,
           ),
+          sheetTitle: 'Skanna QR-kod',
+          hideGalleryButton: true,
           onDetect: (BarcodeCapture capture) {
             if (capture.barcodes.isNotEmpty) {
               final barcode = capture.barcodes.first;

@@ -46,10 +46,15 @@ class _PokedexScreenState extends State<PokedexScreen> {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ListTile(
-                  leading:
-                      pokemon['photo_path'] != null
-                          ? Image.network(pokemon['photo_path'])
-                          : const Icon(Icons.image_outlined, size: 48),
+                  leading: Image.asset(
+                    'assets/images/pkmn/${pokemon['number']}.avif',
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
+                    errorBuilder:
+                        (context, error, stackTrace) =>
+                            const Icon(Icons.image_outlined, size: 48),
+                  ),
                   title: Text("${pokemon['name']} (Nr. ${pokemon['number']})"),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

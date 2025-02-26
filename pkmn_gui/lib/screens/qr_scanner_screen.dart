@@ -110,7 +110,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     return Stack(
       children: [
         Scaffold(
-          appBar: const CommonAppBar(title: 'Scanna ditt band'),
+          // appBar: const CommonAppBar(title: 'Scanna ditt band'),
           body: Column(
             children: [
               Expanded(child: DataMatrixScanner(onCodeScanned: _onGetResult)),
