@@ -7,37 +7,6 @@ import 'screens/qr_scanner_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/high_score_screen.dart';
 
-// New: Global function to prompt for a password.
-Future<String?> promptForPassword(BuildContext context) async {
-  String password = "";
-  return showDialog<String>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text("Enter Password"),
-        content: TextField(
-          obscureText: true,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: "Password"),
-          onChanged: (value) {
-            password = value;
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, null),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, password),
-            child: const Text("Submit"),
-          ),
-        ],
-      );
-    },
-  );
-}
-
 // ------------------------------
 // User Session Provider
 class UserSession extends ChangeNotifier {

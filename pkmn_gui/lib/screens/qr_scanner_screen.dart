@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../widgets/common_app_bar.dart';
 import '../widgets/data_matrix_scanner.dart'; // Use the DataMatrixScanner widget
 import '../api_calls.dart';
-import '../main.dart'; // for UserSession and promptForPassword
-import '../widgets/prompt_user_credentials.dart'; // new import for user credentials
+import '../main.dart'; // for UserSession
+import '../widgets/login_popup.dart';
+import '../widgets/new_user_prompt.dart';
 
 class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
