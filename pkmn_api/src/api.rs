@@ -382,8 +382,7 @@ pub async fn get_pokemon(path: web::Path<u32>) -> HttpResponse {
     let pokemon = databaseconnection::get_pokemon(number, &conn).unwrap();
     match pokemon {
         Some(pokemon) => {
-            let res = pokemon;
-            HttpResponse::Ok().json(res)
+            HttpResponse::Ok().json(pokemon)
         },
         None => {
             HttpResponse::NotFound().finish()

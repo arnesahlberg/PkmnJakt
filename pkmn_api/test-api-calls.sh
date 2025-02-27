@@ -8,6 +8,10 @@ curl -X POST https://127.0.0.1:8081/create_user \
     -H "Content-Type: application/json" \
     -d '{"id": "11111", "name": "Leif Katt", "password": "1234"}'
 
+curl -X POST https://127.0.0.1:8081/logout \
+    -H "Content-Type: application/json" \
+    -H "Authorization: $TOKEN"
+
 # now login
 curl -X POST https://127.0.0.1:8081/login \
     -H "Content-Type: application/json" \
@@ -15,7 +19,7 @@ curl -X POST https://127.0.0.1:8081/login \
 
 
 # set from previous before continue
-export TOKEN="W1RPS0VOLS1Qald1d2FIRWZXVy0tMTExMTEtLTIwMjUtMDMtMDYgMTE6NTA6NDguODY3NDM1IFVUQy0tQ055XQ=="
+export TOKEN="W1RPS0VOLS1KVWdlbkJzcUxvZy0tMTExMTEtLTIwMjUtMDMtMDYgMTM6MTk6MDAuMDU4Mjc0IFVUQy0ta3pXXQ=="
 
 # create other user too
 curl -X POST https://127.0.0.1:8081/create_user \
@@ -28,12 +32,10 @@ curl -X POST https://127.0.0.1:8081/create_user \
 
 
 # Set token for user 2 and 3
-export TOKEN2="W1RPS0VOLS1TcXp4YlVHUXF1QS0tMjIyMjItLTIwMjUtMDMtMDYgMTE6NTE6MDIuMDgyNzEzIFVUQy0tb01ZXQ=="
-export TOKEN3="W1RPS0VOLS1IcWxrRnhUb2hhby0tMzMzMzMtLTIwMjUtMDMtMDYgMTE6NTE6MTAuMDY2MzcyIFVUQy0tdWZNXQ=="
+export TOKEN2="W1RPS0VOLS1UWGVla3dJUXdqbi0tMjIyMjItLTIwMjUtMDMtMDYgMTM6MTk6MjcuMDQzMjkzIFVUQy0tcGVXXQ=="
+export TOKEN3="W1RPS0VOLS1SbnhwZmd6d2NkRy0tMzMzMzMtLTIwMjUtMDMtMDYgMTM6MTk6MjcuMDcwMDYxIFVUQy0tZVd5XQ=="
 
-curl -X POST https://127.0.0.1:8081/logout \
-    -H "Content-Type: application/json" \
-    -H "Authorization: $TOKEN"
+
 
 # change user name using Authorization header
 curl -X POST https://127.0.0.1:8081/set_user_name \
@@ -93,5 +95,5 @@ curl -X GET https://127.0.0.1:8081/statistics_highscore
 
 curl -X GET https://127.0.0.1:8081/statistics_latest_pokemon_found
 
-curl -X GET https://127.0.0.1:8081/get_pokemon/1
+curl -X GET https://127.0.0.1:8081/get_pokemon/39
 
