@@ -15,7 +15,7 @@ curl -X POST https://127.0.0.1:8081/login \
 
 
 # set from previous before continue
-export TOKEN="W1RPS0VOLS1GZWNUakthTHBnbS0tMTExMTEtLTIwMjUtMDMtMDYgMDc6Mzk6MTAuNzMwNDk3IFVUQy0tY1hOXQ=="
+export TOKEN="W1RPS0VOLS1Qald1d2FIRWZXVy0tMTExMTEtLTIwMjUtMDMtMDYgMTE6NTA6NDguODY3NDM1IFVUQy0tQ055XQ=="
 
 # create other user too
 curl -X POST https://127.0.0.1:8081/create_user \
@@ -28,8 +28,8 @@ curl -X POST https://127.0.0.1:8081/create_user \
 
 
 # Set token for user 2 and 3
-export TOKEN2="W1RPS0VOLS1WT3hrd0ZYTnVFVy0tMjIyMjItLTIwMjUtMDMtMDYgMTA6MTA6MjUuMzc4ODkwIFVUQy0tZUZPXQ=="
-export TOKEN3="W1RPS0VOLS1LaUh4akpmUWRXdC0tMzMzMzMtLTIwMjUtMDMtMDYgMTA6MTA6MzYuMTAzMjI2IFVUQy0tRmZzXQ=="
+export TOKEN2="W1RPS0VOLS1TcXp4YlVHUXF1QS0tMjIyMjItLTIwMjUtMDMtMDYgMTE6NTE6MDIuMDgyNzEzIFVUQy0tb01ZXQ=="
+export TOKEN3="W1RPS0VOLS1IcWxrRnhUb2hhby0tMzMzMzMtLTIwMjUtMDMtMDYgMTE6NTE6MTAuMDY2MzcyIFVUQy0tdWZNXQ=="
 
 curl -X POST https://127.0.0.1:8081/logout \
     -H "Content-Type: application/json" \

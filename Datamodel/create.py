@@ -14,7 +14,7 @@ with open('../Pkmn/pkmn.csv', newline='', encoding='utf-8') as csvfile:
         cursor.execute('''
         INSERT INTO Pokemon (pokemon_id, name, description, height)
         VALUES (?, ?, ?, ?)
-        ''', (row['Nr'], row['Name'], row['Info'], float(row['Size'].replace(' m', ''))))
+        ''', (row['Nr'], row['Name'], row['Info'], float(row['Height (m)'],)))
 
 
 with open('../Pkmn/catch_codes.csv', newline='', encoding='utf-8') as csvfile:
