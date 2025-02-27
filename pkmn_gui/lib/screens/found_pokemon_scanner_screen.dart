@@ -51,9 +51,7 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    pokemonInfo['name'] +
-                        " " +
-                        (foundResponse['message'] ?? ""),
+                    "Du har fångat ${pokemonInfo['name']} ${pokemonInfo['number']}!",
                   ),
                   const SizedBox(height: 10),
                   Image.asset(
@@ -107,10 +105,12 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Hitta Pokémon")),
       body: Stack(
         children: [
-          DataMatrixScanner(onCodeScanned: _onGetResult),
+          DataMatrixScanner(
+            onCodeScanned: _onGetResult,
+            sheetTitle: "Scanna QR koden för att registrera hittad Pokémon",
+          ),
           if (_isProcessing)
             Container(
               color: Colors.black45,

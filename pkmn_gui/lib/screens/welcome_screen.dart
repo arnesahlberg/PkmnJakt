@@ -9,7 +9,10 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final session = Provider.of<UserSession>(context);
     return Scaffold(
-      appBar: const CommonAppBar(title: 'Stensund Pokemon-Jakt 2025!'),
+      appBar: const CommonAppBar(
+        title: 'Stensund Pokemon-Jakt 2025!',
+        showBackButton: false,
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),

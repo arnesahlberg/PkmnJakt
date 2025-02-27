@@ -10,7 +10,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CommonAppBar({
     super.key,
     required this.title,
-    this.showBackButton = false,
+    this.showBackButton = true,
     this.backRoute,
   });
 
@@ -19,10 +19,10 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
     final session = Provider.of<UserSession>(context);
     return AppBar(
       // Conditionally show a back button
+      automaticallyImplyLeading: false,
       leading:
           showBackButton
-              ? IconButton(
-                icon: const Icon(Icons.arrow_back),
+              ? BackButton(
                 onPressed: () {
                   if (backRoute != null) {
                     Navigator.pushReplacementNamed(context, backRoute!);

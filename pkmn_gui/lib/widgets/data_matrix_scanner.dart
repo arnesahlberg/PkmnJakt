@@ -3,7 +3,12 @@ import 'package:ai_barcode_scanner/ai_barcode_scanner.dart';
 
 class DataMatrixScanner extends StatelessWidget {
   final Function(String) onCodeScanned;
-  const DataMatrixScanner({super.key, required this.onCodeScanned});
+  final String sheetTitle;
+  const DataMatrixScanner({
+    super.key,
+    required this.onCodeScanned,
+    required this.sheetTitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +18,7 @@ class DataMatrixScanner extends StatelessWidget {
           controller: MobileScannerController(
             detectionSpeed: DetectionSpeed.noDuplicates,
           ),
-          sheetTitle: 'Skanna kod',
+          sheetTitle: sheetTitle,
           hideGalleryButton: true,
           onDetect: (BarcodeCapture capture) {
             if (capture.barcodes.isNotEmpty) {

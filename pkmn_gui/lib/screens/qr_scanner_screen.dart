@@ -127,7 +127,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           // appBar: const CommonAppBar(title: 'Scanna ditt band'),
           body: Column(
             children: [
-              Expanded(child: DataMatrixScanner(onCodeScanned: _onGetResult)),
+              Expanded(
+                child: DataMatrixScanner(
+                  onCodeScanned: _onGetResult,
+                  sheetTitle: "Scanna QR-koden på ditt band för att logga in",
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
