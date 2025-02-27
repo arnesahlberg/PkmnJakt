@@ -28,13 +28,12 @@ curl -X POST https://127.0.0.1:8081/create_user \
 
 
 # Set token for user 2 and 3
-export TOKEN2="W1RPS0VOLS1Xc3VrTk9scERXWS0tMjIyMjItLTIwMjUtMDMtMDQgMDc6MTM6NDYuODYxNzgwIFVUQy0taUdsXQ=="
-export TOKEN3="W1RPS0VOLS1FdkRQanp0ZVNTYS0tMzMzMzMtLTIwMjUtMDMtMDQgMDc6MzI6MTAuODA3MTc1IFVUQy0tZFFMXQ=="
+export TOKEN2="W1RPS0VOLS1WT3hrd0ZYTnVFVy0tMjIyMjItLTIwMjUtMDMtMDYgMTA6MTA6MjUuMzc4ODkwIFVUQy0tZUZPXQ=="
+export TOKEN3="W1RPS0VOLS1LaUh4akpmUWRXdC0tMzMzMzMtLTIwMjUtMDMtMDYgMTA6MTA6MzYuMTAzMjI2IFVUQy0tRmZzXQ=="
 
 curl -X POST https://127.0.0.1:8081/logout \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN"
-
 
 # change user name using Authorization header
 curl -X POST https://127.0.0.1:8081/set_user_name \
@@ -51,32 +50,32 @@ curl -X POST https://127.0.0.1:8081/found_pokemon \
 curl -X POST https://127.0.0.1:8081/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN2" \
-    -d '{"pokemon_id": "6"}'
+    -d '{"catch_code": "331444e7-7a2b-48e3-abe5-74e486b82fb3"}'
 
 curl -X POST https://127.0.0.1:8081/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN" \
-    -d '{"pokemon_id": "92"}'
+    -d '{"catch_code": "f3bb7f69-3b66-4cf6-8342-85e17951b502"}'
 
 curl -X POST https://127.0.0.1:8081/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN" \
-    -d '{"pokemon_id": "111"}'
+    -d '{"catch_code": "2ddf72ec-32a4-40e3-b6c4-e4d03e4339a2"}'
 
 curl -X POST https://127.0.0.1:8081/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN2" \
-    -d '{"pokemon_id": "121"}'
+    -d '{"catch_code": "44cda3fd-62e5-4d68-a41a-7ae472d8aa5b"}'
 
 curl -X POST https://127.0.0.1:8081/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN" \
-    -d '{"pokemon_id": "31"}'
+    -d '{"catch_code": "7a6af775-748a-44ab-9812-dfe934d5fab5"}'
 
 curl -X POST https://127.0.0.1:8081/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN" \
-    -d '{"pokemon_id": "32"}'
+    -d '{"catch_code": "d9f5fe6e-22bd-4240-918c-9994a062df82"}'
 
 # view pokemon found by user using header
 curl -X POST https://127.0.0.1:8081/view_found_pokemon \

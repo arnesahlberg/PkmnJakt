@@ -4,8 +4,9 @@ pkmn_api/target
 **/Cargo.lock
 **/*.db
 
-**/*.avif
-**/*.png
-**/*.jpg
+Pkmn/Pictures
+Pkmn/PicturesHQ
+Pkmn/PicturesHQ-Scaled
+
 
 **/*.pem

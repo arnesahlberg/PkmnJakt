@@ -248,7 +248,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
     let response = FoundPokemonResponse {
         user_id: user_id.clone(),
         pokemon_id: Some(pokemon.number.clone()),
-        message: format!("Caught pokemon {} ({})", pokemon.name, pokemon.number),
+        message: format!("Caught {} (#{})", pokemon.name, pokemon.number),
     };
     HttpResponse::Ok().json(response)
 }
