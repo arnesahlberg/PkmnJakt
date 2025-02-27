@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../api_calls.dart';
 import '../main.dart'; // for UserSession
 import '../widgets/data_matrix_scanner.dart';
+import '../constants.dart';
 
 class FoundPokemonScannerScreen extends StatefulWidget {
   const FoundPokemonScannerScreen({super.key});
@@ -25,18 +26,32 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
         result,
         session.token!,
       );
-      // sheck whether the Pokémon was already found.
-      if (foundResponse['message'] == "Already found pokemon") {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Du har redan hittat denna Pokémon")),
-        );
+      // Check CallResultCode for errors
+      if (foundResponse['result_code'] != CallResultCode.ok) {
+        if (foundResponse['result_code'] ==
+            CallResultCode.pokemonAlreadyFound) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Du har redan hittat denna Pokémon")),
+          );
+        } else if (foundResponse['result_code'] ==
+            CallResultCode.pokemonNotFound) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Koden du scannade tillhör inte en pokemon"),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Fel: ${foundResponse['result_code']}")),
+          );
+        }
         _scanned = false;
         setState(() => _isProcessing = false);
         return;
       }
-      // successful catch: extract pokemon_id and message.
       final pokemonId = foundResponse['pokemon_id']?.toString();
-      if (pokemonId == null) throw Exception("Koden tillhör inte en pokemon.");
+      if (pokemonId == null)
+        throw Exception("Koden du scannade tillhör inte en pokemon.");
       // fetch detailed pokemon info
       final pokemonInfo = await ApiService.getPokemon(pokemonId);
       if (!mounted) return;
@@ -67,24 +82,21 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    // Reset _scanned before navigating to pokedex
                     setState(() {
                       _scanned = false;
                     });
-                    Navigator.pop(context); // close dialog
-                    Navigator.pop(context); // return to main screen
+                    Navigator.pop(context);
                     Navigator.pushReplacementNamed(context, '/pokedex');
                   },
                   child: const Text("Visa Pokedex"),
                 ),
                 TextButton(
                   onPressed: () {
-                    // Reset _scanned and then dismiss dialog and return to main screen
                     setState(() {
                       _scanned = false;
                     });
-                    Navigator.pop(context); // close dialog
-                    Navigator.pop(context); // return to main screen
+                    Navigator.pop(context);
+                    Navigator.pop(context);
                     Navigator.pushReplacementNamed(context, '/home');
                   },
                   child: const Text("Tillbaka"),
@@ -107,10 +119,11 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          DataMatrixScanner(
-            onCodeScanned: _onGetResult,
-            sheetTitle: "Scanna QR koden för att registrera hittad Pokémon",
-          ),
+          if (!_scanned) // Only show scanner when not processing a scan
+            DataMatrixScanner(
+              onCodeScanned: _onGetResult,
+              sheetTitle: "Scanna QR koden för att registrera hittad Pokémon",
+            ),
           if (_isProcessing)
             Container(
               color: Colors.black45,

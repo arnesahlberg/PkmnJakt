@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = 'https://localhost:8081';
+  static const String baseUrl = 'https://192.168.0.73:8081';
 
   static Map<String, String> _headers([String? token]) => {
     "Content-Type": "application/json",

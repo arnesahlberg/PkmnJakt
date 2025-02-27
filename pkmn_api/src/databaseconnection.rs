@@ -156,7 +156,6 @@ pub fn get_pokemon_id_by_catch_code(catch_code: &str, conn: &Connection) -> Resu
 // to call if oyu've found a pokemon
 pub fn found_pokemon(user_id: &str, catch_code: &str, conn: &Connection) -> Result<()> {
     let pokemon_id = get_pokemon_id_by_catch_code(catch_code, conn)?;
-    println!("Found pokemon with id: {}", pokemon_id);
     conn.execute(
         "INSERT INTO FoundPokemon (user_id, pokemon_id) VALUES (?1, ?2)",
         params![user_id, pokemon_id],

@@ -4,6 +4,26 @@ use crate::misc::{self, validate_token};
 use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore};
 use crate::databaseconnection;
 
+#[derive(Debug, Clone, Copy)]
+pub enum CallResultCode {
+    Ok = 0,
+    UserNotFound = 1,
+    InvalidPassword = 2,
+    UserAlreadyExists = 3,
+    PokemonNotFound = 4,
+    PokemonAlreadyFound = 5,
+    InvalidToken = 6,
+} 
+
+impl Serialize for CallResultCode {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_u32(*self as u32)
+    }
+}
+
 fn get_env_dbpath() -> String {
     match std::env::var("DATABASE_PATH") {
         Ok (value) => value,
@@ -25,6 +45,7 @@ pub struct LoginResponse {
     pub token: Option<Token>,
     pub name: Option<String>,
     pub message: String,
+    pub result_code: CallResultCode,
 }
 
 pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
@@ -36,6 +57,7 @@ pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
             token: None,
             name: None,
             message: format!("Create new user first {}", info.id),
+            result_code: CallResultCode::UserNotFound,
         };
         return HttpResponse::Ok().json(response);
     }
@@ -47,15 +69,17 @@ pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
                 token: None,
                 name: None,
                 message: "Invalid password".to_string(),
+                result_code: CallResultCode::InvalidPassword,
             };
             return HttpResponse::Ok().json(response);
         }
     };
     let response = LoginResponse {
         id: user.user_id,
-        token : Some(token),
+        token: Some(token),
         name: Some(user.name.clone()),
         message: format!("Logged in as {}", user.name),
+        result_code: CallResultCode::Ok,
     };
     HttpResponse::Ok().json(response)
 }
@@ -74,8 +98,9 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
         let response = LoginResponse {
             id: info.id.clone(),
             name: None,
-            token : None,
+            token: None,
             message: format!("User already exists {}", info.id),
+            result_code: CallResultCode::UserAlreadyExists,
         };
         return HttpResponse::Ok().json(response);
     }
@@ -83,8 +108,9 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
     let response = LoginResponse {
         id: user.user_id,
         name: Some(user.name),
-        token : Some(token),
+        token: Some(token),
         message: format!("Created new user {}", info.name),
+        result_code: CallResultCode::Ok,
     };
     HttpResponse::Ok().json(response)
 }
@@ -99,6 +125,7 @@ pub struct SetUserNameResponse {
     pub id: String,
     pub name: Option<String>,
     pub message: String,
+    pub result_code: CallResultCode,
 }
 
 pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>) -> HttpResponse {
@@ -112,6 +139,7 @@ pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>
             id: user_id.clone(),
             name: None,
             message: "Invalid token.".to_string(),
+            result_code: CallResultCode::InvalidToken,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -122,6 +150,7 @@ pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>
             id: user_id.clone(),
             name: None,
             message: format!("User does not exist {}", user_id),
+            result_code: CallResultCode::UserNotFound,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -130,6 +159,7 @@ pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>
         id: user_id.clone(),
         name: Some(info.name.clone()),
         message: format!("Updated user name to '{}'", info.name),
+        result_code: CallResultCode::Ok,
     };
     HttpResponse::Ok().json(response)
 }
@@ -139,6 +169,7 @@ pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>
 pub struct LogoutResponse {
     pub logged_out: bool,
     pub message: String,
+    pub result_code: CallResultCode,
 }
 
 pub async fn logout(req: HttpRequest) -> HttpResponse {
@@ -152,6 +183,7 @@ pub async fn logout(req: HttpRequest) -> HttpResponse {
         let response = LogoutResponse {
             logged_out: false,
             message: "Invalid token. Already logged out, it seems.".to_string(),
+            result_code: CallResultCode::InvalidToken,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -159,6 +191,7 @@ pub async fn logout(req: HttpRequest) -> HttpResponse {
     let response = LogoutResponse {
         logged_out: true,
         message: "Logged out".to_string(),
+        result_code: CallResultCode::Ok,
     };
     HttpResponse::Ok().json(response)
 }
@@ -175,6 +208,7 @@ pub async fn logout_everywhere(req: HttpRequest) -> HttpResponse {
         let response = LogoutResponse {
             logged_out: false,
             message: "Invalid token.".to_string(),
+            result_code: CallResultCode::InvalidToken,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -182,6 +216,7 @@ pub async fn logout_everywhere(req: HttpRequest) -> HttpResponse {
     let response = LogoutResponse {
         logged_out: true,
         message: "Logged out everywhere".to_string(),
+        result_code: CallResultCode::Ok,
     };
     HttpResponse::Ok().json(response)
 }
@@ -197,6 +232,7 @@ pub struct FoundPokemonResponse {
     pub user_id: String,
     pub pokemon_id: Option<u32>,
     pub message: String,
+    pub result_code: CallResultCode,
 }
 
 pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokemonRequest>) -> HttpResponse {
@@ -204,14 +240,13 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
     let token = req.headers().get("Authorization")
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    println!("token: {}", token);
     let user_id = misc::get_user_id_from_token(token).unwrap();
-    println!("user_id: {}", user_id);
     if !validate_token(&user_id, token, &conn) {
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
             pokemon_id: None,
             message: "Invalid token".to_string(),
+            result_code: CallResultCode::InvalidToken,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -221,6 +256,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
             user_id: user_id.clone(),
             pokemon_id: None,
             message: format!("User does not exist {}", user_id),
+            result_code: CallResultCode::UserNotFound,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -230,6 +266,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
             user_id: user_id.clone(),
             pokemon_id: None,
             message: "Cannot find pokemon".to_string(),
+            result_code: CallResultCode::PokemonNotFound,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -241,6 +278,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
             user_id: user_id.clone(),
             pokemon_id: Some(pokemon.number.clone()),
             message: format!("Already found pokemon"),
+            result_code: CallResultCode::PokemonAlreadyFound,
         };
         return HttpResponse::Ok().json(response);
     }
@@ -249,6 +287,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
         user_id: user_id.clone(),
         pokemon_id: Some(pokemon.number.clone()),
         message: format!("Caught {} (#{})", pokemon.name, pokemon.number),
+        result_code: CallResultCode::Ok,
     };
     HttpResponse::Ok().json(response)
 }
@@ -264,6 +303,7 @@ pub struct ViewFoundPokemonResponse {
     pub id: String,
     pub pokemon_found: Vec<FoundPkmn>,
     pub message: String,
+    pub result_code: CallResultCode,
 }
 
 pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokemonRequest>) -> HttpResponse {
@@ -277,6 +317,7 @@ pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokem
             id: user_id.clone(),
             pokemon_found: vec![],
             message: "Invalid token".to_string(),
+            result_code: CallResultCode::InvalidToken,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -286,6 +327,7 @@ pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokem
             id: user_id.clone(),
             pokemon_found: vec![],
             message: format!("User does not exist {}", user_id),
+            result_code: CallResultCode::UserNotFound,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -294,6 +336,7 @@ pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokem
         id: user_id.clone(),
         pokemon_found: pokemon,
         message: format!("Found pokemon {}", user_id),
+        result_code: CallResultCode::Ok,
     };
     HttpResponse::Ok().json(response)
 }
@@ -301,7 +344,8 @@ pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokem
 
 #[derive(Debug, Serialize)]
 pub struct GetHighScoreResponse {
-    pub user_scores : Vec<UserScore>
+    pub user_scores : Vec<UserScore>,
+    pub result_code: CallResultCode,
 }
 
 pub async fn get_statistics_highscore() -> HttpResponse  {
@@ -309,7 +353,8 @@ pub async fn get_statistics_highscore() -> HttpResponse  {
     let scores = databaseconnection::statistics_users_most_found(10, &conn).unwrap();
     let res = 
         GetHighScoreResponse {
-            user_scores : scores
+            user_scores : scores,
+            result_code: CallResultCode::Ok,
         };
     HttpResponse::Ok().json(res)
 }
@@ -317,14 +362,16 @@ pub async fn get_statistics_highscore() -> HttpResponse  {
 
 #[derive(Debug, Serialize)]
 pub struct GetLatestFoundPokemonResponse {
-    pub found_pokemon : Vec<FoundPkmn>
+    pub found_pokemon : Vec<FoundPkmn>,
+    pub result_code: CallResultCode,
 }
 
 pub async fn get_statistics_latest_pokemon_found() -> HttpResponse {
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     let found_pokemon = databaseconnection::statistics_latest_pokemon_found(10, &conn).unwrap();
     let res = GetLatestFoundPokemonResponse {
-        found_pokemon : found_pokemon
+        found_pokemon : found_pokemon,
+        result_code: CallResultCode::Ok,
     };
     HttpResponse::Ok().json(res)
 }
@@ -333,6 +380,7 @@ pub async fn get_statistics_latest_pokemon_found() -> HttpResponse {
 pub struct GetUserResponse {
     pub user: Option<User>,
     pub message: String,
+    pub result_code: CallResultCode,
 }
 
 pub async fn get_user(path: web::Path<String>) -> HttpResponse {
@@ -344,6 +392,7 @@ pub async fn get_user(path: web::Path<String>) -> HttpResponse {
             let res = GetUserResponse {
                 user: Some(user),
                 message: format!("User found {}", user_id),
+                result_code: CallResultCode::Ok,
             };
             HttpResponse::Ok().json(res)
         },
@@ -351,6 +400,7 @@ pub async fn get_user(path: web::Path<String>) -> HttpResponse {
             let res = GetUserResponse {
                 user: None,
                 message: format!("User not found {}", user_id),
+                result_code: CallResultCode::UserNotFound,
             };
             HttpResponse::NotFound().json(res)
         }
@@ -361,6 +411,7 @@ pub async fn get_user(path: web::Path<String>) -> HttpResponse {
 #[derive(Debug, Serialize)]
 pub struct UserExistsResponse {
     pub exists: bool,
+    pub result_code: CallResultCode,
 }
 
 pub async fn user_exists(path: web::Path<String>) -> HttpResponse {
@@ -369,6 +420,7 @@ pub async fn user_exists(path: web::Path<String>) -> HttpResponse {
     let exists = databaseconnection::user_exists(&user_id, &conn).unwrap();
     let res = UserExistsResponse {
         exists: exists,
+        result_code: CallResultCode::Ok,
     };
     HttpResponse::Ok().json(res)
 }
@@ -407,6 +459,7 @@ pub async fn get_user_ranking(path: web::Path<String>) -> HttpResponse {
 #[derive(Debug, Serialize)]
 struct MyPokedexResponse {
     pokedex: Vec<Pkmn>,
+    result_code: CallResultCode,
 }
 
 pub async fn get_my_pokedex(req: HttpRequest) -> HttpResponse {
@@ -422,12 +475,14 @@ pub async fn get_my_pokedex(req: HttpRequest) -> HttpResponse {
             id: user_id.clone(),
             name: None,
             message: "Invalid token.".to_string(),
+            result_code: CallResultCode::InvalidToken,
         };
         return HttpResponse::BadRequest().json(response);
     }
     let pokedex = databaseconnection::user_pokedex(&user_id, &conn).unwrap();
     let res = MyPokedexResponse {
         pokedex: pokedex,
+        result_code: CallResultCode::Ok,
     };
     HttpResponse::Ok().json(res)
 }

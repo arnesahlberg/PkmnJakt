@@ -5,6 +5,7 @@ import '../api_calls.dart';
 import '../main.dart'; // for UserSession
 import '../widgets/login_popup.dart';
 import '../widgets/new_user_prompt.dart';
+import '../constants.dart';
 
 class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
@@ -54,11 +55,21 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             return;
           }
           final loginResult = await ApiService.login(scannedId, password);
-          debugPrint("Login result: $loginResult");
-          if (loginResult['message'] == "Invalid password") {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Fel lösenord, försök igen")),
-            );
+          // Check CallResultCode instead of message string
+          if (loginResult['result_code'] != CallResultCode.ok) {
+            if (loginResult['result_code'] == CallResultCode.invalidPassword) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Fel lösenord, försök igen")),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    "Något gick fel. Felkod: ${loginResult['result_code']}",
+                  ),
+                ),
+              );
+            }
             _scanned = false;
             setState(() {
               _isProcessing = false;
@@ -93,7 +104,26 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             name,
             password,
           );
-          debugPrint("Create user result: $createResult");
+          // Use CallResultCode to validate creation attempt
+          if (createResult['result_code'] != CallResultCode.ok) {
+            if (createResult['result_code'] ==
+                CallResultCode.userAlreadyExists) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Användaren finns redan")),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Error: ${createResult['result_code']}"),
+                ),
+              );
+            }
+            _scanned = false;
+            setState(() {
+              _isProcessing = false;
+            });
+            return;
+          }
           encodedToken =
               createResult['token']?['encoded_token']?.toString() ?? "";
           validUntil = createResult['token']?['valid_until']?.toString() ?? "";
