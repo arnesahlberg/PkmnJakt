@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pkmn_gui/screens/pokedex_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_html/html.dart' as html;
 import 'screens/main_screen.dart';
@@ -100,6 +101,7 @@ class MyApp extends StatelessWidget {
         '/profile': (_) => const ProfileScreen(),
         '/highscore': (_) => const HighScoreScreen(),
         '/home': (_) => const UserHomeScreen(),
+        '/pokedex': (_) => const PokedexScreen(),
       },
     );
   }

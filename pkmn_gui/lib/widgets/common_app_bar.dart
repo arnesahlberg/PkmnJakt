@@ -4,12 +4,34 @@ import '../../main.dart'; // import UserSession from main.dart
 
 class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  const CommonAppBar({super.key, required this.title});
+  final bool showBackButton; // new parameter
+  final String? backRoute; // new parameter
+
+  const CommonAppBar({
+    super.key,
+    required this.title,
+    this.showBackButton = false,
+    this.backRoute,
+  });
 
   @override
   Widget build(BuildContext context) {
     final session = Provider.of<UserSession>(context);
     return AppBar(
+      // Conditionally show a back button
+      leading:
+          showBackButton
+              ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  if (backRoute != null) {
+                    Navigator.pushReplacementNamed(context, backRoute!);
+                  } else {
+                    Navigator.pop(context);
+                  }
+                },
+              )
+              : null,
       title: Text(title, style: const TextStyle(fontFamily: 'PixelFontTitle')),
       // Added a gradient background
       flexibleSpace: Container(

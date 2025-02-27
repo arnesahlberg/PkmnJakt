@@ -95,5 +95,5 @@ curl -X GET https://127.0.0.1:8081/statistics_highscore
 
 curl -X GET https://127.0.0.1:8081/statistics_latest_pokemon_found
 
-curl -X GET https://127.0.0.1:8081/get_pokemon/39
+curl -X GET https://127.0.0.1:8081/get_pokemon/4
 

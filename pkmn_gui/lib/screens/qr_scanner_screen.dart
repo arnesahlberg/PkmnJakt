@@ -26,7 +26,21 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       String name;
       String encodedToken;
       String validUntil;
+
       try {
+        // chekc if this is a user_id and not something else (like pokemon_id)
+        // thing they should be 6 digits long, but just check it's shorter than 10 for now
+        if (scannedId.length > 10) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Felaktig kod, försök igen")),
+          );
+          _scanned = false;
+          setState(() {
+            _isProcessing = false;
+          });
+          return;
+        }
+
         // Check if the user exists
         final exists = await ApiService.checkUserExists(scannedId);
         if (exists) {

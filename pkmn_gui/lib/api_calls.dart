@@ -56,12 +56,14 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> foundPokemon(
-    String pokemonId,
+    String catchCode,
     String token,
   ) async {
+    debugPrint('foundPokemon: $catchCode');
+    debugPrint("token: $token");
     final response = await http.post(
       Uri.parse('$baseUrl/found_pokemon'),
-      body: jsonEncode({'pokemon_id': pokemonId}),
+      body: jsonEncode({'catch_code': catchCode}),
       headers: _headers(token),
     );
     return jsonDecode(response.body);

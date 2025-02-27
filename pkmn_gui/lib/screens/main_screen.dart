@@ -5,6 +5,7 @@ import '../widgets/common_app_bar.dart';
 import 'package:intl/intl.dart';
 import '../api_calls.dart';
 import 'pokedex_screen.dart';
+import 'found_pokemon_scanner_screen.dart'; // new import
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -95,6 +96,22 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           textStyle: const TextStyle(fontFamily: 'PixelFont'),
                         ),
                         child: const Text("Mitt pokedex"),
+                      ),
+                      const SizedBox(height: 16),
+                      // New button "Hitta Pokémon"
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const FoundPokemonScannerScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          textStyle: const TextStyle(fontFamily: 'PixelFont'),
+                        ),
+                        child: const Text("Hitta Pokémon"),
                       ),
                       const SizedBox(height: 16),
                       Text(

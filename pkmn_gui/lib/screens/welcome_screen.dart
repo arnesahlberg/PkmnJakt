@@ -71,7 +71,7 @@ class WelcomeScreen extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          Navigator.pushNamed(context, '/scanner');
+                          Navigator.pushReplacementNamed(context, '/scanner');
                         },
                         child: const Text('Logga in med bandet'),
                       ),
