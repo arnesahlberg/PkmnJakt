@@ -2,6 +2,7 @@
 ---------------------------------------------------
 
 PRAGMA foreign_keys = ON;
+PRAGMA encoding = "UTF-8";
 
 
 CREATE TABLE IF NOT EXISTS Users (
@@ -30,6 +31,24 @@ CREATE TABLE IF NOT EXISTS Pokemon (
     active       BOOLEAN DEFAULT 1
 );
 
+CREATE TABLE IF NOT EXISTS CatchCodes (
+    pokemon_id INTEGER NOT NULL,
+    catch_code TEXT PRIMARY KEY,
+    FOREIGN KEY (pokemon_id) REFERENCES Pokemon(pokemon_id)
+);
+
+-- VIEW pokemon with catch code
+CREATE VIEW IF NOT EXISTS ViewPokemonWithCatchCode AS
+SELECT 
+    Pokemon.pokemon_id AS pokemon_id,
+    Pokemon.name AS name,
+    Pokemon.description AS description,
+    Pokemon.height AS height,
+    Pokemon.active AS active,
+    CatchCodes.catch_code AS catch_code
+FROM Pokemon
+JOIN CatchCodes ON Pokemon.pokemon_id = CatchCodes.pokemon_id;
+
 CREATE TABLE IF NOT EXISTS FoundPokemon (
     found_id       INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id        TEXT NOT NULL,
@@ -41,6 +60,23 @@ CREATE TABLE IF NOT EXISTS FoundPokemon (
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
     FOREIGN KEY (pokemon_id) REFERENCES Pokemon(pokemon_id)
 );
+
+-- VIEW to get the FoundPokemon together whith CatchCode 
+-- same as FoundPokemon table but iwth a catch_code column
+CREATE VIEW IF NOT EXISTS ViewFoundPokemonWithCatchCode AS
+SELECT 
+    FoundPokemon.found_id AS found_id,
+    FoundPokemon.user_id AS user_id,
+    FoundPokemon.pokemon_id AS pokemon_id,
+    FoundPokemon.found_timestamp AS found_timestamp,
+    FoundPokemon.photo_path AS photo_path,
+    FoundPokemon.comment AS comment,
+    FoundPokemon.rating AS rating,
+    CatchCodes.catch_code AS catch_code
+FROM FoundPokemon
+JOIN CatchCodes ON FoundPokemon.pokemon_id = CatchCodes.pokemon_id;
+
+
 
 -- view to show found pokemon with user name
 CREATE VIEW IF NOT EXISTS ViewFoundPokemon AS

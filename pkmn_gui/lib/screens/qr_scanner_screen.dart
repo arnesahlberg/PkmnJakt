@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../widgets/data_matrix_scanner.dart'; // Use the DataMatrixScanner widget
+import '../widgets/data_matrix_scanner.dart';
 import '../api_calls.dart';
 import '../main.dart'; // for UserSession
 import '../widgets/login_popup.dart';

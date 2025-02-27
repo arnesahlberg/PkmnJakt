@@ -134,15 +134,31 @@ pub fn check_if_pokemon_exists(pokemon_id: &str, conn: &Connection) -> Result<bo
     Ok(count > 0)
 }
 
-pub fn check_if_you_found_pokemon_before(user_id: &str, pokemon_id: &str, conn: &Connection) -> Result<bool> {
-    let mut stmt = conn.prepare("SELECT COUNT(*) FROM FoundPokemon WHERE User_Id = ?1 AND Pokemon_Id = ?2")?;
-    let count : i32 = stmt.query_row(params![user_id, pokemon_id], |row| row.get(0))?;
+pub fn check_if_pokemon_exists_by_catch_code(catch_code: &str, conn: &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM CatchCodes WHERE catch_code = ?1")?;
+    let count : i32 = stmt.query_row(params![catch_code], |row| row.get(0))?;
     Ok(count > 0)
 }
 
-pub fn found_pokemon(user_id: &str, pokemon_id: &str, conn: &Connection) -> Result<()> {
+pub fn check_if_you_found_pokemon_before(user_id: &str, catch_code: &str, conn: &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM ViewFoundPokemonWithCatchCode WHERE User_Id = ?1 AND catch_code = ?2")?;
+    let count : i32 = stmt.query_row(params![user_id, catch_code], |row| row.get(0))?;
+    Ok(count > 0)
+}
+
+pub fn get_pokemon_id_by_catch_code(catch_code: &str, conn: &Connection) -> Result<u32> {
+    let mut stmt = conn.prepare("SELECT pokemon_id FROM CatchCodes WHERE catch_code = ?1")?;
+    let pokemon_id : u32 = stmt.query_row(params![catch_code], |row| row.get(0))?;
+    Ok(pokemon_id)
+}
+
+
+// to call if oyu've found a pokemon
+pub fn found_pokemon(user_id: &str, catch_code: &str, conn: &Connection) -> Result<()> {
+    let pokemon_id = get_pokemon_id_by_catch_code(catch_code, conn)?;
+    println!("Found pokemon with id: {}", pokemon_id);
     conn.execute(
-        "INSERT INTO FoundPokemon (User_Id, Pokemon_Id) VALUES (?1, ?2)",
+        "INSERT INTO FoundPokemon (user_id, pokemon_id) VALUES (?1, ?2)",
         params![user_id, pokemon_id],
     )?;
     Ok(())
@@ -287,6 +303,20 @@ pub fn get_pokemon(number: u32, conn: &Connection) -> Result<Option<Pkmn>> {
         return Ok(Some(row?));
     }
     Ok(None)
+}
+
+pub fn get_pokemon_by_catch_code(catch_code: &str, conn: &Connection) -> Result<Pkmn> {
+    let mut stmt = conn.prepare("SELECT pokemon_id, name, description, height, active FROM ViewPokemonWithCatchCode WHERE catch_code = ?1")?;
+    let row = stmt.query_row(params![catch_code], |row| {
+        Ok(Pkmn {
+            name: row.get(1)?,
+            number: row.get(0)?,
+            photo_path: None,
+            description: row.get(2)?,
+            height: row.get(3)?,
+        })
+    })?;
+    Ok(row)
 }
 
 // get all info from pokemon caught by the user

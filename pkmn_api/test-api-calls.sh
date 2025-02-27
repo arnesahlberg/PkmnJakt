@@ -15,7 +15,7 @@ curl -X POST https://127.0.0.1:8081/login \
 
 
 # set from previous before continue
-export TOKEN="W1RPS0VOLS1GU05lR2dJR3d5Yi0tMTExMTEtLTIwMjUtMDMtMDUgMTU6MTk6MjIuNzgwNTAzIFVUQy0tQW9YXQ=="
+export TOKEN="W1RPS0VOLS1GZWNUakthTHBnbS0tMTExMTEtLTIwMjUtMDMtMDYgMDc6Mzk6MTAuNzMwNDk3IFVUQy0tY1hOXQ=="
 
 # create other user too
 curl -X POST https://127.0.0.1:8081/create_user \
@@ -46,7 +46,7 @@ curl -X POST https://127.0.0.1:8081/set_user_name \
 curl -X POST https://127.0.0.1:8081/found_pokemon \
     -H "Content-Type: application/json" \
     -H "Authorization: $TOKEN" \
-    -d '{"pokemon_id": "1"}'
+    -d '{"catch_code": "ac3cf629-e151-45a6-a328-5af466cb471d"}'
 
 curl -X POST https://127.0.0.1:8081/found_pokemon \
     -H "Content-Type: application/json" \

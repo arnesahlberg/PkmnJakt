@@ -189,13 +189,13 @@ pub async fn logout_everywhere(req: HttpRequest) -> HttpResponse {
 
 #[derive(Debug, Deserialize)]
 pub struct FoundPokemonRequest {
-    pub pokemon_id: String,
+    pub catch_code: String,
 }
 
 #[derive(Debug, Serialize)]
 pub struct FoundPokemonResponse {
     pub user_id: String,
-    pub pokemon_id: String,
+    pub pokemon_id: Option<u32>,
     pub message: String,
 }
 
@@ -210,7 +210,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
     if !validate_token(&user_id, token, &conn) {
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
-            pokemon_id: info.pokemon_id.clone(),
+            pokemon_id: None,
             message: "Invalid token".to_string(),
         };
         return HttpResponse::BadRequest().json(response);
@@ -219,38 +219,40 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
     if !user_exists {
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
-            pokemon_id: info.pokemon_id.clone(),
+            pokemon_id: None,
             message: format!("User does not exist {}", user_id),
         };
         return HttpResponse::BadRequest().json(response);
     }
-    let pokemon_exists = databaseconnection::check_if_pokemon_exists(&info.pokemon_id, &conn).unwrap();
+    let pokemon_exists = databaseconnection::check_if_pokemon_exists_by_catch_code(&info.catch_code, &conn).unwrap();
     if !pokemon_exists {
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
-            pokemon_id: info.pokemon_id.clone(),
-            message: format!("Pokemon does not exist {}", info.pokemon_id),
+            pokemon_id: None,
+            message: "Cannot find pokemon".to_string(),
         };
         return HttpResponse::BadRequest().json(response);
     }
+    let pokemon = databaseconnection::get_pokemon_by_catch_code(&info.catch_code, &conn).unwrap();
     let found_before =
-        databaseconnection::check_if_you_found_pokemon_before(&user_id, &info.pokemon_id, &conn).unwrap();
+        databaseconnection::check_if_you_found_pokemon_before(&user_id, &info.catch_code, &conn).unwrap();
     if found_before {
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
-            pokemon_id: info.pokemon_id.clone(),
-            message: format!("Already found pokemon {}", info.pokemon_id),
+            pokemon_id: Some(pokemon.number.clone()),
+            message: format!("Already found pokemon"),
         };
         return HttpResponse::Ok().json(response);
     }
-    databaseconnection::found_pokemon(&user_id, &info.pokemon_id, &conn).unwrap();
+    databaseconnection::found_pokemon(&user_id, &info.catch_code, &conn).unwrap();
     let response = FoundPokemonResponse {
         user_id: user_id.clone(),
-        pokemon_id: info.pokemon_id.clone(),
-        message: format!("Caught pokemon {}", info.pokemon_id),
+        pokemon_id: Some(pokemon.number.clone()),
+        message: format!("Caught pokemon {} ({})", pokemon.name, pokemon.number),
     };
     HttpResponse::Ok().json(response)
 }
+
 
 #[derive(Debug, Deserialize)]
 pub struct ViewFoundPokemonRequest {
