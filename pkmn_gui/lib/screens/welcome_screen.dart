@@ -104,7 +104,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/scanner');
+                            Navigator.pushNamed(context, '/scanner');
                           },
                           child: const Text('Logga in med bandet'),
                         ),
