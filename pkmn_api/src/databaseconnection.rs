@@ -11,9 +11,15 @@ pub fn get_conn (path : String) -> Result<Connection> {
     Connection::open(path)
 }
 
-pub fn user_exists(user_id : &str, conn : &Connection) -> Result<bool> {
+pub fn user_id_exists(user_id : &str, conn : &Connection) -> Result<bool> {
     let mut stmt = conn.prepare("SELECT COUNT(*) FROM Users WHERE User_Id = ?1")?;
     let count : i32 = stmt.query_row(params![user_id], |row| row.get(0))?;
+    Ok(count > 0)
+}
+
+pub fn user_name_exists(name : &str, conn : &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Users WHERE name = ?1")?;
+    let count : i32 = stmt.query_row(params![name], |row| row.get(0))?;
     Ok(count > 0)
 }
 

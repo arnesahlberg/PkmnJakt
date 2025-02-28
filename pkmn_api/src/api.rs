@@ -13,6 +13,7 @@ pub enum CallResultCode {
     PokemonNotFound = 4,
     PokemonAlreadyFound = 5,
     InvalidToken = 6,
+    UserNameAlreadyExists = 7,
 } 
 
 impl Serialize for CallResultCode {
@@ -50,7 +51,7 @@ pub struct LoginResponse {
 
 pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let user_exists = databaseconnection::user_exists(&info.id, &conn).unwrap();
+    let user_exists = databaseconnection::user_id_exists(&info.id, &conn).unwrap();
     if !user_exists {
         let response = LoginResponse {
             id: info.id.clone(),
@@ -93,7 +94,7 @@ pub struct CreateUserRequest {
 
 pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let user_exists = databaseconnection::user_exists(&info.id, &conn).unwrap();
+    let user_exists = databaseconnection::user_id_exists(&info.id, &conn).unwrap();
     if user_exists {
         let response = LoginResponse {
             id: info.id.clone(),
@@ -101,6 +102,17 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
             token: None,
             message: format!("User already exists {}", info.id),
             result_code: CallResultCode::UserAlreadyExists,
+        };
+        return HttpResponse::Ok().json(response);
+    }
+    let name_exists = databaseconnection::user_name_exists(&info.name, &conn).unwrap();
+    if name_exists {
+        let response = LoginResponse {
+            id: info.id.clone(),
+            name: None,
+            token: None,
+            message: format!("User name already exists {}", info.name),
+            result_code: CallResultCode::UserNameAlreadyExists,
         };
         return HttpResponse::Ok().json(response);
     }
@@ -144,13 +156,24 @@ pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>
         return HttpResponse::BadRequest().json(response);
     }
 
-    let user_exists = databaseconnection::user_exists(&user_id, &conn).unwrap();
+    let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
     if !user_exists {
         let response = SetUserNameResponse {
             id: user_id.clone(),
             name: None,
             message: format!("User does not exist {}", user_id),
             result_code: CallResultCode::UserNotFound,
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+
+    let name_exists = databaseconnection::user_name_exists(&info.name, &conn).unwrap();
+    if name_exists {
+        let response = SetUserNameResponse {
+            id: user_id.clone(),
+            name: None,
+            message: format!("User name is already taken {}", info.name),
+            result_code: CallResultCode::UserNameAlreadyExists,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -250,7 +273,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
         };
         return HttpResponse::BadRequest().json(response);
     }
-    let user_exists = databaseconnection::user_exists(&user_id, &conn).unwrap();
+    let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
     if !user_exists {
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
@@ -321,7 +344,7 @@ pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokem
         };
         return HttpResponse::BadRequest().json(response);
     }
-    let user_exists = databaseconnection::user_exists(&user_id, &conn).unwrap();
+    let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
     if !user_exists {
         let response = ViewFoundPokemonResponse {
             id: user_id.clone(),
@@ -417,7 +440,7 @@ pub struct UserExistsResponse {
 pub async fn user_exists(path: web::Path<String>) -> HttpResponse {
     let user_id = path.into_inner();
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let exists = databaseconnection::user_exists(&user_id, &conn).unwrap();
+    let exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
     let res = UserExistsResponse {
         exists: exists,
         result_code: CallResultCode::Ok,
@@ -447,7 +470,7 @@ pub async fn get_pokemon(path: web::Path<u32>) -> HttpResponse {
 pub async fn get_user_ranking(path: web::Path<String>) -> HttpResponse {
     let user_id = path.into_inner();
     // first check if user exists
-    if !databaseconnection::user_exists(&user_id, &databaseconnection::get_conn(get_env_dbpath()).unwrap()).unwrap() {
+    if !databaseconnection::user_id_exists(&user_id, &databaseconnection::get_conn(get_env_dbpath()).unwrap()).unwrap() {
         return HttpResponse::NotFound().finish();
     }
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();

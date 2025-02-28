@@ -15,7 +15,7 @@ class QRScannerScreen extends StatefulWidget {
 
 class _QRScannerScreenState extends State<QRScannerScreen> {
   bool _scanned = false;
-  bool _isProcessing = false; // new flag for UI feedback
+  bool _isProcessing = false; // for ui feedback
 
   void _onGetResult(String result) async {
     if (!_scanned) {
@@ -33,9 +33,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         // thing they should be 6 digits long, but just check it's shorter than 10 for now
         if (scannedId.length > 10) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Felaktig kod, försök igen")),
+            const SnackBar(
+              content: Text("Koden du scannade är inte en lägerdeltagares kod"),
+            ),
           );
-          _scanned = false;
           setState(() {
             _isProcessing = false;
           });
@@ -48,7 +49,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           // Existing user: prompt for password for login
           final password = await promptForPassword(context);
           if (password == null || password.isEmpty) {
-            _scanned = false;
             setState(() {
               _isProcessing = false;
             });
@@ -70,7 +70,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 ),
               );
             }
-            _scanned = false;
             setState(() {
               _isProcessing = false;
             });
@@ -91,7 +90,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               credentials['password']?.isEmpty == true ||
               credentials['confirm']?.isEmpty == true ||
               credentials['password'] != credentials['confirm']) {
-            _scanned = false;
             setState(() {
               _isProcessing = false;
             });
@@ -118,7 +116,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 ),
               );
             }
-            _scanned = false;
             setState(() {
               _isProcessing = false;
             });
@@ -140,10 +137,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Error: $e")));
-        _scanned = false;
       } finally {
         setState(() {
           _isProcessing = false;
+        });
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) {
+            setState(() {
+              _scanned = false;
+            });
+          }
         });
       }
     }

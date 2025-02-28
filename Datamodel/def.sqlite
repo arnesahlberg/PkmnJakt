@@ -7,7 +7,7 @@ PRAGMA encoding = "UTF-8";
 
 CREATE TABLE IF NOT EXISTS Users (
     user_id       TEXT PRIMARY KEY,
-    name          TEXT NOT NULL,
+    name          TEXT NOT NULL UNIQUE,
     phone         TEXT,
     email         TEXT,
     password_hash TEXT NOT NULL,
