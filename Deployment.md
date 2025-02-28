@@ -34,6 +34,11 @@ Run the following command to obtain an SSL certificate for your API domain:
 sudo certbot --nginx -d api.yourdomain.com
 ```
 
+#### Verify that we can renew certificates with a dry-run (optional)
+```sh
+sudo certbot renew --dry-run
+```
+
 ### Configure Nginx
 Remove the default Nginx configuration:
 ```sh
@@ -136,3 +141,64 @@ To check the logs for debugging:
 sudo journalctl -u pkmnapi.service --no-pager --lines=50
 ```
 
+## Web app setup
+
+### Fetch certificate
+
+```sh
+sudo certbot --nginx -d yourdomain.com
+```
+
+#### Verify that we can renew certificates with a dry-run (optional)
+```sh
+sudo certbot renew --dry-run
+```
+
+### Configure Nginx
+
+Create a new configuration file under `/etc/nginx/sites-available/yourdomain.com`:
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name yourdomain.com;
+
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+
+    root /path/to/pkmn_jakt_website;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+```
+
+### Enable the Configuration
+Create a symbolic link to enable the configuration:
+```sh
+sudo ln -s /etc/nginx/sites-available/yourdomain.com /etc/nginx/sites-enabled/
+```
+
+### Validate and Reload Nginx
+Check the configuration for errors:
+```sh
+sudo nginx -t
+```
+
+Reload Nginx to apply the changes:
+```sh
+sudo systemctl reload nginx
+```
+
+### Check Nginx Logs
+To debug issues, check the logs:
+```sh
+sudo journalctl -u nginx --no-pager --lines=50
+```

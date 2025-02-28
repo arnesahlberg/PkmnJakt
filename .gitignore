@@ -8,5 +8,6 @@ Pkmn/Pictures
 Pkmn/PicturesHQ
 Pkmn/PicturesHQ-Scaled
 
+pkmn_gui/push_to_server.sh
 
 **/*.pem
