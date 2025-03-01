@@ -71,7 +71,7 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
                   ),
                   const SizedBox(height: 10),
                   Image.asset(
-                    'assets/images/pkmn/$pokemonId.avif',
+                    'assets/images/pkmn/$pokemonId.jpg',
                     errorBuilder:
                         (context, error, stackTrace) =>
                             const Icon(Icons.image_outlined, size: 80),

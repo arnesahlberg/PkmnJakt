@@ -47,7 +47,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ListTile(
                   leading: Image.asset(
-                    'assets/images/pkmn/${pokemon['number']}.avif',
+                    'assets/images/pkmn/${pokemon['number']}.jpg',
                     width: 48,
                     height: 48,
                     fit: BoxFit.cover,

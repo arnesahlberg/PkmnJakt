@@ -150,7 +150,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         child: Column(
                                           children: [
                                             Image.asset(
-                                              'assets/images/pkmn/${pokemon['number']}.avif',
+                                              'assets/images/pkmn/${pokemon['number']}.jpg',
                                               width: 80,
                                               height: 80,
                                               fit: BoxFit.cover,
