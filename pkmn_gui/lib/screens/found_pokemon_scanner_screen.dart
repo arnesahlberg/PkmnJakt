@@ -61,7 +61,7 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
         context: context,
         barrierDismissible: false,
         builder:
-            (context) => AlertDialog(
+            (dialogContext) => AlertDialog(
               title: const Text("Grattis!"),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -83,12 +83,19 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    setState(() {
-                      _scanned = false;
-                    });
-                    Navigator.pop(context);
+                    // Dispose scanner and refresh by replacing the route
+                    Navigator.pop(dialogContext); // close dialog
+                    Navigator.pushReplacementNamed(context, '/pokedex');
                   },
-                  child: const Text("Stäng"),
+                  child: const Text("Mitt Pokédex"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Dispose scanner and refresh by replacing the route
+                    Navigator.pop(dialogContext); // close dialog
+                    Navigator.pushReplacementNamed(context, '/home');
+                  },
+                  child: const Text("Tillbaka"),
                 ),
               ],
             ),
