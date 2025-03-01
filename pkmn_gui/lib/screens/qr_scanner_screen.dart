@@ -88,8 +88,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           if (credentials == null ||
               credentials['username']?.isEmpty == true ||
               credentials['password']?.isEmpty == true ||
-              credentials['confirm']?.isEmpty == true ||
-              credentials['password'] != credentials['confirm']) {
+              credentials['confirm']?.isEmpty == true) {
+            setState(() {
+              _isProcessing = false;
+            });
+            return;
+          }
+          if (credentials['password'] != credentials['confirm']) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Lösenorden matchar inte")),
+            );
             setState(() {
               _isProcessing = false;
             });
