@@ -50,8 +50,9 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
         return;
       }
       final pokemonId = foundResponse['pokemon_id']?.toString();
-      if (pokemonId == null)
+      if (pokemonId == null) {
         throw Exception("Koden du scannade tillhör inte en pokemon.");
+      }
       // fetch detailed pokemon info
       final pokemonInfo = await ApiService.getPokemon(pokemonId);
       if (!mounted) return;
@@ -86,20 +87,8 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
                       _scanned = false;
                     });
                     Navigator.pop(context);
-                    Navigator.pushReplacementNamed(context, '/pokedex');
                   },
-                  child: const Text("Visa Pokedex"),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _scanned = false;
-                    });
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                    Navigator.pushReplacementNamed(context, '/home');
-                  },
-                  child: const Text("Tillbaka"),
+                  child: const Text("Stäng"),
                 ),
               ],
             ),
