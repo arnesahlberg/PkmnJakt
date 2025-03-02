@@ -8,6 +8,8 @@ pub const USER_NAME_MIN_LENGTH: usize = 3;
 pub const USER_NAME_MAX_LENGTH: usize = 20;
 pub const PASSWORD_MIN_LENGTH: usize = 4;
 
+pub const AUHTORIZATION_HEADER_LABEL : &str = "Authorization";
+
 
 #[derive(Debug, Clone, Copy)]
 pub enum CallResultCode {
@@ -162,6 +164,63 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct SetPasswordRequest {
+    pub new_password : String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SetPasswordResponse {
+    pub id: String,
+    pub message: String,
+    pub result_code: CallResultCode,
+}
+
+pub async fn set_user_password(req: HttpRequest, info: web::Json<SetPasswordRequest>) -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        let response = SetPasswordResponse {
+            id : user_id.clone(),
+            message: "Invalid token".to_string(),
+            result_code: CallResultCode::InvalidToken,
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+    let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
+    if !user_exists {
+        let response = SetUserNameResponse {
+            id: user_id.clone(),
+            name: None,
+            message: format!("User does not exist {}", user_id),
+            result_code: CallResultCode::UserNotFound,
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+
+    if info.new_password.len() < PASSWORD_MIN_LENGTH {
+        let response = SetPasswordResponse {
+            id: user_id.clone(),
+            message: format!("Password too short. Min length is {}", PASSWORD_MIN_LENGTH),
+            result_code: CallResultCode::PasswordToShort,
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+
+    databaseconnection::set_user_password(&user_id, &info.new_password, &conn).unwrap();
+    let response = SetPasswordResponse {
+        id: user_id.clone(),
+        message: "Password updated".to_string(),
+        result_code: CallResultCode::Ok,
+    };
+
+    HttpResponse::Ok().json(response)
+}
+
+
+#[derive(Debug, Deserialize)]
 pub struct SetUserNameRequest {
     pub name: String,
 }
@@ -176,7 +235,7 @@ pub struct SetUserNameResponse {
 
 pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>) -> HttpResponse {
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let token = req.headers().get("Authorization")
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
     let user_id = misc::get_user_id_from_token(token).unwrap();
@@ -240,7 +299,7 @@ pub struct LogoutResponse {
 }
 
 pub async fn logout(req: HttpRequest) -> HttpResponse {
-    let token = req.headers().get("Authorization")
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
 
@@ -266,7 +325,7 @@ pub async fn logout(req: HttpRequest) -> HttpResponse {
 
 // logout everywhere (remove all tokens for user)
 pub async fn logout_everywhere(req: HttpRequest) -> HttpResponse {
-    let token = req.headers().get("Authorization")
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
@@ -304,7 +363,7 @@ pub struct FoundPokemonResponse {
 
 pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokemonRequest>) -> HttpResponse {
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let token = req.headers().get("Authorization")
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
     let user_id = misc::get_user_id_from_token(token).unwrap();
@@ -375,7 +434,7 @@ pub struct ViewFoundPokemonResponse {
 
 pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokemonRequest>) -> HttpResponse {
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let token = req.headers().get("Authorization")
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
     let user_id = misc::get_user_id_from_token(token).unwrap();
@@ -530,7 +589,7 @@ struct MyPokedexResponse {
 }
 
 pub async fn get_my_pokedex(req: HttpRequest) -> HttpResponse {
-    let token = req.headers().get("Authorization")
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
     
@@ -561,6 +620,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/logout", web::post().to(logout))
         .route("/logout_everywhere", web::post().to(logout_everywhere))
         .route("/create_user", web::post().to(create_user))
+        .route("/set_password", web::post().to(set_user_password))
         .route("/set_user_name", web::post().to(set_user_name))
         .route("/found_pokemon", web::post().to(register_found_pokemon))
         .route("/view_found_pokemon", web::post().to(view_found_pokemon))

@@ -46,7 +46,6 @@ pub fn token_in_database(user_id : &str, token : &str, conn : &Connection) -> Re
 }
 
 
-
 pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection) -> Result<Option<(User, Token)>> {
 
     // need to fetch user's password salt from database and then hash the password
@@ -124,6 +123,16 @@ pub fn create_user(user_id: &str, name: &str, password : &str, conn: &Connection
         phone: None,
     };
     Ok((user, token))
+}
+
+
+pub fn set_user_password(user_id: &str, value: &str, conn : &Connection) -> Result<()> {
+    let (password_hash, password_salt) = misc::hash_password(value);
+    conn.execute(
+        "UPDATE Users SET password_hash = ?1, password_salt = ?1 WHERE user_id = ?3",
+        params![password_hash, password_salt, user_id],
+    )?;
+    Ok(())
 }
 
 pub fn set_user_name(user_id: &str, name: &str, conn: &Connection) -> Result<()> {
