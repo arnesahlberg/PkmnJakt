@@ -164,7 +164,7 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
 }
 
 
-// verify password request
+// validate password request
 #[derive(Debug, Deserialize)]
 pub struct VerifyPasswordRequest {
     pub password: String,
@@ -194,9 +194,20 @@ pub async fn validate_password(req: HttpRequest, info: web::Json<VerifyPasswordR
         return HttpResponse::BadRequest().json(response);
     }
     let valid = databaseconnection::validate_password(&user_id, &info.password, &conn).unwrap();
+
+    if !valid {
+        let response = VerifyPasswordResponse {
+            id: user_id.clone(),
+            valid: false,
+            message: "Invalid password".to_string(),
+            result_code: CallResultCode::InvalidPassword,
+        };
+        return HttpResponse::Unauthorized().json(response);
+    }
+
     let response = VerifyPasswordResponse {
         id: user_id.clone(),
-        valid: valid,
+        valid: true,
         message: "Password is valid".to_string(),
         result_code: CallResultCode::Ok,
     };
@@ -678,6 +689,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/create_user", web::post().to(create_user))
         .route("/set_password", web::post().to(set_user_password))
         .route("/set_user_name", web::post().to(set_user_name))
+        .route("/validate_password", web::post().to(validate_password))
         .route("/found_pokemon", web::post().to(register_found_pokemon))
         .route("/view_found_pokemon", web::post().to(view_found_pokemon))
         .route("/statistics_highscore", web::get().to(get_statistics_highscore))

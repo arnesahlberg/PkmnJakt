@@ -151,11 +151,24 @@ def run_tests():
         "id": "11111",
         "password": "1234" # test old password, should not work
     })
-    make_request("POST", "login", {
+    response = make_request("POST", "login", {
         "id": "11111",
         "password": "new_password" # test new password, should work
     })
+    if response and response.status_code == 200:
+        data = json.loads(response.text)
+        if "token" in data and "encoded_token" in data["token"]:
+            tokens["11111"] = data["token"]["encoded_token"]
+            print(f"Updated token for user 11111")
 
+    # 11. validate password
+    make_request("POST", "validate_password", {
+        "password": "1234"
+    }, tokens["11111"])
+
+    make_request("POST", "validate_password", {
+        "password": "new_password"
+    }, tokens["11111"])
 
     
     print(f"\n{Fore.GREEN}API tests completed!{Style.RESET_ALL}")
