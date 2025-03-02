@@ -45,14 +45,15 @@ pub fn token_in_database(user_id : &str, token : &str, conn : &Connection) -> Re
     Ok(count > 0)
 }
 
+fn get_user_salt(user_id : &str, conn : &Connection) -> Result<String> {
+    let mut stmt = conn.prepare("SELECT password_salt FROM Users WHERE user_id = ?1")?;
+    let salt : String = stmt.query_row(params![user_id], |row| row.get(0))?;
+    Ok(salt)
+}
 
 pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection) -> Result<Option<(User, Token)>> {
-
     // need to fetch user's password salt from database and then hash the password
-    let mut stmt = conn.prepare (
-        "SELECT password_salt FROM Users WHERE user_id = ?1"
-    )?;
-    let salt : String = stmt.query_row(params![user_id], |row| row.get(0))?;
+    let salt = get_user_salt(user_id, conn)?;
     let hashed = misc::hash_password_with_salt(pwd, &salt);
 
     let mut stmt = conn.prepare(
@@ -125,9 +126,17 @@ pub fn create_user(user_id: &str, name: &str, password : &str, conn: &Connection
     Ok((user, token))
 }
 
+pub fn validate_password(user_id : &str, password : &str, conn : &Connection) -> Result<bool> {
+    let password_salt = get_user_salt(user_id, conn)?;
+    let password_hash = misc::hash_password_with_salt(password, &password_salt);
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Users WHERE user_id = ?1 AND password_hash = ?2")?;
+    let count : i32 = stmt.query_row(params![user_id, password_hash], |row| row.get(0))?;
+    Ok(count > 0)
+}
 
-pub fn set_user_password(user_id: &str, value: &str, conn : &Connection) -> Result<()> {
-    let (password_hash, password_salt) = misc::hash_password(value);
+
+pub fn set_user_password(user_id: &str, new_password: &str, conn : &Connection) -> Result<()> {
+    let (password_hash, password_salt) = misc::hash_password(new_password);
     conn.execute(
         "UPDATE Users SET password_hash = ?1, password_salt = ?2 WHERE user_id = ?3",
         params![password_hash, password_salt, user_id],

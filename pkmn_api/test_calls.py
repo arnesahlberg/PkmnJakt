@@ -137,17 +137,23 @@ def run_tests():
 
     #10. change user password
     make_request("POST", "set_password", {
+        "old_password": "1233", # test wrong old password
+        "new_password": "new_password"
+    }, tokens["11111"])
+
+    make_request("POST", "set_password", {
+        "old_password": "1234", # test correct old password
         "new_password": "new_password"
     }, tokens["11111"])
 
     make_request("POST", "logout", None, tokens["11111"])
     make_request("POST", "login", {
         "id": "11111",
-        "password": "1234"
+        "password": "1234" # test old password, should not work
     })
     make_request("POST", "login", {
         "id": "11111",
-        "password": "new_password"
+        "password": "new_password" # test new password, should work
     })
 
 

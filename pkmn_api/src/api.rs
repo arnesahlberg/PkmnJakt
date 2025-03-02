@@ -70,7 +70,7 @@ pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
             message: format!("Create new user first {}", info.id),
             result_code: CallResultCode::UserNotFound,
         };
-        return HttpResponse::Ok().json(response);
+        return HttpResponse::BadRequest().json(response);
     }
     let (user, token) = match databaseconnection::login_and_get_user_by_id_pwd(&info.id, &info.password, &conn).unwrap() {
         Some((user, token)) => (user, token),
@@ -82,7 +82,7 @@ pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
                 message: "Invalid password".to_string(),
                 result_code: CallResultCode::InvalidPassword,
             };
-            return HttpResponse::Ok().json(response);
+            return HttpResponse::BadRequest().json(response);
         }
     };
     let response = LoginResponse {
@@ -163,8 +163,51 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
     HttpResponse::Ok().json(response)
 }
 
+
+// verify password request
+#[derive(Debug, Deserialize)]
+pub struct VerifyPasswordRequest {
+    pub password: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct VerifyPasswordResponse {
+    pub id: String,
+    pub valid: bool,
+    pub message: String,
+    pub result_code: CallResultCode,
+}
+
+pub async fn validate_password(req: HttpRequest, info: web::Json<VerifyPasswordRequest>) -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        let response = VerifyPasswordResponse {
+            id: user_id.clone(),
+            valid: false,
+            message: "Invalid token".to_string(),
+            result_code: CallResultCode::InvalidToken,
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+    let valid = databaseconnection::validate_password(&user_id, &info.password, &conn).unwrap();
+    let response = VerifyPasswordResponse {
+        id: user_id.clone(),
+        valid: valid,
+        message: "Password is valid".to_string(),
+        result_code: CallResultCode::Ok,
+    };
+    HttpResponse::Ok().json(response)
+}
+
+
+// change password request
 #[derive(Debug, Deserialize)]
 pub struct SetPasswordRequest {
+    pub old_password : String,
     pub new_password : String,
 }
 
@@ -189,6 +232,7 @@ pub async fn set_user_password(req: HttpRequest, info: web::Json<SetPasswordRequ
         };
         return HttpResponse::BadRequest().json(response);
     }
+    // check if user exists
     let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
     if !user_exists {
         let response = SetUserNameResponse {
@@ -200,15 +244,27 @@ pub async fn set_user_password(req: HttpRequest, info: web::Json<SetPasswordRequ
         return HttpResponse::BadRequest().json(response);
     }
 
+    // validate old password
+    if !databaseconnection::validate_password(&user_id, &info.old_password, &conn).unwrap() {
+        let response = SetPasswordResponse {
+            id: user_id.clone(),
+            message: "Invalid old password".to_string(),
+            result_code: CallResultCode::InvalidPassword,
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+
+    // check if new password is too short
     if info.new_password.len() < PASSWORD_MIN_LENGTH {
         let response = SetPasswordResponse {
             id: user_id.clone(),
-            message: format!("Password too short. Min length is {}", PASSWORD_MIN_LENGTH),
+            message: format!("New password too short. Min length is {}", PASSWORD_MIN_LENGTH),
             result_code: CallResultCode::PasswordToShort,
         };
         return HttpResponse::BadRequest().json(response);
     }
 
+    // now set new password
     databaseconnection::set_user_password(&user_id, &info.new_password, &conn).unwrap();
     let response = SetPasswordResponse {
         id: user_id.clone(),
