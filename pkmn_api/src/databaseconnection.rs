@@ -129,7 +129,7 @@ pub fn create_user(user_id: &str, name: &str, password : &str, conn: &Connection
 pub fn set_user_password(user_id: &str, value: &str, conn : &Connection) -> Result<()> {
     let (password_hash, password_salt) = misc::hash_password(value);
     conn.execute(
-        "UPDATE Users SET password_hash = ?1, password_salt = ?1 WHERE user_id = ?3",
+        "UPDATE Users SET password_hash = ?1, password_salt = ?2 WHERE user_id = ?3",
         params![password_hash, password_salt, user_id],
     )?;
     Ok(())

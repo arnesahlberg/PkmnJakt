@@ -133,6 +133,24 @@ def run_tests():
     make_request("GET", "statistics_highscore")
     make_request("GET", "statistics_latest_pokemon_found")
     make_request("GET", "get_pokemon/1")
+
+
+    #10. change user password
+    make_request("POST", "set_password", {
+        "new_password": "new_password"
+    }, tokens["11111"])
+
+    make_request("POST", "logout", None, tokens["11111"])
+    make_request("POST", "login", {
+        "id": "11111",
+        "password": "1234"
+    })
+    make_request("POST", "login", {
+        "id": "11111",
+        "password": "new_password"
+    })
+
+
     
     print(f"\n{Fore.GREEN}API tests completed!{Style.RESET_ALL}")
 
