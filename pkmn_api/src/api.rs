@@ -4,6 +4,11 @@ use crate::misc::{self, validate_token};
 use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore};
 use crate::databaseconnection;
 
+pub const USER_NAME_MIN_LENGTH: usize = 3;
+pub const USER_NAME_MAX_LENGTH: usize = 20;
+pub const PASSWORD_MIN_LENGTH: usize = 4;
+
+
 #[derive(Debug, Clone, Copy)]
 pub enum CallResultCode {
     Ok = 0,
@@ -13,8 +18,11 @@ pub enum CallResultCode {
     PokemonNotFound = 4,
     PokemonAlreadyFound = 5,
     InvalidToken = 6,
-    UserNameAlreadyExists = 7,
+    UserNameTooShort = 7,
+    UserNameTooLong = 8,
+    PasswordToShort = 9,
 } 
+
 
 impl Serialize for CallResultCode {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -103,19 +111,45 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
             message: format!("User already exists {}", info.id),
             result_code: CallResultCode::UserAlreadyExists,
         };
-        return HttpResponse::Ok().json(response);
+        return HttpResponse::BadRequest().json(response);
     }
-    let name_exists = databaseconnection::user_name_exists(&info.name, &conn).unwrap();
-    if name_exists {
+
+    // check if name is too short or long
+    if info.name.len() < USER_NAME_MIN_LENGTH {
         let response = LoginResponse {
             id: info.id.clone(),
             name: None,
             token: None,
-            message: format!("User name already exists {}", info.name),
-            result_code: CallResultCode::UserNameAlreadyExists,
+            message: format!("User name too short. Min length is {}", USER_NAME_MIN_LENGTH),
+            result_code: CallResultCode::UserNameTooShort,
         };
-        return HttpResponse::Ok().json(response);
+        return HttpResponse::BadRequest().json(response);
     }
+
+    if info.name.len() > USER_NAME_MAX_LENGTH {
+        let response = LoginResponse {
+            id: info.id.clone(),
+            name: None,
+            token: None,
+            message: format!("User name too long. Max length is {}", USER_NAME_MAX_LENGTH),
+            result_code: CallResultCode::UserNameTooLong,
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+
+    // password check
+    if info.password.len() < PASSWORD_MIN_LENGTH {
+        let response = LoginResponse {
+            id: info.id.clone(),
+            name: None,
+            token: None,
+            message: format!("Password too short. Min length is {}", PASSWORD_MIN_LENGTH),
+            result_code: CallResultCode::PasswordToShort,
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+
+    // if good then create user
     let (user, token) = databaseconnection::create_user(&info.id, &info.name, &info.password, &conn).unwrap();
     let response = LoginResponse {
         id: user.user_id,
@@ -167,16 +201,26 @@ pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>
         return HttpResponse::BadRequest().json(response);
     }
 
-    let name_exists = databaseconnection::user_name_exists(&info.name, &conn).unwrap();
-    if name_exists {
+    if info.name.len() < USER_NAME_MIN_LENGTH {
         let response = SetUserNameResponse {
             id: user_id.clone(),
             name: None,
-            message: format!("User name is already taken {}", info.name),
-            result_code: CallResultCode::UserNameAlreadyExists,
+            message: format!("User name too short. Min length is {}", USER_NAME_MIN_LENGTH),
+            result_code: CallResultCode::UserNameTooShort,
         };
         return HttpResponse::BadRequest().json(response);
     }
+
+    if info.name.len() > USER_NAME_MAX_LENGTH {
+        let response = SetUserNameResponse {
+            id: user_id.clone(),
+            name: None,
+            message: format!("User name too long. Max length is {}", USER_NAME_MAX_LENGTH),
+            result_code: CallResultCode::UserNameTooLong,
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+
     databaseconnection::set_user_name(&user_id, &info.name, &conn).unwrap();
     let response = SetUserNameResponse {
         id: user_id.clone(),

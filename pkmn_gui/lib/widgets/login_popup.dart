@@ -6,11 +6,11 @@ Future<String?> promptForPassword(BuildContext context) async {
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: const Text("Enter Password"),
+        title: const Text("Ange lösenord"),
         content: TextField(
           obscureText: true,
           autofocus: true,
-          decoration: const InputDecoration(hintText: "Password"),
+          decoration: const InputDecoration(hintText: "Lösenord"),
           onChanged: (value) {
             password = value;
           },
@@ -18,11 +18,11 @@ Future<String?> promptForPassword(BuildContext context) async {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, null),
-            child: const Text("Cancel"),
+            child: const Text("Avbryt"),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, password),
-            child: const Text("Submit"),
+            child: const Text("OK"),
           ),
         ],
       );
