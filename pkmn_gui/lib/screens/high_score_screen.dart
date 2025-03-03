@@ -14,6 +14,33 @@ class HighScoreScreen extends StatefulWidget {
 class _HighScoreScreenState extends State<HighScoreScreen> {
   List<dynamic> _pokemonList = [];
   bool _isLoading = true;
+
+  Future<void> _validateToken() async {
+    final session = Provider.of<UserSession>(context, listen: false);
+    if (session.token == null) {
+      _redirectToWelcome();
+      return;
+    }
+
+    try {
+      final isValid = await ApiService.validateToken(session.token!);
+      if (!isValid || session.isExpored()) {
+        _redirectToWelcome();
+      }
+    } catch (e) {
+      _redirectToWelcome();
+    }
+  }
+
+  void _redirectToWelcome() {
+    final session = Provider.of<UserSession>(context, listen: false);
+    session.logout();
+
+    Future.delayed(Duration.zero, () {
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    });
+  }
+
   Future<void> _loadHighScore() async {
     final session = Provider.of<UserSession>(context, listen: false);
     try {
@@ -35,7 +62,10 @@ class _HighScoreScreenState extends State<HighScoreScreen> {
   @override
   void initState() {
     super.initState();
-    _loadHighScore();
+    _validateToken().then((_) {
+      // Only load data if token validation passed
+      _loadHighScore();
+    });
   }
 
   String _formatTime(String isoTime) {
