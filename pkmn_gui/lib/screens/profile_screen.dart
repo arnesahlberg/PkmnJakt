@@ -25,6 +25,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
+              style: Styles.buttonStyle,
               onPressed: () async {
                 final newName = await changeUserNamePopup(context);
                 if (newName != null) {
@@ -53,6 +54,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 20),
             // to change password
             ElevatedButton(
+              style: Styles.buttonStyle,
               onPressed: () async {
                 final result = await changePasswordPopup(
                   context,

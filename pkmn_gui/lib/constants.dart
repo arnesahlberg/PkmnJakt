@@ -14,7 +14,7 @@ class CallResultCode {
 }
 
 class Styles {
-  static ButtonStyle get profileButtonStyle => ElevatedButton.styleFrom(
+  static ButtonStyle get buttonStyle => ElevatedButton.styleFrom(
     minimumSize: const Size(
       double.infinity,
       56,

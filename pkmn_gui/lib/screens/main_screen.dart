@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pkmn_gui/constants.dart';
 import 'package:provider/provider.dart';
 import '../main.dart'; // for user session
 import '../widgets/common_app_bar.dart';
@@ -87,6 +88,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ElevatedButton(
+                        style: Styles.buttonStyle,
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -95,14 +97,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                             ),
                           );
                         },
-                        style: ElevatedButton.styleFrom(
-                          textStyle: const TextStyle(fontFamily: 'PixelFont'),
-                        ),
                         child: const Text("Mitt pokedex"),
                       ),
                       const SizedBox(height: 16),
                       // New button "Hitta Pokémon"
                       ElevatedButton(
+                        style: Styles.buttonStyle,
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -111,9 +111,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                             ),
                           );
                         },
-                        style: ElevatedButton.styleFrom(
-                          textStyle: const TextStyle(fontFamily: 'PixelFont'),
-                        ),
                         child: const Text("Hitta Pokémon"),
                       ),
                       const SizedBox(height: 16),
