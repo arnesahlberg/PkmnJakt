@@ -73,6 +73,18 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
+  static Future<Map<String, dynamic>> validatePassword(
+    String password,
+    String token,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/validate_password'),
+      body: jsonEncode({'password': password}),
+      headers: _headers(token),
+    );
+    return jsonDecode(response.body);
+  }
+
   static Future<Map<String, dynamic>> foundPokemon(
     String catchCode,
     String token,

@@ -5,6 +5,7 @@ import '../widgets/common_app_bar.dart';
 import '../main.dart';
 import '../api_calls.dart';
 import '../widgets/change_user_name_popup.dart';
+import '../widgets/change_password_popup.dart';
 import '../constants.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -50,6 +51,34 @@ class ProfileScreen extends StatelessWidget {
             ),
             // space between buttons
             const SizedBox(height: 20),
+            // to change password
+            ElevatedButton(
+              onPressed: () async {
+                final result = await changePasswordPopup(
+                  context,
+                  session.token!,
+                );
+                if (result != null) {
+                  final resultCode = result['result_code'];
+                  if (resultCode == CallResultCode.ok) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Lösenord ändrat")),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Kunde inte ändra lösenord"),
+                      ),
+                    );
+                  }
+                }
+              },
+              child: const Text("Byt lösenord"),
+            ),
+            // space between buttons
+            const SizedBox(height: 20),
+
+            // to log out
             ElevatedButton.icon(
               onPressed: () {
                 session.logout();
