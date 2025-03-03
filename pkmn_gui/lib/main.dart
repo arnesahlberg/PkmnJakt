@@ -32,6 +32,7 @@ class UserSession extends ChangeNotifier {
           token = trimmed.substring("token=".length);
         } else if (trimmed.startsWith("valid_until=")) {
           validUntil = trimmed.substring("valid_until=".length);
+          debugPrint("Loaded validUntil: $validUntil");
         }
       }
       notifyListeners();
@@ -69,6 +70,18 @@ class UserSession extends ChangeNotifier {
     html.document.cookie =
         "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
     notifyListeners();
+  }
+
+  void setUserName(String newValue) {
+    userName = newValue;
+    html.document.cookie = "userName=$newValue; path=/";
+    notifyListeners();
+  }
+
+  bool isExpored() {
+    if (validUntil == null) return true;
+    final expDate = DateTime.parse(validUntil!);
+    return DateTime.now().isAfter(expDate);
   }
 
   bool get isLoggedIn => userId != null;

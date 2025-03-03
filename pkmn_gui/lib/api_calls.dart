@@ -57,6 +57,22 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
+  static Future<Map<String, dynamic>> setNewPassword(
+    String oldPassword,
+    String newPassword,
+    String token,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/set_password'),
+      body: jsonEncode({
+        'old_password': oldPassword,
+        'new_password': newPassword,
+      }),
+      headers: _headers(token),
+    );
+    return jsonDecode(response.body);
+  }
+
   static Future<Map<String, dynamic>> foundPokemon(
     String catchCode,
     String token,

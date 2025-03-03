@@ -6,4 +6,7 @@ class CallResultCode {
   static const int pokemonNotFound = 4;
   static const int pokemonAlreadyFound = 5;
   static const int invalidToken = 6;
+  static const int userNameTooShort = 7;
+  static const int userNameTooLong = 8;
+  static const int passwordTooShort = 9;
 }
