@@ -21,6 +21,39 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   bool _isExtraLoading = true;
   int _ranking = 0;
 
+  Future<void> _validateToken() async {
+    final session = Provider.of<UserSession>(context, listen: false);
+    if (session.token == null) {
+      // No token, redirect to welcome screen
+      _redirectToWelcome();
+      return;
+    }
+
+    try {
+      final isValid = await ApiService.validateToken(session.token!);
+      if (!isValid || session.isExpored()) {
+        // Token is invalid or expired, redirect to welcome screen
+        _redirectToWelcome();
+      }
+    } catch (e) {
+      // Error validating token, redirect to welcome screen
+      _redirectToWelcome();
+    }
+  }
+
+  void _redirectToWelcome() {
+    final session = Provider.of<UserSession>(context, listen: false);
+    session.logout(); // Clear session data
+
+    // Use a short delay to allow the current build to complete
+    Future.delayed(Duration.zero, () {
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/', // Root route, assuming it's the welcome screen
+        (route) => false, // Remove all previous routes
+      );
+    });
+  }
+
   Future<void> _loadData() async {
     final session = Provider.of<UserSession>(context, listen: false);
     try {
@@ -65,8 +98,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
-    _loadExtraData();
+    _validateToken().then((_) {
+      // Only load data if token validation passed
+      // (if invalid, we'll be redirected before this completes)
+      _loadData();
+      _loadExtraData();
+    });
   }
 
   @override

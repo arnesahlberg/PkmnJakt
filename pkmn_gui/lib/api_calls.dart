@@ -86,6 +86,7 @@ class ApiService {
   }
 
   static Future<bool> validateToken(String token) async {
+    debugPrint('validateToken: $token');
     final response = await http.post(
       Uri.parse('$baseUrl/validate_token'),
       headers: _headers(token),
