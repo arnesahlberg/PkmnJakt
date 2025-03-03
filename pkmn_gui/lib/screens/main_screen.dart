@@ -131,9 +131,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         _ranking == 1
                             ? "Ranking: #$_ranking 🏆🥇🎉"
                             : _ranking == 2
-                            ? "Ranking: #$_ranking 🥈✨"
+                            ? "Ranking: #$_ranking 🥈"
                             : _ranking == 3
-                            ? "Ranking: #$_ranking 🥉👏"
+                            ? "Ranking: #$_ranking 🥉"
                             : "Ranking: #$_ranking",
                         style: const TextStyle(fontSize: 18),
                       ),
@@ -153,12 +153,29 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         itemCount: _pokemonList.length,
                         itemBuilder: (context, index) {
                           final pokemon = _pokemonList[index];
-                          return ListTile(
-                            title: Text(
-                              "${pokemon['name']} (Nr. ${pokemon['number']})",
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
                             ),
-                            subtitle: Text(
-                              "Tid: ${_formatTime(pokemon['time_found'])}",
+                            child: ListTile(
+                              leading: Image.asset(
+                                'assets/images/pkmn/${pokemon['number']}.jpg',
+                                width: 48,
+                                height: 48,
+                                fit: BoxFit.contain,
+                                errorBuilder:
+                                    (context, error, stackTrace) => const Icon(
+                                      Icons.image_outlined,
+                                      size: 48,
+                                    ),
+                              ),
+                              title: Text(
+                                "${pokemon['name']} (Nr. ${pokemon['number']})",
+                              ),
+                              subtitle: Text(
+                                "Tid: ${_formatTime(pokemon['time_found'])}",
+                              ),
                             ),
                           );
                         },
@@ -183,6 +200,23 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                             itemBuilder: (context, index) {
                               final score = _highScores[index];
                               return ListTile(
+                                leading:
+                                    index == 0
+                                        ? const Icon(
+                                          Icons.emoji_events,
+                                          color: Colors.amber,
+                                        )
+                                        : index == 1
+                                        ? const Icon(
+                                          Icons.emoji_events,
+                                          color: Colors.grey,
+                                        )
+                                        : index == 2
+                                        ? const Icon(
+                                          Icons.emoji_events,
+                                          color: Colors.brown,
+                                        )
+                                        : null,
                                 title: Text(
                                   "${score['name']} (ID: ${score['id']})",
                                 ),
@@ -214,12 +248,30 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                             itemCount: _allPokemonList.length,
                             itemBuilder: (context, index) {
                               final pokemon = _allPokemonList[index];
-                              return ListTile(
-                                title: Text(
-                                  "${pokemon['name']} (Nr. ${pokemon['number']})",
+                              return Card(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
                                 ),
-                                subtitle: Text(
-                                  "Hittad av: ${pokemon['found_by_user']['name']} - Tid: ${_formatTime(pokemon['time_found'])}",
+                                child: ListTile(
+                                  leading: Image.asset(
+                                    'assets/images/pkmn/${pokemon['number']}.jpg',
+                                    width: 48,
+                                    height: 48,
+                                    fit: BoxFit.contain,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(
+                                              Icons.image_outlined,
+                                              size: 48,
+                                            ),
+                                  ),
+                                  title: Text(
+                                    "${pokemon['name']} (Nr. ${pokemon['number']})",
+                                  ),
+                                  subtitle: Text(
+                                    "Hittad av: ${pokemon['found_by_user']['name']} - Tid: ${_formatTime(pokemon['time_found'])}",
+                                  ),
                                 ),
                               );
                             },
