@@ -85,6 +85,14 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
+  static Future<bool> validateToken(String token) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/validate_token'),
+      headers: _headers(token),
+    );
+    return response.statusCode == 200;
+  }
+
   static Future<Map<String, dynamic>> foundPokemon(
     String catchCode,
     String token,
