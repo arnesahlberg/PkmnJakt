@@ -222,9 +222,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 ),
                                 trailing: Text(
                                   "Fångade: ${score['score']}",
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ), // increased font size
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                               );
                             },
@@ -270,7 +268,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                     "${pokemon['name']} (Nr. ${pokemon['number']})",
                                   ),
                                   subtitle: Text(
-                                    "Hittad av: ${pokemon['found_by_user']['name']} - Tid: ${_formatTime(pokemon['time_found'])}",
+                                    "Fångad av: ${pokemon['found_by_user']['name']} - Tid: ${_formatTime(pokemon['time_found'])}",
                                   ),
                                 ),
                               );
