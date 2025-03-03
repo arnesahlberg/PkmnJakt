@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pkmn_gui/widgets/common_app_bar.dart';
 import 'package:provider/provider.dart';
 import '../api_calls.dart';
-import '../main.dart'; // for UserSession
+import '../main.dart';
+import '../utils/auth_utils.dart'; // Import auth utilities
 
 class PokedexScreen extends StatefulWidget {
   const PokedexScreen({super.key});
@@ -13,32 +14,6 @@ class PokedexScreen extends StatefulWidget {
 class _PokedexScreenState extends State<PokedexScreen> {
   late Future<List<dynamic>> _pokedexFuture;
   bool _isLoading = true;
-
-  Future<void> _validateToken() async {
-    final session = Provider.of<UserSession>(context, listen: false);
-    if (session.token == null) {
-      _redirectToWelcome();
-      return;
-    }
-
-    try {
-      final isValid = await ApiService.validateToken(session.token!);
-      if (!isValid || session.isExpored()) {
-        _redirectToWelcome();
-      }
-    } catch (e) {
-      _redirectToWelcome();
-    }
-  }
-
-  void _redirectToWelcome() {
-    final session = Provider.of<UserSession>(context, listen: false);
-    session.logout();
-
-    Future.delayed(Duration.zero, () {
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-    });
-  }
 
   Future<List<dynamic>> _fetchPokedex() async {
     final session = Provider.of<UserSession>(context, listen: false);
@@ -52,9 +27,11 @@ class _PokedexScreenState extends State<PokedexScreen> {
   @override
   void initState() {
     super.initState();
-    _validateToken().then((_) {
-      // Only fetch pokedex if token validation passed
-      _pokedexFuture = _fetchPokedex();
+    AuthUtils.validateTokenAndRedirect(context).then((isValid) {
+      if (isValid) {
+        // Only fetch pokedex if token validation passed
+        _pokedexFuture = _fetchPokedex();
+      }
     });
   }
 

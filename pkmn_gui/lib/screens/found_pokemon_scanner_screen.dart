@@ -4,6 +4,7 @@ import '../api_calls.dart';
 import '../main.dart'; // for UserSession
 import '../widgets/data_matrix_scanner.dart';
 import '../constants.dart';
+import '../utils/auth_utils.dart'; // Import auth utilities
 
 class FoundPokemonScannerScreen extends StatefulWidget {
   const FoundPokemonScannerScreen({super.key});
@@ -15,6 +16,19 @@ class FoundPokemonScannerScreen extends StatefulWidget {
 class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
   bool _scanned = false;
   bool _isProcessing = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    AuthUtils.validateTokenAndRedirect(context).then((isValid) {
+      if (isValid && mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+  }
 
   void _onGetResult(String result) async {
     if (_scanned) return;
@@ -113,20 +127,24 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          if (!_scanned) // Only show scanner when not processing a scan
-            DataMatrixScanner(
-              onCodeScanned: _onGetResult,
-              sheetTitle: "Scanna QR koden för att registrera hittad Pokémon",
-            ),
-          if (_isProcessing)
-            Container(
-              color: Colors.black45,
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-        ],
-      ),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Stack(
+                children: [
+                  if (!_scanned) // Only show scanner when not processing a scan
+                    DataMatrixScanner(
+                      onCodeScanned: _onGetResult,
+                      sheetTitle:
+                          "Scanna QR koden för att registrera hittad Pokémon",
+                    ),
+                  if (_isProcessing)
+                    Container(
+                      color: Colors.black45,
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                ],
+              ),
     );
   }
 }

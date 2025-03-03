@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../widgets/common_app_bar.dart';
 import '../main.dart';
 import '../api_calls.dart';
+import '../utils/auth_utils.dart'; // Import auth utilities
 import '../widgets/change_user_name_popup.dart';
 import '../widgets/change_password_popup.dart';
 import '../constants.dart';
@@ -17,40 +18,16 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = true;
 
-  Future<void> _validateToken() async {
-    final session = Provider.of<UserSession>(context, listen: false);
-    if (session.token == null) {
-      _redirectToWelcome();
-      return;
-    }
-
-    try {
-      final isValid = await ApiService.validateToken(session.token!);
-      if (!isValid || session.isExpored()) {
-        _redirectToWelcome();
-      } else {
+  @override
+  void initState() {
+    super.initState();
+    AuthUtils.validateTokenAndRedirect(context).then((isValid) {
+      if (isValid && mounted) {
         setState(() {
           _isLoading = false;
         });
       }
-    } catch (e) {
-      _redirectToWelcome();
-    }
-  }
-
-  void _redirectToWelcome() {
-    final session = Provider.of<UserSession>(context, listen: false);
-    session.logout();
-
-    Future.delayed(Duration.zero, () {
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _validateToken();
   }
 
   @override

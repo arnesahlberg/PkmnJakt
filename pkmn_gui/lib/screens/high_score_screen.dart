@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../api_calls.dart';
 import '../widgets/common_app_bar.dart';
-import '../main.dart'; // for UserSession
+import '../main.dart';
+import '../utils/auth_utils.dart'; // Import auth utilities
 
 class HighScoreScreen extends StatefulWidget {
   const HighScoreScreen({super.key});
@@ -14,32 +15,6 @@ class HighScoreScreen extends StatefulWidget {
 class _HighScoreScreenState extends State<HighScoreScreen> {
   List<dynamic> _pokemonList = [];
   bool _isLoading = true;
-
-  Future<void> _validateToken() async {
-    final session = Provider.of<UserSession>(context, listen: false);
-    if (session.token == null) {
-      _redirectToWelcome();
-      return;
-    }
-
-    try {
-      final isValid = await ApiService.validateToken(session.token!);
-      if (!isValid || session.isExpored()) {
-        _redirectToWelcome();
-      }
-    } catch (e) {
-      _redirectToWelcome();
-    }
-  }
-
-  void _redirectToWelcome() {
-    final session = Provider.of<UserSession>(context, listen: false);
-    session.logout();
-
-    Future.delayed(Duration.zero, () {
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-    });
-  }
 
   Future<void> _loadHighScore() async {
     final session = Provider.of<UserSession>(context, listen: false);
@@ -62,9 +37,11 @@ class _HighScoreScreenState extends State<HighScoreScreen> {
   @override
   void initState() {
     super.initState();
-    _validateToken().then((_) {
-      // Only load data if token validation passed
-      _loadHighScore();
+    AuthUtils.validateTokenAndRedirect(context).then((isValid) {
+      if (isValid) {
+        // Only load data if token validation passed
+        _loadHighScore();
+      }
     });
   }
 
