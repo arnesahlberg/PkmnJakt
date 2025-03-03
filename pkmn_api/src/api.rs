@@ -680,6 +680,18 @@ pub async fn get_my_pokedex(req: HttpRequest) -> HttpResponse {
     HttpResponse::Ok().json(res)
 }
 
+pub async fn validate_token_request(req: HttpRequest) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    HttpResponse::Ok().finish()
+}
+
 
 // registers all routes.
 pub fn config(cfg: &mut web::ServiceConfig) {
@@ -690,6 +702,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/set_password", web::post().to(set_user_password))
         .route("/set_user_name", web::post().to(set_user_name))
         .route("/validate_password", web::post().to(validate_password))
+        .route("/validate_token", web::post().to(validate_token_request))
         .route("/found_pokemon", web::post().to(register_found_pokemon))
         .route("/view_found_pokemon", web::post().to(view_found_pokemon))
         .route("/statistics_highscore", web::get().to(get_statistics_highscore))

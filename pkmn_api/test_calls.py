@@ -170,6 +170,10 @@ def run_tests():
         "password": "new_password"
     }, tokens["11111"])
 
+    # 12. validate token
+    make_request("POST", "validate_token", None, tokens["11111"])
+    make_request("POST", "logout", None, tokens["11111"])
+    make_request("POST", "validate_token", None, tokens["11111"])
     
     print(f"\n{Fore.GREEN}API tests completed!{Style.RESET_ALL}")
 
