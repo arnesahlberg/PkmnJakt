@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CallResultCode {
+  // API response codes
   static const int ok = 0;
   static const int userNotFound = 1;
   static const int invalidPassword = 2;
@@ -19,9 +20,9 @@ class Styles {
       double.infinity,
       56,
     ), // Full width and taller height
-    padding: const EdgeInsets.symmetric(vertical: 12), // More vertical padding
+    padding: const EdgeInsets.symmetric(vertical: 12),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8), // Slightly rounded corners
+      borderRadius: BorderRadius.circular(8), // rounded corners
     ),
     textStyle: const TextStyle(
       fontSize: 16,
