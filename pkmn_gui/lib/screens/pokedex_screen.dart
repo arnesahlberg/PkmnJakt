@@ -50,7 +50,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
                     'assets/images/pkmn/${pokemon['number']}.jpg',
                     width: 48,
                     height: 48,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                     errorBuilder:
                         (context, error, stackTrace) =>
                             const Icon(Icons.image_outlined, size: 48),

@@ -153,7 +153,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                               'assets/images/pkmn/${pokemon['number']}.jpg',
                                               width: 80,
                                               height: 80,
-                                              fit: BoxFit.cover,
+                                              fit: BoxFit.contain,
                                               errorBuilder:
                                                   (
                                                     context,
