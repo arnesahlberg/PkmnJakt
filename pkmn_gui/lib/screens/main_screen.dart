@@ -88,7 +88,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ElevatedButton(
-                        style: Styles.buttonStyleWide,
+                        style: ButtonStyles.buttonStyleWide,
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -102,7 +102,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       const SizedBox(height: 16),
                       // New button "Hitta Pokémon"
                       ElevatedButton(
-                        style: Styles.buttonStyleWide,
+                        style: ButtonStyles.buttonStyleWide,
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -116,11 +116,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       const SizedBox(height: 16),
                       Text(
                         "Välkommen ${session.userName}",
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'PixelFont',
-                        ),
+                        style: TextStyles.welcomeTextStyle,
                       ),
                       const SizedBox(height: 16),
 
@@ -137,11 +133,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       const SizedBox(height: 16),
                       const Text(
                         "Dina senast fångade Pokémon",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'PixelFont',
-                        ),
+                        style: TextStyles.headerTextStyle,
                       ),
                       const SizedBox(height: 10),
                       ListView.builder(
@@ -182,11 +174,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       const SizedBox(height: 20),
                       const Text(
                         "Global Highscore",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'PixelFont',
-                        ),
+                        style: TextStyles.headerTextStyle,
                       ),
                       _isExtraLoading
                           ? const Center(child: CircularProgressIndicator())
@@ -229,11 +217,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       const SizedBox(height: 20),
                       const Text(
                         "Senast fångade Pokémon av alla",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'PixelFont',
-                        ),
+                        style: TextStyles.headerTextStyle,
                       ),
                       _isExtraLoading
                           ? const Center(child: CircularProgressIndicator())

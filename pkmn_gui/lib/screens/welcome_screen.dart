@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../widgets/common_app_bar.dart';
 import '../main.dart'; // for UserSession
 import '../api_calls.dart'; // for fetching statistics
+import '../constants.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -59,7 +60,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       ),
                       const SizedBox(height: 32),
                       ElevatedButton(
-                        style: Styles.buttonStyleRounder,
+                        style: ButtonStyles.buttonStyleRounder,
                         onPressed: () {
                           Navigator.pushReplacementNamed(context, '/home');
                         },
@@ -85,7 +86,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                         const SizedBox(height: 32),
                         ElevatedButton(
-                          style: Styles.buttonStyleRounder,
+                          style: ButtonStyles.buttonStyleRounder,
                           onPressed: () {
                             Navigator.pushNamed(context, '/scanner');
                           },
@@ -112,11 +113,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               children: [
                                 const Text(
                                   "Senast fångade Pokémon:",
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'PixelFont',
-                                  ),
+                                  style: TextStyles.headerTextStyle,
                                 ),
                                 const SizedBox(height: 16),
                                 SizedBox(
@@ -150,16 +147,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             const SizedBox(height: 4),
                                             Text(
                                               "${pokemon['name']}",
-                                              style: const TextStyle(
-                                                fontFamily: 'PixelFont',
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                              style: TextStyles.smallTextBold,
                                             ),
                                             Text(
                                               "Nr. ${pokemon['number']}",
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                              ),
+                                              style: TextStyles.smallText,
                                             ),
                                             Text(
                                               "Fångad av: ${pokemon['found_by_user']['name']}",
@@ -188,11 +180,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                       children: [
                                         const Text(
                                           "Global Highscore:",
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'PixelFont',
-                                          ),
+                                          style: TextStyles.headerTextStyle,
                                         ),
                                         const SizedBox(height: 16),
                                         ListView.builder(

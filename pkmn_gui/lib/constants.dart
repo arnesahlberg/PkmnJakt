@@ -14,7 +14,7 @@ class CallResultCode {
   static const int passwordTooShort = 9;
 }
 
-class Styles {
+class ButtonStyles {
   static ButtonStyle get buttonStyleWide => ElevatedButton.styleFrom(
     minimumSize: const Size(
       double.infinity,
@@ -35,5 +35,33 @@ class Styles {
   static ButtonStyle get buttonStyleRounder => ElevatedButton.styleFrom(
     padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 20),
     textStyle: const TextStyle(fontSize: 20, fontFamily: 'PixelFont'),
+  );
+}
+
+class TextStyles {
+  static const headerTextStyle = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    fontFamily: 'PixelFont',
+  );
+
+  static const smallTextBold = TextStyle(
+    fontFamily: 'PixelFont',
+    fontWeight: FontWeight.bold,
+    fontSize: 12,
+  );
+
+  static const smallText = TextStyle(fontFamily: 'PixelFont', fontSize: 12);
+
+  static const smallTextItallic = TextStyle(
+    fontFamily: 'PixelFont',
+    fontSize: 12,
+    color: Colors.grey,
+  );
+
+  static const welcomeTextStyle = TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+    fontFamily: 'PixelFont',
   );
 }
