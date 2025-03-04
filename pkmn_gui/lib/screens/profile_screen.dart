@@ -82,6 +82,7 @@ class ProfileScreen extends StatelessWidget {
 
             // to log out
             ElevatedButton.icon(
+              style: ButtonStyles.buttonStyleWide,
               onPressed: () {
                 session.logout();
                 Navigator.pushReplacement(

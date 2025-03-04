@@ -10,7 +10,10 @@ Future<String?> changeUserNamePopup(BuildContext context) async {
         title: const Text("Ange nytt användarnamn"),
         content: TextField(
           autofocus: true,
-          decoration: const InputDecoration(hintText: "Användarnamn"),
+          decoration: const InputDecoration(
+            hintText: "Användarnamn",
+            hintStyle: TextStyle(color: Colors.grey),
+          ),
           onChanged: (value) {
             name = value;
           },

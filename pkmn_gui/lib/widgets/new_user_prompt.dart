@@ -70,16 +70,25 @@ class _NewUserPromptState extends State<NewUserPrompt> {
         children: [
           TextField(
             controller: _usernameController,
-            decoration: const InputDecoration(labelText: "Användarnamn"),
+            decoration: const InputDecoration(
+              labelText: "Användarnamn",
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
           ),
           TextField(
             controller: _passwordController,
-            decoration: const InputDecoration(labelText: "Lösenord"),
+            decoration: const InputDecoration(
+              labelText: "Lösenord",
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
             obscureText: true,
           ),
           TextField(
             controller: _confirmController,
-            decoration: const InputDecoration(labelText: "Bekräfta lösenord"),
+            decoration: const InputDecoration(
+              labelText: "Bekräfta lösenord",
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
             obscureText: true,
           ),
           if (errorMessage != null)
