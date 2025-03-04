@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pkmn_gui/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../widgets/common_app_bar.dart';
@@ -58,16 +59,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       ),
                       const SizedBox(height: 32),
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 40,
-                            vertical: 20,
-                          ),
-                          textStyle: const TextStyle(
-                            fontSize: 20,
-                            fontFamily: 'PixelFont',
-                          ),
-                        ),
+                        style: Styles.buttonStyleRounder,
                         onPressed: () {
                           Navigator.pushReplacementNamed(context, '/home');
                         },
@@ -93,16 +85,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                         const SizedBox(height: 32),
                         ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 40,
-                              vertical: 20,
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 20,
-                              fontFamily: 'PixelFont',
-                            ),
-                          ),
+                          style: Styles.buttonStyleRounder,
                           onPressed: () {
                             Navigator.pushNamed(context, '/scanner');
                           },

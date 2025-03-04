@@ -88,7 +88,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ElevatedButton(
-                        style: Styles.buttonStyle,
+                        style: Styles.buttonStyleWide,
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -102,7 +102,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       const SizedBox(height: 16),
                       // New button "Hitta Pokémon"
                       ElevatedButton(
-                        style: Styles.buttonStyle,
+                        style: Styles.buttonStyleWide,
                         onPressed: () {
                           Navigator.push(
                             context,

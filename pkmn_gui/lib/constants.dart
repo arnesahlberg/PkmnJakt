@@ -15,7 +15,7 @@ class CallResultCode {
 }
 
 class Styles {
-  static ButtonStyle get buttonStyle => ElevatedButton.styleFrom(
+  static ButtonStyle get buttonStyleWide => ElevatedButton.styleFrom(
     minimumSize: const Size(
       double.infinity,
       56,
@@ -29,5 +29,11 @@ class Styles {
       fontWeight: FontWeight.bold,
       fontFamily: 'PixelFont',
     ),
+  );
+
+  // other style of button
+  static ButtonStyle get buttonStyleRounder => ElevatedButton.styleFrom(
+    padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 20),
+    textStyle: const TextStyle(fontSize: 20, fontFamily: 'PixelFont'),
   );
 }
