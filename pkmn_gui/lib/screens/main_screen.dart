@@ -201,7 +201,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                           Icons.emoji_events,
                                           color: Colors.brown,
                                         )
-                                        : null,
+                                        : Text(
+                                          "",
+                                        ), // no icon but still indented
                                 title: Text(
                                   "${score['name']} (ID: ${score['id']})",
                                 ),

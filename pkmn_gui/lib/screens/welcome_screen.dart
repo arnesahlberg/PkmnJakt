@@ -117,7 +117,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 ),
                                 const SizedBox(height: 16),
                                 SizedBox(
-                                  height: 140,
+                                  height: 200,
                                   child: ListView.builder(
                                     scrollDirection: Axis.horizontal,
                                     itemCount: recent.length,
@@ -191,6 +191,23 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                           itemBuilder: (context, index) {
                                             final score = highs[index];
                                             return ListTile(
+                                              leading:
+                                                  index == 0
+                                                      ? const Icon(
+                                                        Icons.emoji_events,
+                                                        color: Colors.amber,
+                                                      )
+                                                      : index == 1
+                                                      ? const Icon(
+                                                        Icons.emoji_events,
+                                                        color: Colors.grey,
+                                                      )
+                                                      : index == 2
+                                                      ? const Icon(
+                                                        Icons.emoji_events,
+                                                        color: Colors.brown,
+                                                      )
+                                                      : Text(""),
                                               title: Text(
                                                 "${score['name']} (ID: ${score['id']})",
                                                 style: const TextStyle(
