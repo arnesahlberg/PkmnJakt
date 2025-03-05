@@ -29,8 +29,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       String validUntil;
 
       try {
-        // chekc if this is a user_id and not something else (like pokemon_id)
+        // check if this is a user_id and not something else (like pokemon_id)
         // thing they should be 6 digits long, but just check it's shorter than 10 for now
+        // should implement better validation later here. also in backend.
         if (scannedId.length > 10) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -177,7 +178,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'Rikta kameran mot QR-koden på ditt band',
+                  'Rikta kameran mot ditt deltagarband. Om du inte loggat in tidigare kommer du få skapa ett konto.',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),

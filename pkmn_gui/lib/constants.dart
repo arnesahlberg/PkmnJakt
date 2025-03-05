@@ -14,6 +14,11 @@ class CallResultCode {
   static const int passwordTooShort = 9;
 }
 
+class UIConstants {
+  static const double pokedexImageSize = 64;
+  static const double separatingHeight = 20;
+}
+
 class ButtonStyles {
   static ButtonStyle get buttonStyleWide => ElevatedButton.styleFrom(
     minimumSize: const Size(

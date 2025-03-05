@@ -3,7 +3,7 @@ import 'package:pkmn_gui/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../widgets/common_app_bar.dart';
-import "qr_scanner_screen.dart";
+import "login_scanner_screen.dart";
 import '../main.dart'; // for UserSession
 import '../api_calls.dart'; // for fetching statistics
 

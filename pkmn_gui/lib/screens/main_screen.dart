@@ -83,7 +83,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     final session = Provider.of<UserSession>(context);
     return Scaffold(
       appBar: const CommonAppBar(
-        title: "Stensund Pokemon-Jakt 2025",
+        title: "Stensund Pokémon-Jakt 2025",
         showBackButton: false,
       ),
       body:
@@ -95,6 +95,24 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        "Välkommen ${session.userName}",
+                        style: TextStyles.welcomeTextStyle,
+                      ),
+                      const SizedBox(height: 16),
+
+                      Text(
+                        _ranking == 1
+                            ? "Du är rankad: #$_ranking 🏆🥇🎉"
+                            : _ranking == 2
+                            ? "Du är rankad: #$_ranking 🥈"
+                            : _ranking == 3
+                            ? "Du är rankad: #$_ranking 🥉"
+                            : "Du är rankad: #$_ranking",
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(height: UIConstants.separatingHeight),
+
                       ElevatedButton(
                         style: ButtonStyles.buttonStyleWide,
                         onPressed: () {
@@ -107,8 +125,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         },
                         child: const Text("Mitt pokedex"),
                       ),
-                      const SizedBox(height: 16),
-                      // New button "Hitta Pokémon"
+                      const SizedBox(height: UIConstants.separatingHeight),
+                      // button "fånga Pokémon"
                       ElevatedButton(
                         style: ButtonStyles.buttonStyleWide,
                         onPressed: () {
@@ -119,26 +137,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                             ),
                           );
                         },
-                        child: const Text("Hitta Pokémon"),
+                        child: const Text("Fånga Pokémon"),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        "Välkommen ${session.userName}",
-                        style: TextStyles.welcomeTextStyle,
-                      ),
-                      const SizedBox(height: 16),
-
-                      Text(
-                        _ranking == 1
-                            ? "Ranking: #$_ranking 🏆🥇🎉"
-                            : _ranking == 2
-                            ? "Ranking: #$_ranking 🥈"
-                            : _ranking == 3
-                            ? "Ranking: #$_ranking 🥉"
-                            : "Ranking: #$_ranking",
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: UIConstants.separatingHeight),
+                      const Divider(),
+                      const SizedBox(height: UIConstants.separatingHeight),
                       const Text(
                         "Dina senast fångade Pokémon",
                         style: TextStyles.headerTextStyle,
@@ -158,13 +161,13 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                             child: ListTile(
                               leading: Image.asset(
                                 'assets/images/pkmn/${pokemon['number']}.jpg',
-                                width: 48,
-                                height: 48,
+                                width: UIConstants.pokedexImageSize,
+                                height: UIConstants.pokedexImageSize,
                                 fit: BoxFit.contain,
                                 errorBuilder:
                                     (context, error, stackTrace) => const Icon(
                                       Icons.image_outlined,
-                                      size: 48,
+                                      size: UIConstants.pokedexImageSize,
                                     ),
                               ),
                               title: Text(
@@ -177,9 +180,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           );
                         },
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: UIConstants.separatingHeight),
                       const Divider(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: UIConstants.separatingHeight),
                       const Text(
                         "Global Highscore",
                         style: TextStyles.headerTextStyle,
@@ -222,9 +225,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                               );
                             },
                           ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: UIConstants.separatingHeight),
                       const Divider(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: UIConstants.separatingHeight),
                       const Text(
                         "Senast fångade Pokémon av alla",
                         style: TextStyles.headerTextStyle,
@@ -245,21 +248,22 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 child: ListTile(
                                   leading: Image.asset(
                                     'assets/images/pkmn/${pokemon['number']}.jpg',
-                                    width: 48,
-                                    height: 48,
+                                    width: UIConstants.pokedexImageSize,
+                                    height: UIConstants.pokedexImageSize,
                                     fit: BoxFit.contain,
                                     errorBuilder:
                                         (context, error, stackTrace) =>
                                             const Icon(
                                               Icons.image_outlined,
-                                              size: 48,
+                                              size:
+                                                  UIConstants.pokedexImageSize,
                                             ),
                                   ),
                                   title: Text(
                                     "${pokemon['name']} (Nr. ${pokemon['number']})",
                                   ),
                                   subtitle: Text(
-                                    "Fångad av: ${pokemon['found_by_user']['name']} - Tid: ${_formatTime(pokemon['time_found'])}",
+                                    "Fångad av: ${pokemon['found_by_user']['name']}\nTid: ${_formatTime(pokemon['time_found'])}",
                                   ),
                                 ),
                               );
