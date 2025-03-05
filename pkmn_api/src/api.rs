@@ -711,7 +711,7 @@ pub async fn am_i_admin(req: HttpRequest) -> HttpResponse {
 // reset user password
 #[derive(Debug, Deserialize)]
 pub struct ResetUserPasswordRequest {
-    pub user_id: String,
+    pub id: String,
     pub new_password: String,
 }
 
@@ -724,7 +724,7 @@ pub async fn admin_reset_user_password(req: HttpRequest, info: web::Json<ResetUs
     if !validate_token(&user_id, token, &conn) {
         return HttpResponse::Unauthorized().finish();
     }
-    let user_exists = databaseconnection::user_id_exists(&info.user_id, &conn).unwrap();
+    let user_exists = databaseconnection::user_id_exists(&info.id, &conn).unwrap();
     if !user_exists {
         return HttpResponse::NotFound().finish();
     }
@@ -732,8 +732,8 @@ pub async fn admin_reset_user_password(req: HttpRequest, info: web::Json<ResetUs
     if !is_admin {
         return HttpResponse::Forbidden().finish();
     }
-    let new_password = databaseconnection::set_user_password(&info.user_id, &info.new_password, &conn).unwrap();
-    HttpResponse::Ok().json(new_password)
+    let worked = databaseconnection::set_user_password(&info.id, &info.new_password, &conn).is_ok();
+    HttpResponse::Ok().body(worked.to_string())
 }
 
 // registers all routes.

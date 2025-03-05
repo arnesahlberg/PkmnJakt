@@ -171,10 +171,45 @@ def run_tests():
     }, tokens["11111"])
 
     # 12. validate token
+    print("\nTesting validate token. Should work.")
     make_request("POST", "validate_token", None, tokens["11111"])
     make_request("POST", "logout", None, tokens["11111"])
+    print("\nTesting validate token. Now logged out so should not work.")
     make_request("POST", "validate_token", None, tokens["11111"])
     
+    # 13. Is user admin?
+    print("\nTesting if user is admin. Should give 401.")
+    make_request("GET", "am_i_admin", None, tokens["11111"])
+
+    print("\nLogging in as admin user now.")
+    res = make_request("POST", "login", {
+        "id": "admin",
+        "password": "stensund"
+    })
+    if res and res.status_code == 200:
+        data = json.loads(res.text)
+        if "token" in data and "encoded_token" in data["token"]:
+            tokens["admin"] = data["token"]["encoded_token"]
+            print(f"Updated token for user admin")
+    else :
+        print("Failed to login as admin user.")
+        sys.exit(1)
+
+    print("\nTesting if user is admin. Should give 200.")
+    make_request("GET", "am_i_admin", None, tokens["admin"])
+
+    # 14. reset password for user
+    print("\nTesting reset password as non admin. Should give 403.")
+    make_request("POST", "admin_reset_user_password", {
+        "id": "11111", "new_password": "123456"
+    }, tokens["22222"])
+
+    print("\nTesting reset password as admin. Should give 200.")
+    make_request("POST", "admin_reset_user_password", {
+        "id": "admin", "new_password": "123456"
+    }, tokens["admin"])
+
+
     print(f"\n{Fore.GREEN}API tests completed!{Style.RESET_ALL}")
 
 if __name__ == "__main__":

@@ -24,7 +24,7 @@ pub fn user_name_exists(name : &str, conn : &Connection) -> Result<bool> {
 }
 
 pub fn user_is_admin(user_id : &str, conn : &Connection) -> Result<bool> {
-    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Admins WHERE User_Id = ?1")?;
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Users WHERE user_id = ?1 AND admin")?;
     let count : i32 = stmt.query_row(params![user_id], |row| row.get(0))?;
     Ok(count > 0)
 }
