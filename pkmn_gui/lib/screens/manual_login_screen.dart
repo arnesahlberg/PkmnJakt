@@ -46,6 +46,7 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
 
       if (exists) {
         // Existing user: prompt for password
+        if (!mounted) return;
         final password = await promptForPassword(context);
         if (password == null || password.isEmpty) {
           setState(() {
@@ -59,6 +60,7 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
               (loginResult['result_code'] == CallResultCode.invalidPassword)
                   ? "Fel lösenord, försök igen"
                   : "Något gick fel. Felkod: ${loginResult['result_code']}";
+          if (!mounted) return;
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(errorMsg)));
@@ -72,6 +74,7 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
         validUntil = loginResult['token']?['valid_until']?.toString() ?? "";
       } else {
         // New user: prompt for credentials
+        if (!mounted) return;
         final credentials = await promptForUserCredentials(context, idCode);
         if (credentials == null ||
             credentials['username']?.isEmpty == true ||
@@ -83,6 +86,7 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
           return;
         }
         if (credentials['password'] != credentials['confirm']) {
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Lösenorden matchar inte")),
           );
@@ -103,6 +107,7 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
               (createResult['result_code'] == CallResultCode.userAlreadyExists)
                   ? "Användaren finns redan"
                   : "Error: ${createResult['result_code']}";
+          if (!mounted) return;
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(errorMsg)));
@@ -115,7 +120,7 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
             createResult['token']?['encoded_token']?.toString() ?? "";
         validUntil = createResult['token']?['valid_until']?.toString() ?? "";
       }
-
+      if (!mounted) return;
       Provider.of<UserSession>(
         context,
         listen: false,

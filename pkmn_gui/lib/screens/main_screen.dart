@@ -36,6 +36,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     } catch (e) {
       // if could not retch from api
       setState(() => _isLoading = false);
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Fel vid hämtning: $e")));
@@ -53,6 +54,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       });
     } catch (e) {
       setState(() => _isExtraLoading = false);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Fel vid hämtning av extra data: $e")),
       );

@@ -30,17 +30,20 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
       if (foundResponse['result_code'] != CallResultCode.ok) {
         if (foundResponse['result_code'] ==
             CallResultCode.pokemonAlreadyFound) {
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Du har redan hittat denna Pokémon")),
           );
         } else if (foundResponse['result_code'] ==
             CallResultCode.pokemonNotFound) {
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("Koden du scannade tillhör inte en pokemon"),
             ),
           );
         } else {
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Fel: ${foundResponse['result_code']}")),
           );

@@ -136,6 +136,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         }
         // Debug: print token to verify correctness
         debugPrint("Encoded token received: $encodedToken");
+        if (!mounted) return;
         Provider.of<UserSession>(
           context,
           listen: false,
