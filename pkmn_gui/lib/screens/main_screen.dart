@@ -33,6 +33,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      // if could not retch from api
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(
         context,
@@ -65,6 +66,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   @override
   void initState() {
+    // to validate token or go back to login
     super.initState();
     AuthUtils.validateTokenAndRedirect(context).then((isValid) {
       if (isValid) {
@@ -84,7 +86,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         showBackButton: false,
       ),
       body:
-          _isLoading
+          _isLoading // trigger body based on loading state
               ? const Center(child: CircularProgressIndicator())
               : Padding(
                 padding: const EdgeInsets.all(16.0),
