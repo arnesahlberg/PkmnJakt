@@ -6,6 +6,7 @@ import '../widgets/common_app_bar.dart';
 import "login_scanner_screen.dart";
 import '../main.dart'; // for UserSession
 import '../api_calls.dart'; // for fetching statistics
+import 'manual_login_screen.dart'; // added import for manual login
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -88,14 +89,30 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ElevatedButton(
                           style: ButtonStyles.buttonStyleRounder,
                           onPressed: () {
-                            Navigator.pushReplacement(
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const QRScannerScreen(),
                               ),
                             );
                           },
-                          child: const Text('Logga in med bandet'),
+                          child: const Text('Logga in genom att scanna bandet'),
+                        ),
+                        const SizedBox(height: 16),
+                        // New manual login button. unsure if we should have it
+                        // since we don't want users to be able to enter another
+                        // user's ID code´when creating a user
+                        ElevatedButton(
+                          style: ButtonStyles.buttonStyleRounder,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ManualLoginScreen(),
+                              ),
+                            );
+                          },
+                          child: const Text('Logga in med bandets ID nummer'),
                         ),
                         const SizedBox(height: 32),
                         FutureBuilder<Map<String, dynamic>>(
