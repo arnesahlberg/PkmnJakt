@@ -110,9 +110,8 @@ class MyApp extends StatelessWidget {
       ),
       home: const WelcomeScreen(),
       routes: {
-        '/scanner': (_) => const QRScannerScreen(),
-        '/profile': (_) => const ProfileScreen(),
         '/highscore': (_) => const HighScoreScreen(),
+        '/profile': (_) => const ProfileScreen(),
         '/home': (_) => const UserHomeScreen(),
         '/pokedex': (_) => const PokedexScreen(),
       },

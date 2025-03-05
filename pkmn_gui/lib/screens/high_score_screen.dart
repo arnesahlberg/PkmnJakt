@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../api_calls.dart';
 import '../widgets/common_app_bar.dart';
-import '../main.dart'; // for UserSession
+import '../main.dart';
+import '../utils/auth_utils.dart'; // Import auth utilities
 
 class HighScoreScreen extends StatefulWidget {
   const HighScoreScreen({super.key});
@@ -14,6 +15,7 @@ class HighScoreScreen extends StatefulWidget {
 class _HighScoreScreenState extends State<HighScoreScreen> {
   List<dynamic> _pokemonList = [];
   bool _isLoading = true;
+
   Future<void> _loadHighScore() async {
     final session = Provider.of<UserSession>(context, listen: false);
     try {
@@ -35,7 +37,12 @@ class _HighScoreScreenState extends State<HighScoreScreen> {
   @override
   void initState() {
     super.initState();
-    _loadHighScore();
+    AuthUtils.validateTokenAndRedirect(context).then((isValid) {
+      if (isValid) {
+        // Only load data if token validation passed
+        _loadHighScore();
+      }
+    });
   }
 
   String _formatTime(String isoTime) {

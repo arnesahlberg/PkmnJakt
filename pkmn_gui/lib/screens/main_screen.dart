@@ -5,6 +5,7 @@ import '../main.dart'; // for user session
 import '../widgets/common_app_bar.dart';
 import 'package:intl/intl.dart';
 import '../api_calls.dart';
+import '../utils/auth_utils.dart'; // Import auth utilities
 import 'pokedex_screen.dart';
 import 'found_pokemon_scanner_screen.dart'; // new import
 
@@ -33,6 +34,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      // if could not retch from api
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(
         context,
@@ -65,9 +67,15 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   @override
   void initState() {
+    // to validate token or go back to login
     super.initState();
-    _loadData();
-    _loadExtraData();
+    AuthUtils.validateTokenAndRedirect(context).then((isValid) {
+      if (isValid) {
+        // Only load data if token validation passed
+        _loadData();
+        _loadExtraData();
+      }
+    });
   }
 
   @override
@@ -79,7 +87,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         showBackButton: false,
       ),
       body:
-          _isLoading
+          _isLoading // trigger body based on loading state
               ? const Center(child: CircularProgressIndicator())
               : Padding(
                 padding: const EdgeInsets.all(16.0),

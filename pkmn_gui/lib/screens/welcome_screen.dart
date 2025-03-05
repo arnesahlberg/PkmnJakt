@@ -3,6 +3,7 @@ import 'package:pkmn_gui/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../widgets/common_app_bar.dart';
+import "qr_scanner_screen.dart";
 import '../main.dart'; // for UserSession
 import '../api_calls.dart'; // for fetching statistics
 
@@ -87,7 +88,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ElevatedButton(
                           style: ButtonStyles.buttonStyleRounder,
                           onPressed: () {
-                            Navigator.pushNamed(context, '/scanner');
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const QRScannerScreen(),
+                              ),
+                            );
                           },
                           child: const Text('Logga in med bandet'),
                         ),
