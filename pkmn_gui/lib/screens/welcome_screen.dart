@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import '../widgets/common_app_bar.dart';
 import '../main.dart'; // for UserSession
 import '../api_calls.dart'; // for fetching statistics
-import '../constants.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
