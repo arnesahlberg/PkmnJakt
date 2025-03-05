@@ -51,6 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ElevatedButton(
                       style: ButtonStyles.buttonStyleWide,
                       onPressed: () async {
+                        final messenger = ScaffoldMessenger.of(context);
                         final newName = await changeUserNamePopup(context);
                         if (newName != null) {
                           final result = await ApiService.setUserName(
@@ -60,13 +61,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           final int resultCode = result['result_code'];
                           if (resultCode == CallResultCode.ok) {
                             session.setUserName(newName);
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               const SnackBar(
                                 content: Text("Användarnamn ändrat"),
                               ),
                             );
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               const SnackBar(
                                 content: Text("Kunde inte ändra användarnamn"),
                               ),
@@ -80,6 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ElevatedButton(
                       style: ButtonStyles.buttonStyleWide,
                       onPressed: () async {
+                        final messenger = ScaffoldMessenger.of(context);
                         final result = await changePasswordPopup(
                           context,
                           session.token!,
@@ -87,11 +89,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         if (result != null) {
                           final resultCode = result['result_code'];
                           if (resultCode == CallResultCode.ok) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               const SnackBar(content: Text("Lösenord ändrat")),
                             );
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               const SnackBar(
                                 content: Text("Kunde inte ändra lösenord"),
                               ),

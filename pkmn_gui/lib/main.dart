@@ -4,9 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:universal_html/html.dart' as html;
 import 'screens/main_screen.dart';
 import 'screens/welcome_screen.dart';
-import 'screens/qr_scanner_screen.dart';
 import 'screens/profile_screen.dart';
-import 'screens/high_score_screen.dart';
 
 // ------------------------------
 // User Session Provider
@@ -110,7 +108,6 @@ class MyApp extends StatelessWidget {
       ),
       home: const WelcomeScreen(),
       routes: {
-        '/highscore': (_) => const HighScoreScreen(),
         '/profile': (_) => const ProfileScreen(),
         '/home': (_) => const UserHomeScreen(),
         '/pokedex': (_) => const PokedexScreen(),
