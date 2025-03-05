@@ -692,6 +692,49 @@ pub async fn validate_token_request(req: HttpRequest) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
+pub async fn am_i_admin(req: HttpRequest) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !is_admin {
+        return HttpResponse::Forbidden().finish();
+    }
+    HttpResponse::Ok().finish()
+}
+
+// reset user password
+#[derive(Debug, Deserialize)]
+pub struct ResetUserPasswordRequest {
+    pub user_id: String,
+    pub new_password: String,
+}
+
+pub async fn admin_reset_user_password(req: HttpRequest, info: web::Json<ResetUserPasswordRequest>) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    let user_exists = databaseconnection::user_id_exists(&info.user_id, &conn).unwrap();
+    if !user_exists {
+        return HttpResponse::NotFound().finish();
+    }
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !is_admin {
+        return HttpResponse::Forbidden().finish();
+    }
+    let new_password = databaseconnection::set_user_password(&info.user_id, &info.new_password, &conn).unwrap();
+    HttpResponse::Ok().json(new_password)
+}
 
 // registers all routes.
 pub fn config(cfg: &mut web::ServiceConfig) {
@@ -712,6 +755,9 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/user_exists/{user_id}", web::get().to(user_exists))
         .route("/user_ranking/{user_id}", web::get().to(get_user_ranking))
         .route("/my_pokedex", web::get().to(get_my_pokedex))
+        // admin endpoints
+        .route("/am_i_admin", web::get().to(am_i_admin))
+        .route("/admin_reset_user_password", web::post().to(admin_reset_user_password))
         ;
 }
 

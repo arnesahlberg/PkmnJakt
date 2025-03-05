@@ -23,6 +23,12 @@ pub fn user_name_exists(name : &str, conn : &Connection) -> Result<bool> {
     Ok(count > 0)
 }
 
+pub fn user_is_admin(user_id : &str, conn : &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Admins WHERE User_Id = ?1")?;
+    let count : i32 = stmt.query_row(params![user_id], |row| row.get(0))?;
+    Ok(count > 0)
+}
+
 pub fn get_num_users(conn : &Connection) -> Result<i32> {
     let mut stmt = conn.prepare("SELECT COUNT(*) FROM Users")?;
     let count : i32 = stmt.query_row([], |row| row.get(0))?;
