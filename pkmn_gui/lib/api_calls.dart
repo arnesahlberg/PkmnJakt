@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 class ApiService {
   static const String baseUrl =
       'https://pkmnapi.notawebsitejustmynotebookgoaway.com'; // for release
-  // 'https://192.168.0.73:8081 '; // for local test
+  // 'https://192.168.0.73:8081'; // for local test
 
   static Map<String, String> _headers([String? token]) => {
     "Content-Type": "application/json",

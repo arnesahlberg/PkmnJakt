@@ -29,7 +29,7 @@ def print_response(response, endpoint):
     except Exception as e:
         print(f"{Fore.RED}Error processing response: {str(e)}{Style.RESET_ALL}")
 
-def make_request(method, endpoint, data=None, token=None):
+def make_request(method, endpoint, data=None, token=None, expected_status=None):
     """Make a request to the API and handle errors."""
     url = f"{BASE_URL}/{endpoint}"
     headers = HEADERS.copy()
@@ -46,6 +46,10 @@ def make_request(method, endpoint, data=None, token=None):
             print(f"{Fore.RED}Unsupported method: {method}{Style.RESET_ALL}")
             return None
         
+        if expected_status is not None and response.status_code != expected_status:
+            print(f"{Fore.RED}Expected status {expected_status} but got {response.status_code}{Style.RESET_ALL}")
+            sys.exit(1)
+        
         print_response(response, endpoint)
         return response
     except requests.exceptions.RequestException as e:
@@ -60,10 +64,11 @@ def run_tests():
     requests.packages.urllib3.disable_warnings()
     
     # 1. Try login (should fail for non-existent user)
+    print(f"{Fore.YELLOW}Test 1: Attempt login with non-existent user (expecting 401){Style.RESET_ALL}")
     login_response = make_request("POST", "login", {
         "id": "11111",
         "password": "1234"
-    })
+    }, expected_status=404)
     
     # 2. Create users
     users = [
@@ -71,25 +76,26 @@ def run_tests():
         {"id": "22222", "name": "Sture Stur", "password": "stur-pass"},
         {"id": "33333", "name": "Lisa Lis", "password": "lis-pass"}
     ]
-    
     for user in users:
-        response = make_request("POST", "create_user", user)
+        print(f"{Fore.YELLOW}Test 2: Creating user {user['id']} ({user['name']}) (expecting 200){Style.RESET_ALL}")
+        response = make_request("POST", "create_user", user, expected_status=200)
         if response and response.status_code == 200:
             data = json.loads(response.text)
             if "token" in data and "encoded_token" in data["token"]:
                 tokens[user["id"]] = data["token"]["encoded_token"]
                 print(f"Stored token for user {user['id']}")
     
-    # 3. Test logout with first user
+    # 3. Logout first user
+    print(f"{Fore.YELLOW}Test 3: Logging out user 11111 (expecting 200){Style.RESET_ALL}")
     if "11111" in tokens:
-        make_request("POST", "logout", None, tokens["11111"])
+        make_request("POST", "logout", None, tokens["11111"], expected_status=200)
     
     # 4. Login again with first user
+    print(f"{Fore.YELLOW}Test 4: Logging in user 11111 (expecting 200){Style.RESET_ALL}")
     login_response = make_request("POST", "login", {
         "id": "11111",
         "password": "1234"
-    })
-    
+    }, expected_status=200)
     if login_response and login_response.status_code == 200:
         data = json.loads(login_response.text)
         if "token" in data and "encoded_token" in data["token"]:
@@ -97,10 +103,11 @@ def run_tests():
             print(f"Updated token for user 11111")
     
     # 5. Update username for second user
+    print(f"{Fore.YELLOW}Test 5: Updating username for user 22222 (expecting 200){Style.RESET_ALL}")
     if "22222" in tokens:
         make_request("POST", "set_user_name", {
             "name": "Sture Stör"
-        }, tokens["22222"])
+        }, tokens["22222"], expected_status=200)
     
     # 6. Found Pokemon calls
     catch_codes = [
@@ -112,104 +119,109 @@ def run_tests():
         {"user": "11111", "catch_code": "7a6af775-748a-44ab-9812-dfe934d5fab5"},
         {"user": "11111", "catch_code": "d9f5fe6e-22bd-4240-918c-9994a062df82"}
     ]
-    
     for catch in catch_codes:
         if catch["user"] in tokens:
+            print(f"{Fore.YELLOW}Test 6: User {catch['user']} found pokemon with code {catch['catch_code']} (expecting 200){Style.RESET_ALL}")
             make_request("POST", "found_pokemon", {
                 "catch_code": catch["catch_code"]
-            }, tokens[catch["user"]])
+            }, tokens[catch["user"]], expected_status=200)
     
     # 7. View found pokemon for user 1
+    print(f"{Fore.YELLOW}Test 7: Viewing found pokemon for user 11111 (expecting 200){Style.RESET_ALL}")
     if "11111" in tokens:
         make_request("POST", "view_found_pokemon", {
             "n": 10
-        }, tokens["11111"])
+        }, tokens["11111"], expected_status=200)
     
     # 8. Get user's pokedex
+    print(f"{Fore.YELLOW}Test 8: Getting pokedex for user 11111 (expecting 200){Style.RESET_ALL}")
     if "11111" in tokens:
-        make_request("GET", "my_pokedex", None, tokens["11111"])
+        make_request("GET", "my_pokedex", None, tokens["11111"], expected_status=200)
     
     # 9. Statistics calls
-    make_request("GET", "statistics_highscore")
-    make_request("GET", "statistics_latest_pokemon_found")
-    make_request("GET", "get_pokemon/1")
+    print(f"{Fore.YELLOW}Test 9a: Getting statistics highscore (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "statistics_highscore", expected_status=200)
+    print(f"{Fore.YELLOW}Test 9b: Getting latest pokemon found statistics (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "statistics_latest_pokemon_found", expected_status=200)
+    print(f"{Fore.YELLOW}Test 9c: Getting pokemon with id 1 (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "get_pokemon/1", expected_status=200)
 
-
-    #10. change user password
+    # 10. Change user password
+    print(f"{Fore.YELLOW}Test 10a: Changing password with wrong old password for user 11111 (expecting 401){Style.RESET_ALL}")
     make_request("POST", "set_password", {
-        "old_password": "1233", # test wrong old password
+        "old_password": "1233",  # wrong old password
         "new_password": "new_password"
-    }, tokens["11111"])
-
+    }, tokens["11111"], expected_status=401)
+    print(f"{Fore.YELLOW}Test 10b: Changing password with correct old password for user 11111 (expecting 200){Style.RESET_ALL}")
     make_request("POST", "set_password", {
-        "old_password": "1234", # test correct old password
+        "old_password": "1234",  # correct old password
         "new_password": "new_password"
-    }, tokens["11111"])
-
-    make_request("POST", "logout", None, tokens["11111"])
+    }, tokens["11111"], expected_status=200)
+    print(f"{Fore.YELLOW}Test 10c: Logging out after password change (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "logout", None, tokens["11111"], expected_status=200)
+    print(f"{Fore.YELLOW}Test 10d: Login with old password should fail for user 11111 (expecting 401){Style.RESET_ALL}")
     make_request("POST", "login", {
         "id": "11111",
-        "password": "1234" # test old password, should not work
-    })
+        "password": "1234"  # test old password, should not work
+    }, expected_status=401)
+    print(f"{Fore.YELLOW}Test 10e: Login with new password should succeed for user 11111 (expecting 200){Style.RESET_ALL}")
     response = make_request("POST", "login", {
         "id": "11111",
-        "password": "new_password" # test new password, should work
-    })
+        "password": "new_password"  # test new password, should work
+    }, expected_status=200)
     if response and response.status_code == 200:
         data = json.loads(response.text)
         if "token" in data and "encoded_token" in data["token"]:
             tokens["11111"] = data["token"]["encoded_token"]
             print(f"Updated token for user 11111")
-
-    # 11. validate password
+    
+    # 11. Validate password
+    print(f"{Fore.YELLOW}Test 11a: Validate password with wrong password for user 11111 (expecting 401){Style.RESET_ALL}")
     make_request("POST", "validate_password", {
         "password": "1234"
-    }, tokens["11111"])
-
+    }, tokens["11111"], expected_status=401)
+    print(f"{Fore.YELLOW}Test 11b: Validate password with correct password for user 11111 (expecting 200){Style.RESET_ALL}")
     make_request("POST", "validate_password", {
         "password": "new_password"
-    }, tokens["11111"])
-
-    # 12. validate token
-    print("\nTesting validate token. Should work.")
-    make_request("POST", "validate_token", None, tokens["11111"])
-    make_request("POST", "logout", None, tokens["11111"])
-    print("\nTesting validate token. Now logged out so should not work.")
-    make_request("POST", "validate_token", None, tokens["11111"])
+    }, tokens["11111"], expected_status=200)
     
-    # 13. Is user admin?
-    print("\nTesting if user is admin. Should give 401.")
-    make_request("GET", "am_i_admin", None, tokens["11111"])
-
-    print("\nLogging in as admin user now.")
+    # 12. Validate token
+    print(f"{Fore.YELLOW}Test 12a: Validate token while logged in for user 11111 (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "validate_token", None, tokens["11111"], expected_status=200)
+    print(f"{Fore.YELLOW}Test 12b: Logging out user 11111 (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "logout", None, tokens["11111"], expected_status=200)
+    print(f"{Fore.YELLOW}Test 12c: Validate token after logout for user 11111 (expecting 401){Style.RESET_ALL}")
+    make_request("POST", "validate_token", None, tokens["11111"], expected_status=401)
+    
+    # 13. Check if user is admin
+    print(f"{Fore.YELLOW}Test 13a: Check admin status for non-admin user 11111 (expecting 401){Style.RESET_ALL}")
+    make_request("GET", "am_i_admin", None, tokens["11111"], expected_status=401)
+    print(f"{Fore.YELLOW}Test 13b: Login as admin user (expecting 200){Style.RESET_ALL}")
     res = make_request("POST", "login", {
         "id": "admin",
         "password": "stensund"
-    })
+    }, expected_status=200)
     if res and res.status_code == 200:
         data = json.loads(res.text)
         if "token" in data and "encoded_token" in data["token"]:
             tokens["admin"] = data["token"]["encoded_token"]
             print(f"Updated token for user admin")
-    else :
+    else:
         print("Failed to login as admin user.")
         sys.exit(1)
-
-    print("\nTesting if user is admin. Should give 200.")
-    make_request("GET", "am_i_admin", None, tokens["admin"])
-
-    # 14. reset password for user
-    print("\nTesting reset password as non admin. Should give 403.")
+    print(f"{Fore.YELLOW}Test 13c: Check admin status for admin user (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "am_i_admin", None, tokens["admin"], expected_status=200)
+    
+    # 14. Reset password for user as admin/non-admin
+    print(f"{Fore.YELLOW}Test 14a: Non-admin attempting to reset password for user 11111 (expecting 403){Style.RESET_ALL}")
     make_request("POST", "admin_reset_user_password", {
         "id": "11111", "new_password": "123456"
-    }, tokens["22222"])
-
-    print("\nTesting reset password as admin. Should give 200.")
+    }, tokens["22222"], expected_status=403)
+    print(f"{Fore.YELLOW}Test 14b: Admin resetting password (expecting 200){Style.RESET_ALL}")
     make_request("POST", "admin_reset_user_password", {
         "id": "admin", "new_password": "123456"
-    }, tokens["admin"])
-
-
+    }, tokens["admin"], expected_status=200)
+    
     print(f"\n{Fore.GREEN}API tests completed!{Style.RESET_ALL}")
 
 if __name__ == "__main__":

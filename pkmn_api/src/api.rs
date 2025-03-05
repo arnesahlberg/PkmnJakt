@@ -70,7 +70,7 @@ pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
             message: format!("Create new user first {}", info.id),
             result_code: CallResultCode::UserNotFound,
         };
-        return HttpResponse::BadRequest().json(response);
+        return HttpResponse::NotFound().json(response);
     }
     let (user, token) = match databaseconnection::login_and_get_user_by_id_pwd(&info.id, &info.password, &conn).unwrap() {
         Some((user, token)) => (user, token),
@@ -82,7 +82,7 @@ pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
                 message: "Invalid password".to_string(),
                 result_code: CallResultCode::InvalidPassword,
             };
-            return HttpResponse::BadRequest().json(response);
+            return HttpResponse::Unauthorized().json(response);
         }
     };
     let response = LoginResponse {
@@ -191,7 +191,7 @@ pub async fn validate_password(req: HttpRequest, info: web::Json<VerifyPasswordR
             message: "Invalid token".to_string(),
             result_code: CallResultCode::InvalidToken,
         };
-        return HttpResponse::BadRequest().json(response);
+        return HttpResponse::Unauthorized().json(response);
     }
     let valid = databaseconnection::validate_password(&user_id, &info.password, &conn).unwrap();
 
@@ -241,7 +241,7 @@ pub async fn set_user_password(req: HttpRequest, info: web::Json<SetPasswordRequ
             message: "Invalid token".to_string(),
             result_code: CallResultCode::InvalidToken,
         };
-        return HttpResponse::BadRequest().json(response);
+        return HttpResponse::Unauthorized().json(response);
     }
     // check if user exists
     let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
@@ -252,7 +252,7 @@ pub async fn set_user_password(req: HttpRequest, info: web::Json<SetPasswordRequ
             message: format!("User does not exist {}", user_id),
             result_code: CallResultCode::UserNotFound,
         };
-        return HttpResponse::BadRequest().json(response);
+        return HttpResponse::NotFound().json(response);
     }
 
     // validate old password
@@ -262,7 +262,7 @@ pub async fn set_user_password(req: HttpRequest, info: web::Json<SetPasswordRequ
             message: "Invalid old password".to_string(),
             result_code: CallResultCode::InvalidPassword,
         };
-        return HttpResponse::BadRequest().json(response);
+        return HttpResponse::Unauthorized().json(response);
     }
 
     // check if new password is too short
