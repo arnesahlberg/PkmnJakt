@@ -256,6 +256,9 @@ def run_tests():
     print(f"{Fore.YELLOW}\nTest 16c: Attempting to delete user as non-admin (expecting 403){Style.RESET_ALL}")
     make_request("DELETE", "admin_delete_user/33333", None, tokens["22222"], expected_status=403)
 
+    # 17. get num users
+    print(f"{Fore.YELLOW}\nTest 17: Getting number of users (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "num_users", None, tokens["admin"], expected_status=200)
 
 
     print(f"\n{Fore.GREEN}API tests completed!{Style.RESET_ALL}")

@@ -223,4 +223,14 @@ class AdminApiService {
     );
     return response.statusCode == 200;
   }
+
+  // check number of users
+  // returns integer
+  static Future<int> checkNumberOfUsers(String token) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/num_users'),
+      headers: ApiService._headers(token),
+    );
+    return int.parse(response.body);
+  }
 }

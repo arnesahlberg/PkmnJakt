@@ -95,6 +95,12 @@ pub fn get_users_filter_id(id_filter : &str, num : u32, conn : &Connection) -> R
     Ok(result)
 }
 
+pub fn num_users(conn : &Connection) -> Result<u32> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Users")?;
+    let count : u32 = stmt.query_row([], |row| row.get(0))?;
+    Ok(count)
+}
+
 pub fn delete_user(user_id : &str, conn : &Connection) -> Result<()> {
     // first delete tokens and pokemon for user
     conn.execute("DELETE FROM Tokens WHERE user_id = ?1", params![user_id])?;

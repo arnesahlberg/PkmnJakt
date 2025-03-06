@@ -619,6 +619,13 @@ pub async fn get_user(path: web::Path<String>) -> HttpResponse {
     }
 }
 
+// get num users
+pub async fn num_users() -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let num_users = databaseconnection::num_users(&conn).unwrap();
+    HttpResponse::Ok().body(num_users.to_string())
+}
+
 
 // get many users
 
@@ -890,6 +897,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/statistics_highscore", web::get().to(get_statistics_highscore))
         .route("/statistics_latest_pokemon_found", web::get().to(get_statistics_latest_pokemon_found))
         .route("/get_user/{user_id}", web::get().to(get_user))
+        .route("/num_users", web::get().to(num_users))
         .route("/get_pokemon/{number}", web::get().to(get_pokemon))
         .route("/user_exists/{user_id}", web::get().to(user_exists))
         .route("/user_ranking/{user_id}", web::get().to(get_user_ranking))
