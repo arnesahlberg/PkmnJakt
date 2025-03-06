@@ -708,8 +708,9 @@ pub async fn get_users_filter_id(req : HttpRequest, info: web::Json<GetUsersById
         };
         return HttpResponse::Forbidden().json(response);
     }
+    let filter = format!("%{}%", info.id_filter);
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let users = databaseconnection::get_users_filter_id(&info.id_filter, info.n, &conn).unwrap();
+    let users = databaseconnection::get_users_filter_id(&filter, info.n, &conn).unwrap();
     let num_users = users.len();
     let res = GetUsersResponse {
         users: users,
