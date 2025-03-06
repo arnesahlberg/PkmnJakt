@@ -12,6 +12,19 @@ class ApiService {
     if (token != null) "Authorization": token,
   };
 
+  // login
+  // look for response on the form:
+  //   Status code: 200
+  // {
+  //   "id": "123456",
+  //   "token": {
+  //     "encoded_token": "TOKEN-HERE",
+  //     "valid_until": "2025-03-13T19:32:07.424672Z"
+  //   },
+  //   "name": "Leif Katt",
+  //   "message": "Logged in as Leif Katt",
+  //   "result_code": 0
+  // }
   static Future<Map<String, dynamic>> login(String id, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/login'),
@@ -21,6 +34,8 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
+  // check if user exists
+  // look for response on the form:
   static Future<bool> checkUserExists(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/user_exists/$id'));
     final json = jsonDecode(response.body);
@@ -32,6 +47,19 @@ class ApiService {
     return int.parse(response.body);
   }
 
+  // create user
+  // look for response on the form:
+  //   Status code: 200
+  // {
+  //   "id": "123456",
+  //   "token": {
+  //     "encoded_token": "TOKEN-HERE",
+  //     "valid_until": "2025-03-13T19:32:07.386942Z"
+  //   },
+  //   "name": "Leif Katt",
+  //   "message": "Created new user Leif Katt",
+  //   "result_code": 0
+  // }
   static Future<Map<String, dynamic>> createUser(
     String id,
     String name,

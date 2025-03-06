@@ -622,7 +622,7 @@ pub async fn get_user(path: web::Path<String>) -> HttpResponse {
 // get num users
 pub async fn num_users() -> HttpResponse {
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let num_users = databaseconnection::num_users(&conn).unwrap();
+    let num_users = databaseconnection::get_num_users(&conn).unwrap();
     HttpResponse::Ok().body(num_users.to_string())
 }
 
@@ -667,7 +667,6 @@ pub async fn get_users(req: HttpRequest, info: web::Json<GetUsersRequest>) -> Ht
         return HttpResponse::Forbidden().json(response);
     }
     
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     let users = databaseconnection::get_users(info.n, info.skip, &conn).unwrap();
     let num_users = users.len();
     let res = GetUsersResponse {

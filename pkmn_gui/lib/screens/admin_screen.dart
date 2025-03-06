@@ -57,6 +57,7 @@ class _AdminScreenState extends State<AdminScreen> {
       );
       setState(() {
         _users = result['users'] ?? [];
+        debugPrint('Users: $_users');
       });
     } else {
       final result = await AdminApiService.getUsersFilterId(
@@ -127,7 +128,7 @@ class _AdminScreenState extends State<AdminScreen> {
       );
     }
     return Scaffold(
-      appBar: CommonAppBar(title: 'Välkommen admin: ${session.userName ?? ""}'),
+      appBar: CommonAppBar(title: 'Admin-sida'),
       body: Column(
         children: [
           Padding(
@@ -135,7 +136,7 @@ class _AdminScreenState extends State<AdminScreen> {
             child: TextField(
               controller: _searchController,
               decoration: const InputDecoration(
-                labelText: 'Sök användare (user_id)',
+                labelText: 'Sök användare (användar id)',
                 border: OutlineInputBorder(),
               ),
               onChanged: (value) => _onSearchChanged(),
@@ -146,10 +147,15 @@ class _AdminScreenState extends State<AdminScreen> {
               itemCount: _users.length,
               itemBuilder: (_, index) {
                 final user = _users[index];
-                final userId = user['id'] ?? 'unknown';
+                final userId = user['user_id']?.toString() ?? 'okänd';
+                final userName = user['name']?.toString() ?? '';
+                final isAdmin = user['admin'] == true;
                 return Card(
                   child: ListTile(
-                    title: Text('User: $userId'),
+                    title: Text('Användar id: $userId'),
+                    subtitle: Text(
+                      'Namn: $userName${isAdmin ? " (Admin)" : ""}',
+                    ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
