@@ -240,6 +240,13 @@ def run_tests():
     print(f"{Fore.YELLOW}\nTest 15b: Get users without admin token (expecting 403){Style.RESET_ALL}")
     make_request("POST","get_users", data, tokens["22222"], expected_status=403)
 
+    # 15b. query users with filter
+    data = {
+        "n": 10,
+        "id_filter" : "11",
+    }
+    print(f"{Fore.YELLOW}\nTest 15c: Querying users with filter (expecting 200){Style.RESET_ALL}")
+    make_request("POST","get_users_filter_id", data, tokens["admin"], expected_status=200)
     
     # 16. Delete users
     print(f"{Fore.YELLOW}\nTest 16a: Deleting user 44444 (expecting 200){Style.RESET_ALL}")
