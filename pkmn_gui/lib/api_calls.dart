@@ -49,7 +49,8 @@ class ApiService {
     String name,
     String token,
   ) async {
-    final response = await http.patch(
+    final response = await http.post(
+      // changed from patch to post to avoid cors error
       Uri.parse('$baseUrl/set_user_name'),
       body: jsonEncode({'name': name}),
       headers: _headers(token),
@@ -62,7 +63,7 @@ class ApiService {
     String newPassword,
     String token,
   ) async {
-    final response = await http.patch(
+    final response = await http.post(
       Uri.parse('$baseUrl/set_password'),
       body: jsonEncode({
         'old_password': oldPassword,
@@ -215,7 +216,7 @@ class AdminApiService {
     String newPassword,
     String token,
   ) async {
-    final response = await http.patch(
+    final response = await http.post(
       Uri.parse('$baseUrl/reset_user_password'),
       body: jsonEncode({'id': id, 'new_password': newPassword}),
       headers: ApiService._headers(token),

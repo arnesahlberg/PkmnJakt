@@ -111,7 +111,7 @@ def run_tests():
     # 5. Update username for second user
     print(f"{Fore.YELLOW}Test 5: Updating username for user 22222 (expecting 200){Style.RESET_ALL}")
     if "22222" in tokens:
-        make_request("PATCH", "set_user_name", {
+        make_request("POST", "set_user_name", {
             "name": "Sture Stör"
         }, tokens["22222"], expected_status=200)
     
@@ -154,12 +154,12 @@ def run_tests():
 
     # 10. Change user password
     print(f"{Fore.YELLOW}Test 10a: Changing password with wrong old password for user 11111 (expecting 401){Style.RESET_ALL}")
-    make_request("PATCH", "set_password", {
+    make_request("POST", "set_password", {
         "old_password": "1233",  # wrong old password
         "new_password": "new_password"
     }, tokens["11111"], expected_status=401)
     print(f"{Fore.YELLOW}Test 10b: Changing password with correct old password for user 11111 (expecting 200){Style.RESET_ALL}")
-    make_request("PATCH", "set_password", {
+    make_request("POST", "set_password", {
         "old_password": "1234",  # correct old password
         "new_password": "new_password"
     }, tokens["11111"], expected_status=200)
@@ -220,11 +220,11 @@ def run_tests():
     
     # 14. Reset password for user as admin/non-admin
     print(f"{Fore.YELLOW}Test 14a: Non-admin attempting to reset password for user 11111 (expecting 403){Style.RESET_ALL}")
-    make_request("PATH", "admin_reset_user_password", {
+    make_request("POST", "admin_reset_user_password", {
         "id": "11111", "new_password": "123456"
     }, tokens["22222"], expected_status=403)
     print(f"{Fore.YELLOW}Test 14b: Admin resetting password (expecting 200){Style.RESET_ALL}")
-    make_request("PATCH", "admin_reset_user_password", {
+    make_request("POST", "admin_reset_user_password", {
         "id": "admin", "new_password": "123456"
     }, tokens["admin"], expected_status=200)
 
