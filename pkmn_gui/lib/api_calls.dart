@@ -49,7 +49,7 @@ class ApiService {
     String name,
     String token,
   ) async {
-    final response = await http.post(
+    final response = await http.patch(
       Uri.parse('$baseUrl/set_user_name'),
       body: jsonEncode({'name': name}),
       headers: _headers(token),
@@ -62,7 +62,7 @@ class ApiService {
     String newPassword,
     String token,
   ) async {
-    final response = await http.post(
+    final response = await http.patch(
       Uri.parse('$baseUrl/set_password'),
       body: jsonEncode({
         'old_password': oldPassword,
@@ -122,7 +122,7 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  // New: Get statistics (no Authorization required)
+  //Get statistics (no Authorization required)
   static Future<Map<String, dynamic>> getStatisticsHighscore() async {
     final response = await http.get(Uri.parse('$baseUrl/statistics_highscore'));
     return jsonDecode(response.body);
@@ -146,5 +146,80 @@ class ApiService {
       headers: _headers(token),
     );
     return jsonDecode(response.body);
+  }
+}
+
+// admin stuff
+class AdminApiService {
+  static const String baseUrl = ApiService.baseUrl; // same as other
+
+  // get am_i_admin
+  static Future<bool> amIAdmin(String token) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/am_i_admin'),
+      headers: ApiService._headers(token),
+    );
+    return response.statusCode == 200;
+  }
+
+  // get users in interval (post)
+  // returns on form:
+  // {
+  //   users: Vec<User>,
+  //   message: String,
+  //   result_code: CallResultCode,
+  // }
+  static Future<Map<String, dynamic>> getUsersInInterval(
+    int n,
+    int skip,
+    String token,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/get_users'),
+      body: jsonEncode({'n': n, 'skip': skip}),
+      headers: ApiService._headers(token),
+    );
+    return jsonDecode(response.body);
+  }
+
+  // get users filtering on id
+  // returns as getUsersInInterval
+  static Future<Map<String, dynamic>> getUsersFilterId(
+    String id_filter,
+    int n,
+    String token,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/get_users_filter_id'),
+      body: jsonEncode({'id_filter': id_filter, 'n': n}),
+      headers: ApiService._headers(token),
+    );
+    return jsonDecode(response.body);
+  }
+
+  // delete user
+  // checks if status_code is 200 and then it succeded return bool
+  static Future<bool> deleteUser(String id, String token) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/delete_user/$id'),
+      headers: ApiService._headers(token),
+    );
+    return response.statusCode == 200;
+  }
+
+  // reset user password
+  // checks if status_code is 200 and then it succeded return bool
+  // give input id and new_password
+  static Future<bool> resetUserPassword(
+    String id,
+    String newPassword,
+    String token,
+  ) async {
+    final response = await http.patch(
+      Uri.parse('$baseUrl/reset_user_password'),
+      body: jsonEncode({'id': id, 'new_password': newPassword}),
+      headers: ApiService._headers(token),
+    );
+    return response.statusCode == 200;
   }
 }

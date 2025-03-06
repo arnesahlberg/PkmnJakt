@@ -23,6 +23,7 @@ pub enum CallResultCode {
     UserNameTooShort = 7,
     UserNameTooLong = 8,
     PasswordToShort = 9,
+    UserNotAdmin = 10,
 } 
 
 
@@ -414,6 +415,24 @@ pub async fn logout_everywhere(req: HttpRequest) -> HttpResponse {
     HttpResponse::Ok().json(response)
 }
 
+// to delete user
+pub async fn delete_user(req: HttpRequest) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
+    if !user_exists {
+        return HttpResponse::NotFound().finish();
+    }
+    databaseconnection::delete_user(&user_id, &conn).unwrap();
+    HttpResponse::Ok().finish()
+}
+
 
 #[derive(Debug, Deserialize)]
 pub struct FoundPokemonRequest {
@@ -600,6 +619,100 @@ pub async fn get_user(path: web::Path<String>) -> HttpResponse {
     }
 }
 
+
+// get many users
+
+#[derive(Debug, Deserialize)]
+pub struct GetUsersRequest {
+    pub n: u32,
+    pub skip: u32,
+}
+
+#[derive(Debug, Serialize)]
+pub struct GetUsersResponse {
+    pub users: Vec<User>,
+    pub message: String,
+    pub result_code: CallResultCode,
+}
+
+pub async fn get_users(req: HttpRequest, info: web::Json<GetUsersRequest>) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    let valid_token = validate_token(&user_id, token, &conn);
+    if !valid_token {
+        let response = GetUsersResponse {
+            users: vec![],
+            message: "Invalid token".to_string(),
+            result_code: CallResultCode::InvalidToken,
+        };
+        return HttpResponse::Unauthorized().json(response);
+    }
+    if !is_admin {
+        let response = GetUsersResponse {
+            users: vec![],
+            message: "Only admin can read all users".to_string(),
+            result_code: CallResultCode::UserNotAdmin,
+        };
+        return HttpResponse::Forbidden().json(response);
+    }
+    
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let users = databaseconnection::get_users(info.n, info.skip, &conn).unwrap();
+    let num_users = users.len();
+    let res = GetUsersResponse {
+        users: users,
+        message: format!("Got {} users", num_users),
+        result_code: CallResultCode::Ok,
+    };
+    HttpResponse::Ok().json(res)
+}
+
+// get many users filter by id
+#[derive(Debug, Deserialize)]
+pub struct GetUsersByIdRequest {
+    pub id_filter: String,
+    pub num: u32,
+}
+
+pub async fn get_users_filter_id(req : HttpRequest, info: web::Json<GetUsersByIdRequest>) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    let valid_token = validate_token(&user_id, token, &conn);
+    if !valid_token {
+        let response = GetUsersResponse {
+            users: vec![],
+            message: "Invalid token".to_string(),
+            result_code: CallResultCode::InvalidToken,
+        };
+        return HttpResponse::Forbidden().json(response);
+    }
+    if !is_admin {
+        let response = GetUsersResponse {
+            users: vec![],
+            message: "Only admin can read all users".to_string(),
+            result_code: CallResultCode::UserNotAdmin,
+        };
+        return HttpResponse::Forbidden().json(response);
+    }
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let users = databaseconnection::get_users_filter_id(&info.id_filter, info.num, &conn).unwrap();
+    let num_users = users.len();
+    let res = GetUsersResponse {
+        users: users,
+        message: format!("Got {} users", num_users),
+        result_code: CallResultCode::Ok,
+    };
+    HttpResponse::Ok().json(res)
+}
+
 // user exists request
 #[derive(Debug, Serialize)]
 pub struct UserExistsResponse {
@@ -692,6 +805,8 @@ pub async fn validate_token_request(req: HttpRequest) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
+// admin endpoints
+
 pub async fn am_i_admin(req: HttpRequest) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
@@ -736,14 +851,38 @@ pub async fn admin_reset_user_password(req: HttpRequest, info: web::Json<ResetUs
     HttpResponse::Ok().body(worked.to_string())
 }
 
+// admin delete user request
+
+pub async fn admin_delete_user(req: HttpRequest, path: web::Path<String>) -> HttpResponse {
+    let target_user_id = path.into_inner();
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    let user_exists = databaseconnection::user_id_exists(&target_user_id, &conn).unwrap();
+    if !user_exists {
+        return HttpResponse::NotFound().finish();
+    }
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !is_admin {
+        return HttpResponse::Forbidden().finish();
+    }
+    let worked = databaseconnection::delete_user(&target_user_id, &conn).is_ok();
+    HttpResponse::Ok().body(worked.to_string())
+}
+
 // registers all routes.
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.route("/login", web::post().to(login))
         .route("/logout", web::post().to(logout))
         .route("/logout_everywhere", web::post().to(logout_everywhere))
         .route("/create_user", web::post().to(create_user))
-        .route("/set_password", web::post().to(set_user_password))
-        .route("/set_user_name", web::post().to(set_user_name))
+        .route("/set_password", web::patch().to(set_user_password))
+        .route("/set_user_name", web::patch().to(set_user_name))
         .route("/validate_password", web::post().to(validate_password))
         .route("/validate_token", web::post().to(validate_token_request))
         .route("/found_pokemon", web::post().to(register_found_pokemon))
@@ -757,7 +896,11 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/my_pokedex", web::get().to(get_my_pokedex))
         // admin endpoints
         .route("/am_i_admin", web::get().to(am_i_admin))
-        .route("/admin_reset_user_password", web::post().to(admin_reset_user_password))
+        .route("/admin_reset_user_password", web::patch().to(admin_reset_user_password))
+        .route("/admin_delete_user/{id}", web::delete().to(admin_delete_user))
+        .route("/get_users", web::post().to(get_users))
+        .route("/get_users_filter_id", web::post().to(get_users_filter_id))
+
         ;
 }
 

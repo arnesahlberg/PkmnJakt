@@ -57,13 +57,59 @@ fn get_user_salt(user_id : &str, conn : &Connection) -> Result<String> {
     Ok(salt)
 }
 
+pub fn get_users(num : u32, skip: u32, conn : &Connection) -> Result<Vec<User>> {
+    let mut stmt = conn.prepare("SELECT user_id, name, email, phone, admin FROM Users LIMIT ?1 OFFSET ?2")?;
+    let rows = stmt.query_map(params![num, skip], |row| {
+        Ok(User {
+            user_id: row.get(0)?,
+            name: row.get(1)?,
+            email: row.get(2)?,
+            phone: row.get(3)?,
+            admin: row.get(4)?,
+        })
+    })?;
+
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?);
+    }
+    Ok(result)
+}
+
+pub fn get_users_filter_id(id_filter : &str, num : u32, conn : &Connection) -> Result<Vec<User>> {
+    let mut stmt = conn.prepare("SELECT user_id, name, email, phone, admin FROM Users WHERE user_id LIKE ?1 LIMIT ?2")?;
+    let rows = stmt.query_map(params![id_filter, num], |row| {
+        Ok(User {
+            user_id: row.get(0)?,
+            name: row.get(1)?,
+            email: row.get(2)?,
+            phone: row.get(3)?,
+            admin: row.get(4)?,
+        })
+    })?;
+
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?);
+    }
+    Ok(result)
+}
+
+pub fn delete_user(user_id : &str, conn : &Connection) -> Result<()> {
+    // first delete tokens and pokemon for user
+    conn.execute("DELETE FROM Tokens WHERE user_id = ?1", params![user_id])?;
+    conn.execute("DELETE FROM FoundPokemon WHERE user_id = ?1", params![user_id])?;
+    conn.execute("DELETE FROM Users WHERE user_id = ?1", params![user_id])?;
+    Ok(())
+}
+
 pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection) -> Result<Option<(User, Token)>> {
     // need to fetch user's password salt from database and then hash the password
     let salt = get_user_salt(user_id, conn)?;
     let hashed = misc::hash_password_with_salt(pwd, &salt);
 
     let mut stmt = conn.prepare(
-        "SELECT user_id, name, email, phone FROM Users WHERE user_id = ?1 AND password_hash = ?2"
+        "SELECT user_id, name, email, phone, admin FROM Users WHERE user_id = ?1 AND password_hash = ?2"
     )?;
 
     let user_iter = stmt.query_map(params![user_id, hashed],  |row| {
@@ -72,6 +118,7 @@ pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection)
             name: row.get(1)?,
             email: row.get(2)?,
             phone: row.get(3)?,
+            admin: row.get(4)?,
         })
     })?;
 
@@ -91,7 +138,7 @@ pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection)
 
 pub fn get_user_by_id_str(user_id: &str, conn: &Connection) -> Result<Option<User>> {
     let mut stmt = conn.prepare(
-        "SELECT user_id, name, email, phone FROM Users WHERE user_id = ?1",
+        "SELECT user_id, name, email, phone, admin FROM Users WHERE user_id = ?1",
     )?;
 
     let user_iter = stmt.query_map(params![user_id], |row| {
@@ -100,6 +147,7 @@ pub fn get_user_by_id_str(user_id: &str, conn: &Connection) -> Result<Option<Use
             name: row.get(1)?,
             email: row.get(2)?,
             phone: row.get(3)?,
+            admin: row.get(4)?,
         })
     })?;
 
@@ -128,6 +176,7 @@ pub fn create_user(user_id: &str, name: &str, password : &str, conn: &Connection
         name: name.to_string(),
         email: None,
         phone: None,
+        admin: false,
     };
     Ok((user, token))
 }
@@ -203,12 +252,14 @@ pub fn view_found_pokemon(user_id: &str, n: i32, conn: &Connection) -> Result<Ve
     // use view ViewFoundPokemon
     let mut stmt = conn.prepare("SELECT Pokemon, Number, TimeStamp, PhotoPath, Comment, Rating FROM ViewFoundPokemon WHERE UserId = ?1 ORDER BY TimeStamp DESC LIMIT ?2")?;
     let rows = stmt.query_map(params![user_id, n], |row| {
+        let user = get_user_by_id_str(user_id, conn)?.unwrap();
         Ok(FoundPkmn {
             found_by_user: User {
                 user_id: user_id.to_string(),
-                name: get_user_by_id_str(user_id, conn)?.unwrap().name,
-                email : None,
-                phone: None,
+                name: user.name,
+                email : user.email,
+                phone: user.phone,
+                admin: user.admin,
             },
             name: row.get(0)?,
             number: row.get(1)?,
@@ -229,13 +280,14 @@ pub fn view_found_pokemon(user_id: &str, n: i32, conn: &Connection) -> Result<Ve
 
 // get user by id
 pub fn get_user_by_id(user_id: &str, conn: &Connection) -> Result<Option<User>> {
-    let mut stmt = conn.prepare("SELECT user_id, name, email, phone FROM Users WHERE user_id = ?1")?;
+    let mut stmt = conn.prepare("SELECT user_id, name, email, phone, admin FROM Users WHERE user_id = ?1")?;
     let user_iter = stmt.query_map(params![user_id], |row| {
         Ok(User {
             user_id: row.get(0)?,
             name: row.get(1)?,
             email: row.get(2)?,
             phone: row.get(3)?,
+            admin: row.get(4)?,
         })
     })?;
 
@@ -296,6 +348,7 @@ pub fn statistics_latest_pokemon_found(n: i32, conn: &Connection) -> Result<Vec<
                 name: row.get(1)?,
                 email : None,
                 phone : None,
+                admin : false,
             },
             name: row.get(2)?,
             number: row.get(3)?,

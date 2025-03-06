@@ -12,14 +12,14 @@ HEADERS = {"Content-Type": "application/json"}
 # Dictionary to store tokens
 tokens = {}
 
-def print_response(response, endpoint):
+def print_response(response, endpoint, color=Fore.CYAN):
     """Pretty print the response with status code."""
     print(f"\n{Fore.CYAN}==== {endpoint} ===={Style.RESET_ALL}")
     print(f"Status code: {response.status_code}")
     
     try:
         if response.status_code >= 400:
-            print(f"{Fore.RED}Error: {response.text}{Style.RESET_ALL}")
+            print(f"{color}Error: {response.text}{Style.RESET_ALL}")
         else:
             # Try to pretty print the JSON
             parsed = json.loads(response.text)
@@ -42,15 +42,21 @@ def make_request(method, endpoint, data=None, token=None, expected_status=None):
             response = requests.get(url, headers=headers, verify=False)
         elif method.upper() == "POST":
             response = requests.post(url, headers=headers, data=json.dumps(data) if data else None, verify=False)
+        elif method.upper() == "PATCH":
+            response = requests.patch(url, headers=headers, data=json.dumps(data) if data else None, verify=False)
+        elif method.upper() == "DELETE":
+            response = requests.delete(url, headers=headers, data=json.dumps(data) if data else None, verify=False)
         else:
             print(f"{Fore.RED}Unsupported method: {method}{Style.RESET_ALL}")
             return None
         
+
         if expected_status is not None and response.status_code != expected_status:
             print(f"{Fore.RED}Expected status {expected_status} but got {response.status_code}{Style.RESET_ALL}")
+            print_response(response, endpoint, Fore.RED)
             sys.exit(1)
+        print_response(response, endpoint, Fore.GREEN)
         
-        print_response(response, endpoint)
         return response
     except requests.exceptions.RequestException as e:
         print(f"{Fore.RED}Request error: {str(e)}{Style.RESET_ALL}")
@@ -74,7 +80,8 @@ def run_tests():
     users = [
         {"id": "11111", "name": "Leif Katt", "password": "1234"},
         {"id": "22222", "name": "Sture Stur", "password": "stur-pass"},
-        {"id": "33333", "name": "Lisa Lis", "password": "lis-pass"}
+        {"id": "33333", "name": "Lisa Lis", "password": "lis-pass"},
+        {"id": "44444", "name": "Frulle Frull", "password": "frull-pass"},
     ]
     for user in users:
         print(f"{Fore.YELLOW}Test 2: Creating user {user['id']} ({user['name']}) (expecting 200){Style.RESET_ALL}")
@@ -87,8 +94,7 @@ def run_tests():
     
     # 3. Logout first user
     print(f"{Fore.YELLOW}Test 3: Logging out user 11111 (expecting 200){Style.RESET_ALL}")
-    if "11111" in tokens:
-        make_request("POST", "logout", None, tokens["11111"], expected_status=200)
+    make_request("POST", "logout", None, tokens["11111"], expected_status=200)
     
     # 4. Login again with first user
     print(f"{Fore.YELLOW}Test 4: Logging in user 11111 (expecting 200){Style.RESET_ALL}")
@@ -105,7 +111,7 @@ def run_tests():
     # 5. Update username for second user
     print(f"{Fore.YELLOW}Test 5: Updating username for user 22222 (expecting 200){Style.RESET_ALL}")
     if "22222" in tokens:
-        make_request("POST", "set_user_name", {
+        make_request("PATCH", "set_user_name", {
             "name": "Sture Stör"
         }, tokens["22222"], expected_status=200)
     
@@ -148,12 +154,12 @@ def run_tests():
 
     # 10. Change user password
     print(f"{Fore.YELLOW}Test 10a: Changing password with wrong old password for user 11111 (expecting 401){Style.RESET_ALL}")
-    make_request("POST", "set_password", {
+    make_request("PATCH", "set_password", {
         "old_password": "1233",  # wrong old password
         "new_password": "new_password"
     }, tokens["11111"], expected_status=401)
     print(f"{Fore.YELLOW}Test 10b: Changing password with correct old password for user 11111 (expecting 200){Style.RESET_ALL}")
-    make_request("POST", "set_password", {
+    make_request("PATCH", "set_password", {
         "old_password": "1234",  # correct old password
         "new_password": "new_password"
     }, tokens["11111"], expected_status=200)
@@ -214,14 +220,44 @@ def run_tests():
     
     # 14. Reset password for user as admin/non-admin
     print(f"{Fore.YELLOW}Test 14a: Non-admin attempting to reset password for user 11111 (expecting 403){Style.RESET_ALL}")
-    make_request("POST", "admin_reset_user_password", {
+    make_request("PATH", "admin_reset_user_password", {
         "id": "11111", "new_password": "123456"
     }, tokens["22222"], expected_status=403)
     print(f"{Fore.YELLOW}Test 14b: Admin resetting password (expecting 200){Style.RESET_ALL}")
-    make_request("POST", "admin_reset_user_password", {
+    make_request("PATCH", "admin_reset_user_password", {
         "id": "admin", "new_password": "123456"
     }, tokens["admin"], expected_status=200)
+
+
+    # 15. Query users
+    print(f"{Fore.YELLOW}\nTest 15: Querying users (expecting 200){Style.RESET_ALL}")
+    data = {
+        "n": 10,
+        "skip": 0
+    }
+    make_request("POST","get_users", data, tokens["admin"], expected_status=200)
+
+    print(f"{Fore.YELLOW}\nTest 15b: Get users without admin token (expecting 403){Style.RESET_ALL}")
+    make_request("POST","get_users", data, tokens["22222"], expected_status=403)
+
     
+    # 16. Delete users
+    print(f"{Fore.YELLOW}\nTest 16a: Deleting user 44444 (expecting 200){Style.RESET_ALL}")
+    make_request("DELETE", "admin_delete_user/44444", None, tokens["admin"], expected_status=200)
+
+    # try to log in as deleted user
+    print(f"{Fore.YELLOW}\nTest 16b: Attempting to login as deleted user 44444 (expecting 401){Style.RESET_ALL}")
+    make_request("POST", "login", {
+        "id": "44444",
+        "password": "frull-pass"
+    }, expected_status=404)
+
+    # try to delete user as non admin
+    print(f"{Fore.YELLOW}\nTest 16c: Attempting to delete user as non-admin (expecting 403){Style.RESET_ALL}")
+    make_request("DELETE", "admin_delete_user/33333", None, tokens["22222"], expected_status=403)
+
+
+
     print(f"\n{Fore.GREEN}API tests completed!{Style.RESET_ALL}")
 
 if __name__ == "__main__":
