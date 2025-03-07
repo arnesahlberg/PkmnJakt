@@ -12,13 +12,15 @@ CREATE TABLE IF NOT EXISTS Users (
     email         TEXT,
     password_hash TEXT NOT NULL,
     password_salt TEXT NOT NULL,
-    admin         BOOLEAN DEFAULT 0
+    admin         BOOLEAN DEFAULT 0,
+    created_at     DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS Tokens (
     token       TEXT PRIMARY KEY,
     user_id     TEXT NOT NULL,
     expiry      DATETIME NOT NULL,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
 

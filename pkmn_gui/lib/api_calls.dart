@@ -176,6 +176,24 @@ class ApiService {
     );
     return jsonDecode(response.body);
   }
+
+  // get user
+  // returns on form:
+  //   {
+  //     user: {
+  //        user_id: String,
+  //        name: String,
+  //        email: Option<String>,
+  //        phone : Option<String>,
+  //        admin : bool,
+  //     },
+  //     message: String,
+  //     result_code: CallResultCode,
+  //   }
+  static Future<Map<String, dynamic>> getUser(String id) async {
+    final response = await http.get(Uri.parse('$baseUrl/get_user/$id'));
+    return jsonDecode(response.body);
+  }
 }
 
 // admin stuff

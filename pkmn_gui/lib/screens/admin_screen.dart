@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pkmn_gui/api_calls.dart';
 import 'package:pkmn_gui/constants.dart';
 import 'package:pkmn_gui/widgets/edit_user_popup.dart';
+import 'package:pkmn_gui/widgets/login_popup.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import 'package:pkmn_gui/widgets/common_app_bar.dart';
@@ -22,10 +23,27 @@ class _AdminScreenState extends State<AdminScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
+  final TextEditingController _adminIdController = TextEditingController();
+  String _loginError = '';
+
   @override
   void initState() {
     super.initState();
-    _checkAdminAndLoad();
+    final token = Provider.of<UserSession>(context, listen: false).token;
+    if (token != null) {
+      _checkAdminAndLoad();
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _adminIdController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkAdminAndLoad() async {
@@ -80,12 +98,110 @@ class _AdminScreenState extends State<AdminScreen> {
     }
   }
 
+  // New method to handle admin login when not logged in
+  Future<void> _handleAdminLogin() async {
+    setState(() {
+      _loginError = '';
+    });
+    final adminId = _adminIdController.text.trim();
+    if (adminId.isEmpty) {
+      setState(() {
+        _loginError = "Ange ett giltigt id.";
+      });
+      return;
+    }
+    try {
+      final userResponse = await ApiService.getUser(adminId);
+      final user = userResponse['user'];
+      if (user == null || user['admin'] != true) {
+        setState(() {
+          _loginError = "Det är inte ett adminkonto.";
+        });
+        return;
+      }
+      // Prompt for password
+      final password = await promptForPassword(context);
+      if (password == null || password.isEmpty) return;
+      // Attempt login
+      final loginResponse = await ApiService.login(adminId, password);
+      if (loginResponse['result_code'] == 0 && loginResponse['token'] != null) {
+        Provider.of<UserSession>(context, listen: false).token =
+            loginResponse['token']['encoded_token'];
+        setState(() {
+          _isLoading = true;
+        });
+        await _checkAdminAndLoad();
+      } else {
+        setState(() {
+          _loginError = "Fel lösenord.";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _loginError = "Inloggning misslyckades.";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final session = Provider.of<UserSession>(context);
     if (_isLoading) {
       return Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+    // New branch: when not logged in show the login form
+    if (session.token == null) {
+      return Scaffold(
+        appBar: const CommonAppBar(title: 'Admin-sida'),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Det här är admin-sidan. Du måste logga in som admin.",
+                style: TextStyles.welcomeTextStyle,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _adminIdController,
+                      decoration: const InputDecoration(
+                        labelText: 'Admin ID',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: _handleAdminLogin,
+                    child: const Text('Logga in admin'),
+                  ),
+                ],
+              ),
+              if (_loginError.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Text(
+                    _loginError,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed:
+                    () => Navigator.pushReplacementNamed(context, "/home"),
+                child: const Text('Gå tillbaka'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    // Existing branch for logged in users
     if (!_isAdmin) {
       return Scaffold(
         appBar: const CommonAppBar(
@@ -160,9 +276,8 @@ class _AdminScreenState extends State<AdminScreen> {
                                               context,
                                               listen: false,
                                             ).token;
-                                        if (token != null) {
+                                        if (token != null)
                                           await _fetchUsers(token);
-                                        }
                                       },
                                     ),
                               ),
