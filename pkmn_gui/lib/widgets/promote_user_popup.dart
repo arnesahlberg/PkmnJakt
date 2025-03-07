@@ -5,12 +5,13 @@ import '../main.dart';
 
 class PromoteUserDialog extends StatefulWidget {
   final String userId;
-  // Om true visas en vanlig bekräftelse. Om false krävs manuellt inmatad id.
   final bool isMainAdmin;
+  final VoidCallback? onUserUpdated;
   const PromoteUserDialog({
     super.key,
     required this.userId,
     required this.isMainAdmin,
+    this.onUserUpdated,
   });
 
   @override
@@ -23,15 +24,12 @@ class _PromoteUserDialogState extends State<PromoteUserDialog> {
   bool _isProcessing = false;
 
   void _promoteUser() async {
-    // Om inte huvud-admin, verifiera att inmatat värde stämmer med userId.
-    if (!widget.isMainAdmin &&
-        _confirmController.text.trim() != widget.userId) {
+    if (_confirmController.text.trim() != widget.userId) {
       setState(() {
         _errorMessage = "Användar-id matchar inte!";
       });
       return;
     }
-    // Bekräfta befordran via API
     setState(() {
       _isProcessing = true;
       _errorMessage = null;
@@ -43,11 +41,14 @@ class _PromoteUserDialogState extends State<PromoteUserDialog> {
       _isProcessing = false;
     });
     Navigator.of(context).pop();
+    if (success) {
+      widget.onUserUpdated?.call();
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           success
-              ? 'Användare ${widget.userId} befordrad till admin'
+              ? 'Användare ${widget.userId} befordrad till administratör'
               : 'Befordran misslyckades',
         ),
       ),
@@ -57,21 +58,18 @@ class _PromoteUserDialogState extends State<PromoteUserDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Bekräfta befordran'),
+      title: const Text('Bekräfta administratör'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Vill du verkligen göra ${widget.userId} till administratör?\nDu kan inte ångra detta.',
+            'Vill du verkligen göra ${widget.userId} till administratör?\nAnge användar-id för att bekräfta:',
           ),
-          if (!widget.isMainAdmin) ...[
-            const SizedBox(height: 10),
-            const Text('Ange användar-id för att bekräfta:'),
-            TextField(
-              controller: _confirmController,
-              decoration: const InputDecoration(labelText: 'Användar-id'),
-            ),
-          ],
+          const SizedBox(height: 10),
+          TextField(
+            controller: _confirmController,
+            decoration: const InputDecoration(labelText: 'Användar-id'),
+          ),
           if (_errorMessage != null)
             Padding(
               padding: const EdgeInsets.only(top: 8.0),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pkmn_gui/api_calls.dart';
 import 'package:provider/provider.dart';
 import 'delete_user_popup.dart';
 import 'reset_user_password_popup.dart';
@@ -8,17 +9,21 @@ import '../main.dart';
 class EditUserDialog extends StatelessWidget {
   final String userId;
   final String userName;
-  final VoidCallback? onUserUpdated; // new
+  final bool userIsAdmin;
+  final VoidCallback? onUserUpdated;
 
   const EditUserDialog({
     Key? key,
     required this.userId,
     required this.userName,
+    this.userIsAdmin = false,
     this.onUserUpdated,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final currentIsMainAdmin =
+        Provider.of<UserSession>(context, listen: false).userId == 'admin';
     return AlertDialog(
       title: Text('Redigera användare: $userId'),
       content: Column(
@@ -26,6 +31,7 @@ class EditUserDialog extends StatelessWidget {
         children: [
           Text('Namn: $userName'),
           const SizedBox(height: 20),
+          // Återställ lösenord
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
@@ -37,25 +43,66 @@ class EditUserDialog extends StatelessWidget {
             child: const Text('Återställ lösenord'),
           ),
           const SizedBox(height: 10),
-          // Ny knapp: Promote to Admin
-          ElevatedButton(
-            onPressed: () {
-              final isMainAdmin =
-                  Provider.of<UserSession>(context, listen: false).userId ==
-                  'admin';
-              Navigator.of(context).pop();
-              showDialog(
-                context: context,
-                builder:
-                    (context) => PromoteUserDialog(
-                      userId: userId,
-                      isMainAdmin: isMainAdmin,
-                    ),
-              );
-            },
-            child: const Text('Promote to Admin'),
-          ),
+          userIsAdmin
+              ? ElevatedButton(
+                onPressed:
+                    currentIsMainAdmin
+                        ? () async {
+                          final token =
+                              Provider.of<UserSession>(
+                                context,
+                                listen: false,
+                              ).token;
+                          if (token != null) {
+                            final success =
+                                await AdminApiService.removeUserAdmin(
+                                  userId,
+                                  token,
+                                );
+                            Navigator.of(context).pop();
+                            if (success) {
+                              onUserUpdated?.call();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Användare $userId gjord till icke administratör',
+                                  ),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Återkallande av admin-status misslyckades',
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        }
+                        : null,
+                child: const Text('Gör till icke administratör'),
+              )
+              : ElevatedButton(
+                onPressed: () {
+                  final isMainAdmin =
+                      Provider.of<UserSession>(context, listen: false).userId ==
+                      'admin';
+                  Navigator.of(context).pop();
+                  showDialog(
+                    context: context,
+                    builder:
+                        (context) => PromoteUserDialog(
+                          userId: userId,
+                          isMainAdmin: isMainAdmin,
+                          onUserUpdated: onUserUpdated,
+                        ),
+                  );
+                },
+                child: const Text('Gör till administratör'),
+              ),
           const SizedBox(height: 10),
+          // Radera användare
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
@@ -64,7 +111,7 @@ class EditUserDialog extends StatelessWidget {
                 builder:
                     (context) => DeleteUserDialog(
                       userId: userId,
-                      onDeleted: onUserUpdated, // pass callback
+                      onDeleted: onUserUpdated,
                     ),
               );
             },

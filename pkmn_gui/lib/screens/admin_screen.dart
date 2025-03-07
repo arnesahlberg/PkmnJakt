@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pkmn_gui/api_calls.dart';
 import 'package:pkmn_gui/constants.dart';
-import 'package:pkmn_gui/screens/user_detail_screen.dart';
 import 'package:pkmn_gui/widgets/edit_user_popup.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import 'package:pkmn_gui/widgets/common_app_bar.dart';
 
 class AdminScreen extends StatefulWidget {
-  const AdminScreen({Key? key}) : super(key: key);
+  const AdminScreen({super.key});
   @override
   _AdminScreenState createState() => _AdminScreenState();
 }
@@ -79,20 +78,6 @@ class _AdminScreenState extends State<AdminScreen> {
     if (token != null) {
       _fetchUsers(token);
     }
-  }
-
-  void _promoteUser(String userId) {
-    // For demonstration we simply show a snackbar.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('User $userId promoted to admin (dummy action)')),
-    );
-  }
-
-  void _goToDetail(String userId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => UserDetailScreen(userId: userId)),
-    );
   }
 
   @override
@@ -168,14 +153,16 @@ class _AdminScreenState extends State<AdminScreen> {
                                     (context) => EditUserDialog(
                                       userId: userId,
                                       userName: userName,
+                                      userIsAdmin: isAdmin,
                                       onUserUpdated: () async {
                                         final token =
                                             Provider.of<UserSession>(
                                               context,
                                               listen: false,
                                             ).token;
-                                        if (token != null)
+                                        if (token != null) {
                                           await _fetchUsers(token);
+                                        }
                                       },
                                     ),
                               ),

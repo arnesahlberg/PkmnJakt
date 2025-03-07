@@ -135,7 +135,7 @@ SELECT
     Users.phone AS Phone,
     Users.admin AS Admin
 FROM Users 
-WHERE admin = 0;
+WHERE UserId != 'admin'; -- exclude admin user
 
 -- view users along with num pokemon found without the admin user included
 CREATE VIEW IF NOT EXISTS ViewUsersWithPokemonFound AS
