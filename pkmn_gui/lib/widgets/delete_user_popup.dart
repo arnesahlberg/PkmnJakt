@@ -5,7 +5,9 @@ import '../main.dart';
 
 class DeleteUserDialog extends StatefulWidget {
   final String userId;
-  const DeleteUserDialog({Key? key, required this.userId}) : super(key: key);
+  final VoidCallback? onDeleted; // new
+  const DeleteUserDialog({Key? key, required this.userId, this.onDeleted})
+    : super(key: key);
 
   @override
   _DeleteUserDialogState createState() => _DeleteUserDialogState();
@@ -43,6 +45,9 @@ class _DeleteUserDialogState extends State<DeleteUserDialog> {
       _isProcessing = false;
     });
     Navigator.of(context).pop();
+    if (success && widget.onDeleted != null) {
+      widget.onDeleted!(); // refresh list callback
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(success ? 'Användare raderad' : 'Radering misslyckades'),

@@ -168,6 +168,15 @@ class _AdminScreenState extends State<AdminScreen> {
                                     (context) => EditUserDialog(
                                       userId: userId,
                                       userName: userName,
+                                      onUserUpdated: () async {
+                                        final token =
+                                            Provider.of<UserSession>(
+                                              context,
+                                              listen: false,
+                                            ).token;
+                                        if (token != null)
+                                          await _fetchUsers(token);
+                                      },
                                     ),
                               ),
                           child: const Text('Redigera'),

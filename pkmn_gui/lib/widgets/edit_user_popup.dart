@@ -5,8 +5,14 @@ import 'reset_user_password_popup.dart';
 class EditUserDialog extends StatelessWidget {
   final String userId;
   final String userName;
-  const EditUserDialog({Key? key, required this.userId, required this.userName})
-    : super(key: key);
+  final VoidCallback? onUserUpdated; // new
+
+  const EditUserDialog({
+    Key? key,
+    required this.userId,
+    required this.userName,
+    this.onUserUpdated,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +39,11 @@ class EditUserDialog extends StatelessWidget {
               Navigator.of(context).pop();
               showDialog(
                 context: context,
-                builder: (context) => DeleteUserDialog(userId: userId),
+                builder:
+                    (context) => DeleteUserDialog(
+                      userId: userId,
+                      onDeleted: onUserUpdated, // pass callback
+                    ),
               );
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
