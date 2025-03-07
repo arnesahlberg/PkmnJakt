@@ -108,6 +108,25 @@ pub fn get_users_filter_id(id_filter : &str, num : u32, conn : &Connection) -> R
     Ok(result)
 }
 
+pub fn get_users_filter_id_name(filter: &str, num : u32, conn : &Connection) -> Result<Vec<User>> {
+    let mut stmt = conn.prepare("SELECT UserId, User, Email, Phone, Admin FROM ViewUsers WHERE UserId LIKE ?1 OR User LIKE ?1 LIMIT ?2")?;
+    let rows = stmt.query_map(params![filter, num], |row| {
+        Ok(User {
+            user_id: row.get(0)?,
+            name: row.get(1)?,
+            email: row.get(2)?,
+            phone: row.get(3)?,
+            admin: row.get(4)?,
+        })
+    })?;
+
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?);
+    }
+    Ok(result)
+}
+
 
 pub fn delete_user(user_id : &str, conn : &Connection) -> Result<()> {
     if user_id == "admin" {

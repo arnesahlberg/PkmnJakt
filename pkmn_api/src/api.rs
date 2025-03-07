@@ -679,12 +679,12 @@ pub async fn get_users(req: HttpRequest, info: web::Json<GetUsersRequest>) -> Ht
 
 // get many users filter by id
 #[derive(Debug, Deserialize)]
-pub struct GetUsersByIdRequest {
-    pub id_filter: String,
+pub struct GetUsersFilterRequest {
+    pub filter: String,
     pub n: u32,
 }
 
-pub async fn get_users_filter_id(req : HttpRequest, info: web::Json<GetUsersByIdRequest>) -> HttpResponse {
+pub async fn get_users_filter_id(req : HttpRequest, info: web::Json<GetUsersFilterRequest>) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
@@ -708,7 +708,7 @@ pub async fn get_users_filter_id(req : HttpRequest, info: web::Json<GetUsersById
         };
         return HttpResponse::Forbidden().json(response);
     }
-    let filter = format!("%{}%", info.id_filter);
+    let filter = format!("%{}%", info.filter);
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     let users = databaseconnection::get_users_filter_id(&filter, info.n, &conn).unwrap();
     let num_users = users.len();
@@ -719,6 +719,43 @@ pub async fn get_users_filter_id(req : HttpRequest, info: web::Json<GetUsersById
     };
     HttpResponse::Ok().json(res)
 }
+
+pub async fn get_users_filter_id_name(req: HttpRequest, info: web::Json<GetUsersFilterRequest>) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    let valid_token = validate_token(&user_id, token, &conn);
+    if !valid_token {
+        let response = GetUsersResponse {
+            users: vec![],
+            message: "Invalid token".to_string(),
+            result_code: CallResultCode::InvalidToken,
+        };
+        return HttpResponse::Forbidden().json(response);
+    }
+    if !is_admin {
+        let response = GetUsersResponse {
+            users: vec![],
+            message: "Only admin can read all users".to_string(),
+            result_code: CallResultCode::UserNotAdmin,
+        };
+        return HttpResponse::Forbidden().json(response);
+    }
+    let filter = format!("%{}%", info.filter);
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let users = databaseconnection::get_users_filter_id_name(&filter, info.n, &conn).unwrap();
+    let num_users = users.len();
+    let res = GetUsersResponse {
+        users: users,
+        message: format!("Got {} users", num_users),
+        result_code: CallResultCode::Ok,
+    };
+    HttpResponse::Ok().json(res)
+}
+
 
 // user exists request
 #[derive(Debug, Serialize)]
@@ -964,7 +1001,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/admin_delete_user", web::post().to(admin_delete_user))
         .route("/get_users", web::post().to(get_users))
         .route("/get_users_filter_id", web::post().to(get_users_filter_id))
-
+        .route("/get_users_filter", web::post().to(get_users_filter_id_name)) // this is probably the one to use
         ;
 }
 

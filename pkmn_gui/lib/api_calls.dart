@@ -213,14 +213,14 @@ class AdminApiService {
 
   // get users filtering on id
   // returns as getUsersInInterval
-  static Future<Map<String, dynamic>> getUsersFilterId(
-    String id_filter,
+  static Future<Map<String, dynamic>> getUsersFilter(
+    String filter,
     int n,
     String token,
   ) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/get_users_filter_id'),
-      body: jsonEncode({'id_filter': id_filter, 'n': n}),
+      Uri.parse('$baseUrl/get_users_filter'),
+      body: jsonEncode({'filter': filter, 'n': n}),
       headers: ApiService._headers(token),
     );
     return jsonDecode(response.body);

@@ -251,7 +251,7 @@ def run_tests():
     }, tokens["22222"], expected_status=403)
     print(f"{Fore.YELLOW}Test 14b: Admin resetting password (expecting 200){Style.RESET_ALL}")
     make_request("POST", "admin_reset_user_password", {
-        "id": "admin", "new_password": "123456"
+        "id": "11111", "new_password": "123456"
     }, tokens["admin"], expected_status=200)
 
 
@@ -269,10 +269,10 @@ def run_tests():
     # 15b. query users with filter
     data = {
         "n": 10,
-        "id_filter" : "11",
+        "filter" : "katt",
     }
     print(f"{Fore.YELLOW}\nTest 15c: Querying users with filter (expecting 200){Style.RESET_ALL}")
-    make_request("POST","get_users_filter_id", data, tokens["admin"], expected_status=200)
+    make_request("POST","get_users_filter", data, tokens["admin"], expected_status=200)
     
     # 16. Delete users
     print(f"{Fore.YELLOW}\nTest 16a: Deleting user 44444 (expecting 200){Style.RESET_ALL}")
@@ -301,6 +301,13 @@ def run_tests():
     make_request("GET", "num_users", None, tokens["admin"], expected_status=200)
 
 
+    # Final: DELETE ALL USERS
+    print(f"{Fore.YELLOW}\nTest 18: Deleting all users by looping{Style.RESET_ALL}")
+    for user in users:
+        if user["id"] != "44444": # skip already deleted user
+            print(f"{Fore.YELLOW}Deleting user {user['id']}{Style.RESET_ALL}")
+            make_request("POST", "admin_delete_user", {"id": user["id"]}, tokens["admin"], expected_status=200)
+    
     print(f"\n{Fore.GREEN}API tests completed!{Style.RESET_ALL}")
 
 if __name__ == "__main__":

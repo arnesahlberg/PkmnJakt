@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pkmn_gui/api_calls.dart';
 import 'package:provider/provider.dart';
 import '../../main.dart'; // import UserSession from main.dart
 
@@ -45,20 +46,37 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         if (session.isLoggedIn)
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'profile') {
-                Navigator.pushNamed(context, '/profile');
-              } else if (value == 'logout') {
-                session.logout();
-                Navigator.pushReplacementNamed(context, '/');
+          FutureBuilder<bool>(
+            future: AdminApiService.amIAdmin(session.token!),
+            builder: (context, snapshot) {
+              final menuItems = <PopupMenuEntry<String>>[
+                const PopupMenuItem(value: 'profile', child: Text('Profil')),
+              ];
+              if (snapshot.hasData && snapshot.data == true) {
+                menuItems.add(
+                  const PopupMenuItem(
+                    value: 'admin',
+                    child: Text('Admin-panel'),
+                  ),
+                );
               }
+              menuItems.add(
+                const PopupMenuItem(value: 'logout', child: Text('Logga ut')),
+              );
+              return PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'profile') {
+                    Navigator.pushNamed(context, '/profile');
+                  } else if (value == 'admin') {
+                    Navigator.pushNamed(context, '/admin');
+                  } else if (value == 'logout') {
+                    session.logout();
+                    Navigator.pushReplacementNamed(context, '/');
+                  }
+                },
+                itemBuilder: (context) => menuItems,
+              );
             },
-            itemBuilder:
-                (context) => const [
-                  PopupMenuItem(value: 'profile', child: Text('Profil')),
-                  PopupMenuItem(value: 'logout', child: Text('Logga ut')),
-                ],
           ),
       ],
     );

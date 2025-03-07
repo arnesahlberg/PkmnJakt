@@ -61,7 +61,7 @@ class _AdminScreenState extends State<AdminScreen> {
         debugPrint('Users: $_users');
       });
     } else {
-      final result = await AdminApiService.getUsersFilterId(
+      final result = await AdminApiService.getUsersFilter(
         _searchQuery,
         _pageSize,
         token,
@@ -214,6 +214,13 @@ class _AdminScreenState extends State<AdminScreen> {
                   child: const Text('Next'),
                 ),
             ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Sida ${_currentPage + 1} / ${(_totalUsers / _pageSize).ceil()}",
+              style: const TextStyle(fontSize: 16),
+            ),
           ),
           const SizedBox(height: 10),
         ],
