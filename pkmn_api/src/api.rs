@@ -957,7 +957,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/make_user_admin/", web::post().to(make_user_admin))
         .route("/make_user_not_admin/", web::post().to(make_user_not_admin))
         .route("/admin_reset_user_password", web::post().to(admin_reset_user_password))
-        .route("/admin_delete_user/{id}", web::delete().to(admin_delete_user))
+        .route("/admin_delete_user/{id}", web::post().to(admin_delete_user))
         .route("/get_users", web::post().to(get_users))
         .route("/get_users_filter_id", web::post().to(get_users_filter_id))
 

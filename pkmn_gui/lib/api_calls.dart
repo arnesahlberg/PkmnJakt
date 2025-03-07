@@ -229,8 +229,8 @@ class AdminApiService {
   // delete user
   // checks if status_code is 200 and then it succeded return bool
   static Future<bool> deleteUser(String id, String token) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/delete_user/$id'),
+    final response = await http.post(
+      Uri.parse('$baseUrl/admin_delete_user/$id'),
       headers: ApiService._headers(token),
     );
     return response.statusCode == 200;

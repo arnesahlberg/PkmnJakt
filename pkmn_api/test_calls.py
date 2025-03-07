@@ -250,7 +250,7 @@ def run_tests():
     
     # 16. Delete users
     print(f"{Fore.YELLOW}\nTest 16a: Deleting user 44444 (expecting 200){Style.RESET_ALL}")
-    make_request("DELETE", "admin_delete_user/44444", None, tokens["admin"], expected_status=200)
+    make_request("POST", "admin_delete_user/44444", None, tokens["admin"], expected_status=200)
 
     # try to log in as deleted user
     print(f"{Fore.YELLOW}\nTest 16b: Attempting to login as deleted user 44444 (expecting 401){Style.RESET_ALL}")
