@@ -263,4 +263,28 @@ class AdminApiService {
     );
     return int.parse(response.body);
   }
+
+  //make user admin
+  // input {id: id}
+  // returns bool if status_code is 200 and body is true
+  static Future<bool> makeUserAdmin(String id, String token) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/make_user_admin'),
+      body: jsonEncode({'id': id}),
+      headers: ApiService._headers(token),
+    );
+    return response.statusCode == 200 && response.body == 'true';
+  }
+
+  //remove user admin
+  // input {id: id}
+  // returns bool if status_code is 200 and body is true
+  static Future<bool> removeUserAdmin(String id, String token) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/make_user_not_admin'),
+      body: jsonEncode({'id': id}),
+      headers: ApiService._headers(token),
+    );
+    return response.statusCode == 200 && response.body == 'true';
+  }
 }
