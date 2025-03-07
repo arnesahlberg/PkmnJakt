@@ -29,6 +29,19 @@ pub fn user_is_admin(user_id : &str, conn : &Connection) -> Result<bool> {
     Ok(count > 0)
 }
 
+pub fn make_user_admin(user_id : &str, conn : &Connection) -> Result<()> {
+    conn.execute("UPDATE Users SET admin = 1 WHERE user_id = ?1", params![user_id])?;
+    Ok(())
+}
+
+pub fn make_user_not_admin(user_id : &str, conn : &Connection) -> Result<()> {
+    if (user_id == "admin") {
+        return Err(rusqlite::Error::InvalidParameterName("Can't remove admin status from admin user".to_string()));
+    }
+    conn.execute("UPDATE Users SET admin = 0 WHERE user_id = ?1", params![user_id])?;
+    Ok(())
+}
+
 pub fn get_num_users(conn : &Connection) -> Result<i32> {
     let mut stmt = conn.prepare("SELECT COUNT(*) FROM ViewUsers")?;
     let count : i32 = stmt.query_row([], |row| row.get(0))?;

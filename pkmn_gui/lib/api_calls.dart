@@ -245,7 +245,7 @@ class AdminApiService {
     String token,
   ) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/reset_user_password'),
+      Uri.parse('$baseUrl/admin_reset_user_password'),
       body: jsonEncode({'id': id, 'new_password': newPassword}),
       headers: ApiService._headers(token),
     );

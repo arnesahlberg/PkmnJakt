@@ -830,6 +830,56 @@ pub async fn am_i_admin(req: HttpRequest) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
+// make user admin
+#[derive(Debug, Deserialize)]
+pub struct MakeUserAdminRequest {
+    pub user_id : String,
+}
+
+pub async fn make_user_admin(req: HttpRequest, info: web::Json<MakeUserAdminRequest>) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !is_admin {
+        return HttpResponse::Forbidden().finish();
+    }
+
+    // now make user admin
+    let worked = databaseconnection::make_user_admin(&info.user_id, &conn).is_ok();
+    HttpResponse::Ok().body(worked.to_string())
+}
+
+pub async fn make_user_not_admin(req: HttpRequest, info: web::Json<MakeUserAdminRequest>) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !is_admin {
+        return HttpResponse::Forbidden().finish();
+    }
+    if user_id == info.user_id {
+        return HttpResponse::BadRequest().body("Cannot remove own admin status");
+    }
+    if user_id != "admin" {
+        return HttpResponse::BadRequest().body("Only root admin account can demote other admins");
+    }
+
+    // now make user admin
+    let worked = databaseconnection::make_user_not_admin(&info.user_id, &conn).is_ok();
+    HttpResponse::Ok().body(worked.to_string())
+}
+
 // reset user password
 #[derive(Debug, Deserialize)]
 pub struct ResetUserPasswordRequest {
@@ -904,6 +954,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/my_pokedex", web::get().to(get_my_pokedex))
         // admin endpoints
         .route("/am_i_admin", web::get().to(am_i_admin))
+        .route("/make_user_admin/", web::post().to(make_user_admin))
+        .route("/make_user_not_admin/", web::post().to(make_user_not_admin))
         .route("/admin_reset_user_password", web::post().to(admin_reset_user_password))
         .route("/admin_delete_user/{id}", web::delete().to(admin_delete_user))
         .route("/get_users", web::post().to(get_users))

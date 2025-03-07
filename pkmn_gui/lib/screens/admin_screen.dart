@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pkmn_gui/api_calls.dart';
 import 'package:pkmn_gui/constants.dart';
 import 'package:pkmn_gui/screens/user_detail_screen.dart';
+import 'package:pkmn_gui/widgets/edit_user_popup.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import 'package:pkmn_gui/widgets/common_app_bar.dart';
@@ -160,13 +161,16 @@ class _AdminScreenState extends State<AdminScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ElevatedButton(
-                          onPressed: () => _goToDetail(userId),
-                          child: const Text('More Info'),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: () => _promoteUser(userId),
-                          child: const Text('Promote'),
+                          onPressed:
+                              () => showDialog(
+                                context: context,
+                                builder:
+                                    (context) => EditUserDialog(
+                                      userId: userId,
+                                      userName: userName,
+                                    ),
+                              ),
+                          child: const Text('Redigera'),
                         ),
                       ],
                     ),
