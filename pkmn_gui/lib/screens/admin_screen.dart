@@ -125,8 +125,14 @@ class _AdminScreenState extends State<AdminScreen> {
       // Attempt login
       final loginResponse = await ApiService.login(adminId, password);
       if (loginResponse['result_code'] == 0 && loginResponse['token'] != null) {
-        Provider.of<UserSession>(context, listen: false).token =
-            loginResponse['token']['encoded_token'];
+        final name = loginResponse['name'] ?? "Admin";
+        final encodedToken = loginResponse['token']['encoded_token'];
+        final validUntil = loginResponse['token']['valid_until'];
+        // Use the login method to set cookies instead of shared preferences
+        Provider.of<UserSession>(
+          context,
+          listen: false,
+        ).login(adminId, name, encodedToken, validUntil);
         setState(() {
           _isLoading = true;
         });

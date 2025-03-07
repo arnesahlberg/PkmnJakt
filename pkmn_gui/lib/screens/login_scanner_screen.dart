@@ -81,7 +81,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               loginResult['token']?['encoded_token'].toString() ?? "";
           validUntil = loginResult['token']?['valid_until']?.toString() ?? "";
         } else {
-          // New user: prompt for username, password and confirmation.
+          // new user: prompt for username, password and confirmation.
           final credentials = await promptForUserCredentials(
             context,
             scannedId,
@@ -134,8 +134,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               createResult['token']?['encoded_token']?.toString() ?? "";
           validUntil = createResult['token']?['valid_until']?.toString() ?? "";
         }
-        // Debug: print token to verify correctness
-        debugPrint("Encoded token received: $encodedToken");
         if (!mounted) return;
         Provider.of<UserSession>(
           context,
@@ -167,7 +165,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     return Stack(
       children: [
         Scaffold(
-          // appBar: const CommonAppBar(title: 'Scanna ditt band'),
           body: Column(
             children: [
               Expanded(

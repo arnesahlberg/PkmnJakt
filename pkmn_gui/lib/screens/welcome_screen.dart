@@ -102,18 +102,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         // New manual login button. unsure if we should have it
                         // since we don't want users to be able to enter another
                         // user's ID code´when creating a user
-                        ElevatedButton(
-                          style: ButtonStyles.buttonStyleRounder,
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const ManualLoginScreen(),
-                              ),
-                            );
-                          },
-                          child: const Text('Logga in med bandets ID nummer'),
-                        ),
+                        // ElevatedButton(
+                        //   style: ButtonStyles.buttonStyleRounder,
+                        //   onPressed: () {
+                        //     Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //         builder: (context) => const ManualLoginScreen(),
+                        //       ),
+                        //     );
+                        //   },
+                        //   child: const Text('Logga in med bandets ID nummer'),
+                        // ),
                         const SizedBox(height: 32),
                         FutureBuilder<Map<String, dynamic>>(
                           future: _statsFuture,
