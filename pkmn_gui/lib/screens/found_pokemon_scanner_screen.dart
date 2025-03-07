@@ -70,7 +70,7 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "Du har fångat ${pokemonInfo['name']} ${pokemonInfo['number']}!",
+                    "Du har fångat ${pokemonInfo['name']} ( Nr. ${pokemonInfo['number']})!",
                   ),
                   const SizedBox(height: 10),
                   Image.asset(

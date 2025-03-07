@@ -23,8 +23,27 @@ pub fn user_name_exists(name : &str, conn : &Connection) -> Result<bool> {
     Ok(count > 0)
 }
 
+pub fn user_is_admin(user_id : &str, conn : &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Users WHERE user_id = ?1 AND admin")?;
+    let count : i32 = stmt.query_row(params![user_id], |row| row.get(0))?;
+    Ok(count > 0)
+}
+
+pub fn make_user_admin(user_id : &str, conn : &Connection) -> Result<()> {
+    conn.execute("UPDATE Users SET admin = 1 WHERE user_id = ?1", params![user_id])?;
+    Ok(())
+}
+
+pub fn make_user_not_admin(user_id : &str, conn : &Connection) -> Result<()> {
+    if user_id == "admin" {
+        return Err(rusqlite::Error::InvalidParameterName("Can't remove admin status from admin user".to_string()));
+    }
+    conn.execute("UPDATE Users SET admin = 0 WHERE user_id = ?1", params![user_id])?;
+    Ok(())
+}
+
 pub fn get_num_users(conn : &Connection) -> Result<i32> {
-    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Users")?;
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM ViewUsers")?;
     let count : i32 = stmt.query_row([], |row| row.get(0))?;
     Ok(count)
 }
@@ -39,16 +58,79 @@ pub fn remove_all_tokens_for_user(user_id : &str, conn : &Connection) -> Result<
     Ok(())
 }
 
-pub fn token_in_database(user_id : &str, token : &str, conn : &Connection) -> Result<bool> {
-    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Tokens WHERE Token = ?1 AND User_Id = ?2")?;
-    let count : i32 = stmt.query_row(params![token, user_id], |row| row.get(0))?;
-    Ok(count > 0)
-}
-
 fn get_user_salt(user_id : &str, conn : &Connection) -> Result<String> {
     let mut stmt = conn.prepare("SELECT password_salt FROM Users WHERE user_id = ?1")?;
     let salt : String = stmt.query_row(params![user_id], |row| row.get(0))?;
     Ok(salt)
+}
+
+pub fn get_users(num : u32, skip: u32, conn : &Connection) -> Result<Vec<User>> {
+    let mut stmt = conn.prepare("SELECT UserId, User, Email, Phone, Admin FROM ViewUsers LIMIT ?1 OFFSET ?2")?;
+    let rows = stmt.query_map(params![num, skip], |row| {
+        Ok(User {
+            user_id: row.get(0)?,
+            name: row.get(1)?,
+            email: row.get(2)?,
+            phone: row.get(3)?,
+            admin: row.get(4)?,
+        })
+    })?;
+
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?);
+    }
+    Ok(result)
+}
+
+pub fn get_users_filter_id(id_filter : &str, num : u32, conn : &Connection) -> Result<Vec<User>> {
+    let mut stmt = conn.prepare("SELECT UserId, User, Email, Phone, Admin FROM ViewUsers WHERE UserId LIKE ?1 LIMIT ?2")?;
+    let rows = stmt.query_map(params![id_filter, num], |row| {
+        Ok(User {
+            user_id: row.get(0)?,
+            name: row.get(1)?,
+            email: row.get(2)?,
+            phone: row.get(3)?,
+            admin: row.get(4)?,
+        })
+    })?;
+
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?);
+    }
+    Ok(result)
+}
+
+pub fn get_users_filter_id_name(filter: &str, num : u32, conn : &Connection) -> Result<Vec<User>> {
+    let mut stmt = conn.prepare("SELECT UserId, User, Email, Phone, Admin FROM ViewUsers WHERE UserId LIKE ?1 OR User LIKE ?1 LIMIT ?2")?;
+    let rows = stmt.query_map(params![filter, num], |row| {
+        Ok(User {
+            user_id: row.get(0)?,
+            name: row.get(1)?,
+            email: row.get(2)?,
+            phone: row.get(3)?,
+            admin: row.get(4)?,
+        })
+    })?;
+
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?);
+    }
+    Ok(result)
+}
+
+
+pub fn delete_user(user_id : &str, conn : &Connection) -> Result<()> {
+    if user_id == "admin" {
+        return Err(rusqlite::Error::InvalidParameterName("Can't delete admin user".to_string()));
+    }
+    // first delete tokens and pokemon for user
+    conn.execute("DELETE FROM Tokens WHERE user_id = ?1", params![user_id])?;
+    conn.execute("DELETE FROM FoundPokemon WHERE user_id = ?1", params![user_id])?;
+    conn.execute("DELETE FROM Users WHERE user_id = ?1", params![user_id])?;
+    Ok(())
 }
 
 pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection) -> Result<Option<(User, Token)>> {
@@ -57,7 +139,7 @@ pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection)
     let hashed = misc::hash_password_with_salt(pwd, &salt);
 
     let mut stmt = conn.prepare(
-        "SELECT user_id, name, email, phone FROM Users WHERE user_id = ?1 AND password_hash = ?2"
+        "SELECT user_id, name, email, phone, admin FROM Users WHERE user_id = ?1 AND password_hash = ?2"
     )?;
 
     let user_iter = stmt.query_map(params![user_id, hashed],  |row| {
@@ -66,6 +148,7 @@ pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection)
             name: row.get(1)?,
             email: row.get(2)?,
             phone: row.get(3)?,
+            admin: row.get(4)?,
         })
     })?;
 
@@ -85,7 +168,7 @@ pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection)
 
 pub fn get_user_by_id_str(user_id: &str, conn: &Connection) -> Result<Option<User>> {
     let mut stmt = conn.prepare(
-        "SELECT user_id, name, email, phone FROM Users WHERE user_id = ?1",
+        "SELECT user_id, name, email, phone, admin FROM Users WHERE user_id = ?1",
     )?;
 
     let user_iter = stmt.query_map(params![user_id], |row| {
@@ -94,6 +177,7 @@ pub fn get_user_by_id_str(user_id: &str, conn: &Connection) -> Result<Option<Use
             name: row.get(1)?,
             email: row.get(2)?,
             phone: row.get(3)?,
+            admin: row.get(4)?,
         })
     })?;
 
@@ -122,6 +206,7 @@ pub fn create_user(user_id: &str, name: &str, password : &str, conn: &Connection
         name: name.to_string(),
         email: None,
         phone: None,
+        admin: false,
     };
     Ok((user, token))
 }
@@ -195,14 +280,16 @@ pub fn num_pokemon_found(user_id: &str, conn: &Connection) -> Result<i32> {
 
 pub fn view_found_pokemon(user_id: &str, n: i32, conn: &Connection) -> Result<Vec<FoundPkmn>> {
     // use view ViewFoundPokemon
-    let mut stmt = conn.prepare("SELECT Pokemon, Number, TimeStamp, PhotoPath, Comment, Rating FROM ViewFoundPokemon WHERE UserId = ?1 ORDER BY TimeStamp DESC LIMIT ?2")?;
+    let mut stmt = conn.prepare("SELECT Pokemon, PokemonNumber, TimeStamp, PhotoPath, Comment, Rating FROM ViewFoundPokemon WHERE UserId = ?1 ORDER BY TimeStamp DESC LIMIT ?2")?;
     let rows = stmt.query_map(params![user_id, n], |row| {
+        let user = get_user_by_id_str(user_id, conn)?.unwrap();
         Ok(FoundPkmn {
             found_by_user: User {
                 user_id: user_id.to_string(),
-                name: get_user_by_id_str(user_id, conn)?.unwrap().name,
-                email : None,
-                phone: None,
+                name: user.name,
+                email : user.email,
+                phone: user.phone,
+                admin: user.admin,
             },
             name: row.get(0)?,
             number: row.get(1)?,
@@ -223,13 +310,14 @@ pub fn view_found_pokemon(user_id: &str, n: i32, conn: &Connection) -> Result<Ve
 
 // get user by id
 pub fn get_user_by_id(user_id: &str, conn: &Connection) -> Result<Option<User>> {
-    let mut stmt = conn.prepare("SELECT user_id, name, email, phone FROM Users WHERE user_id = ?1")?;
+    let mut stmt = conn.prepare("SELECT user_id, name, email, phone, admin FROM Users WHERE user_id = ?1")?;
     let user_iter = stmt.query_map(params![user_id], |row| {
         Ok(User {
             user_id: row.get(0)?,
             name: row.get(1)?,
             email: row.get(2)?,
             phone: row.get(3)?,
+            admin: row.get(4)?,
         })
     })?;
 
@@ -290,6 +378,7 @@ pub fn statistics_latest_pokemon_found(n: i32, conn: &Connection) -> Result<Vec<
                 name: row.get(1)?,
                 email : None,
                 phone : None,
+                admin : false,
             },
             name: row.get(2)?,
             number: row.get(3)?,
