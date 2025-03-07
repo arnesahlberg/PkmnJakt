@@ -137,7 +137,7 @@ class _AdminScreenState extends State<AdminScreen> {
             child: TextField(
               controller: _searchController,
               decoration: const InputDecoration(
-                labelText: 'Sök användare (användar id)',
+                labelText: 'Sök användare',
                 border: OutlineInputBorder(),
               ),
               onChanged: (value) => _onSearchChanged(),

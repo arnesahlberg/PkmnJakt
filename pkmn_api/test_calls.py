@@ -29,7 +29,7 @@ def print_response(response, endpoint, color=Fore.CYAN):
     except Exception as e:
         print(f"{Fore.RED}Error processing response: {str(e)}{Style.RESET_ALL}")
 
-def make_request(method, endpoint, data=None, token=None, expected_status=None):
+def make_request(method, endpoint, data=None, token=None, expected_status=None, silent=False):
     """Make a request to the API and handle errors."""
     url = f"{BASE_URL}/{endpoint}"
     headers = HEADERS.copy()
@@ -42,10 +42,6 @@ def make_request(method, endpoint, data=None, token=None, expected_status=None):
             response = requests.get(url, headers=headers, verify=False)
         elif method.upper() == "POST":
             response = requests.post(url, headers=headers, data=json.dumps(data) if data else None, verify=False)
-        elif method.upper() == "PATCH":
-            response = requests.patch(url, headers=headers, data=json.dumps(data) if data else None, verify=False)
-        elif method.upper() == "DELETE":
-            response = requests.delete(url, headers=headers, data=json.dumps(data) if data else None, verify=False)
         else:
             print(f"{Fore.RED}Unsupported method: {method}{Style.RESET_ALL}")
             return None
@@ -55,7 +51,8 @@ def make_request(method, endpoint, data=None, token=None, expected_status=None):
             print(f"{Fore.RED}Expected status {expected_status} but got {response.status_code}{Style.RESET_ALL}")
             print_response(response, endpoint, Fore.RED)
             sys.exit(1)
-        print_response(response, endpoint, Fore.GREEN)
+        if not silent:
+            print_response(response, endpoint, Fore.GREEN)
         
         return response
     except requests.exceptions.RequestException as e:
@@ -301,12 +298,40 @@ def run_tests():
     make_request("GET", "num_users", None, tokens["admin"], expected_status=200)
 
 
+    # 18. Check if user is admin
+    print(f"{Fore.YELLOW}Test 18a: Check admin status for non-admin user 11111 (expecting 401){Style.RESET_ALL}")
+    make_request("GET", "is_user_admin/22222", None, tokens["11111"], expected_status=401)
+    print(f"{Fore.YELLOW}Test 18b: As admin, check admin status for user 22222 (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "is_user_admin/22222", None, tokens["admin"], expected_status=200)
+    print(f"{Fore.YELLOW}Test 18c: As admin, check admin status for user admin (expecting 401){Style.RESET_ALL}")
+    make_request("GET", "is_user_admin/admin", None, tokens["admin"], expected_status=200)
+
+    # 19. Make user into an admin
+    print(f"{Fore.YELLOW}Test 19: Make user 22222 into an admin (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "make_user_admin", {"id": "22222"}, tokens["admin"], expected_status=200)
+
+    # 20. Check if user is admin
+    print(f"{Fore.YELLOW}Test 20a: Check admin status for user 22222 (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "is_user_admin/22222", None, tokens["admin"], expected_status=200)
+    print(f"{Fore.YELLOW}Test 20b: Check admin status for user 22222 (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "is_user_admin/22222", None, tokens["22222"], expected_status=200)
+
+    # 21. Remove user from admin
+    print(f"{Fore.YELLOW}Test 21: Remove user 22222 from admin (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "make_user_not_admin", {"id": "22222"}, tokens["admin"], expected_status=200)
+
+    # 22. Check if user is admin
+    print(f"{Fore.YELLOW}Test 22a: Check admin status for user 22222 (expecting 401){Style.RESET_ALL}")
+    make_request("GET", "is_user_admin/22222", None, tokens["admin"], expected_status=200)
+
+
     # Final: DELETE ALL USERS
     print(f"{Fore.YELLOW}\nTest 18: Deleting all users by looping{Style.RESET_ALL}")
     for user in users:
         if user["id"] != "44444": # skip already deleted user
             print(f"{Fore.YELLOW}Deleting user {user['id']}{Style.RESET_ALL}")
-            make_request("POST", "admin_delete_user", {"id": user["id"]}, tokens["admin"], expected_status=200)
+            make_request("POST", "admin_delete_user", {"id": user["id"]}, tokens["admin"], expected_status=200, silent=True)
+    
     
     print(f"\n{Fore.GREEN}API tests completed!{Style.RESET_ALL}")
 

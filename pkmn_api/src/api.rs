@@ -1,3 +1,5 @@
+use std::path;
+
 use actix_web::{web, HttpResponse, HttpRequest};
 use serde::{Deserialize, Serialize};
 use crate::misc::{self, validate_token};
@@ -867,10 +869,28 @@ pub async fn am_i_admin(req: HttpRequest) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
+pub async fn is_user_admin(req: HttpRequest, path: web::Path<String>) -> HttpResponse {
+    let target_user_id = path.into_inner();
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !is_admin {
+        return HttpResponse::Forbidden().finish();
+    }
+    let is_admin = databaseconnection::user_is_admin(&target_user_id, &conn).unwrap();
+    HttpResponse::Ok().body(is_admin.to_string())
+}
+
 // make user admin
 #[derive(Debug, Deserialize)]
 pub struct MakeUserAdminRequest {
-    pub user_id : String,
+    pub id : String,
 }
 
 pub async fn make_user_admin(req: HttpRequest, info: web::Json<MakeUserAdminRequest>) -> HttpResponse {
@@ -888,7 +908,7 @@ pub async fn make_user_admin(req: HttpRequest, info: web::Json<MakeUserAdminRequ
     }
 
     // now make user admin
-    let worked = databaseconnection::make_user_admin(&info.user_id, &conn).is_ok();
+    let worked = databaseconnection::make_user_admin(&info.id, &conn).is_ok();
     HttpResponse::Ok().body(worked.to_string())
 }
 
@@ -905,7 +925,7 @@ pub async fn make_user_not_admin(req: HttpRequest, info: web::Json<MakeUserAdmin
     if !is_admin {
         return HttpResponse::Forbidden().finish();
     }
-    if user_id == info.user_id {
+    if user_id == info.id {
         return HttpResponse::BadRequest().body("Cannot remove own admin status");
     }
     if user_id != "admin" {
@@ -913,7 +933,7 @@ pub async fn make_user_not_admin(req: HttpRequest, info: web::Json<MakeUserAdmin
     }
 
     // now make user admin
-    let worked = databaseconnection::make_user_not_admin(&info.user_id, &conn).is_ok();
+    let worked = databaseconnection::make_user_not_admin(&info.id, &conn).is_ok();
     HttpResponse::Ok().body(worked.to_string())
 }
 
@@ -995,8 +1015,9 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/my_pokedex", web::get().to(get_my_pokedex))
         // admin endpoints
         .route("/am_i_admin", web::get().to(am_i_admin))
-        .route("/make_user_admin/", web::post().to(make_user_admin))
-        .route("/make_user_not_admin/", web::post().to(make_user_not_admin))
+        .route("/is_user_admin/{user_id}", web::get().to(is_user_admin))
+        .route("/make_user_admin", web::post().to(make_user_admin))
+        .route("/make_user_not_admin", web::post().to(make_user_not_admin))
         .route("/admin_reset_user_password", web::post().to(admin_reset_user_password))
         .route("/admin_delete_user", web::post().to(admin_delete_user))
         .route("/get_users", web::post().to(get_users))

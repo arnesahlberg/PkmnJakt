@@ -35,7 +35,7 @@ pub fn make_user_admin(user_id : &str, conn : &Connection) -> Result<()> {
 }
 
 pub fn make_user_not_admin(user_id : &str, conn : &Connection) -> Result<()> {
-    if (user_id == "admin") {
+    if user_id == "admin" {
         return Err(rusqlite::Error::InvalidParameterName("Can't remove admin status from admin user".to_string()));
     }
     conn.execute("UPDATE Users SET admin = 0 WHERE user_id = ?1", params![user_id])?;
@@ -56,12 +56,6 @@ pub fn remove_token(user_id : &str, token : &str, conn : &Connection) -> Result<
 pub fn remove_all_tokens_for_user(user_id : &str, conn : &Connection) -> Result<()> {
     conn.execute("DELETE FROM Tokens WHERE User_Id = ?1", params![user_id])?;
     Ok(())
-}
-
-pub fn token_in_database(user_id : &str, token : &str, conn : &Connection) -> Result<bool> {
-    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Tokens WHERE Token = ?1 AND User_Id = ?2")?;
-    let count : i32 = stmt.query_row(params![token, user_id], |row| row.get(0))?;
-    Ok(count > 0)
 }
 
 fn get_user_salt(user_id : &str, conn : &Connection) -> Result<String> {
