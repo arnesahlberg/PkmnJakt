@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'delete_user_popup.dart';
 import 'reset_user_password_popup.dart';
 import 'promote_user_popup.dart';
+import 'demote_user_popup.dart';
 import '../main.dart';
 
 class EditUserDialog extends StatelessWidget {
@@ -47,38 +48,16 @@ class EditUserDialog extends StatelessWidget {
               ? ElevatedButton(
                 onPressed:
                     currentIsMainAdmin
-                        ? () async {
-                          final token =
-                              Provider.of<UserSession>(
-                                context,
-                                listen: false,
-                              ).token;
-                          if (token != null) {
-                            final success =
-                                await AdminApiService.removeUserAdmin(
-                                  userId,
-                                  token,
-                                );
-                            Navigator.of(context).pop();
-                            if (success) {
-                              onUserUpdated?.call();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Användare $userId gjord till icke administratör',
-                                  ),
+                        ? () {
+                          Navigator.of(context).pop();
+                          showDialog(
+                            context: context,
+                            builder:
+                                (context) => DemoteUserDialog(
+                                  userId: userId,
+                                  onUserUpdated: onUserUpdated,
                                 ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Återkallande av admin-status misslyckades',
-                                  ),
-                                ),
-                              );
-                            }
-                          }
+                          );
                         }
                         : null,
                 child: const Text('Gör till icke administratör'),
