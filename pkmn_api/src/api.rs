@@ -909,9 +909,13 @@ pub async fn admin_reset_user_password(req: HttpRequest, info: web::Json<ResetUs
 }
 
 // admin delete user request
+#[derive(Debug, Deserialize)]
+pub struct AdminDeleteUserRequest {
+    pub id: String,
+}
 
-pub async fn admin_delete_user(req: HttpRequest, path: web::Path<String>) -> HttpResponse {
-    let target_user_id = path.into_inner();
+pub async fn admin_delete_user(req: HttpRequest, info: web::Json<AdminDeleteUserRequest>) -> HttpResponse {
+    let target_user_id = &info.id;
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
@@ -920,7 +924,7 @@ pub async fn admin_delete_user(req: HttpRequest, path: web::Path<String>) -> Htt
     if !validate_token(&user_id, token, &conn) {
         return HttpResponse::Unauthorized().finish();
     }
-    let user_exists = databaseconnection::user_id_exists(&target_user_id, &conn).unwrap();
+    let user_exists = databaseconnection::user_id_exists(target_user_id, &conn).unwrap();
     if !user_exists {
         return HttpResponse::NotFound().finish();
     }
@@ -928,7 +932,7 @@ pub async fn admin_delete_user(req: HttpRequest, path: web::Path<String>) -> Htt
     if !is_admin {
         return HttpResponse::Forbidden().finish();
     }
-    let worked = databaseconnection::delete_user(&target_user_id, &conn).is_ok();
+    let worked = databaseconnection::delete_user(target_user_id, &conn).is_ok();
     HttpResponse::Ok().body(worked.to_string())
 }
 
@@ -957,7 +961,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/make_user_admin/", web::post().to(make_user_admin))
         .route("/make_user_not_admin/", web::post().to(make_user_not_admin))
         .route("/admin_reset_user_password", web::post().to(admin_reset_user_password))
-        .route("/admin_delete_user/{id}", web::post().to(admin_delete_user))
+        .route("/admin_delete_user", web::post().to(admin_delete_user))
         .route("/get_users", web::post().to(get_users))
         .route("/get_users_filter_id", web::post().to(get_users_filter_id))
 

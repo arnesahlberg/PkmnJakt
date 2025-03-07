@@ -82,6 +82,32 @@ def run_tests():
         {"id": "22222", "name": "Sture Stur", "password": "stur-pass"},
         {"id": "33333", "name": "Lisa Lis", "password": "lis-pass"},
         {"id": "44444", "name": "Frulle Frull", "password": "frull-pass"},
+        {"id": "55555", "name": "Sven Svensson", "password": "sven-pass"},
+        {"id": "66666", "name": "Anna Andersson", "password": "anna-pass"},
+        {"id": "77777", "name": "Bertil Bertilsson", "password": "bertil-pass"},
+        {"id": "88888", "name": "Ceci Ceder", "password": "ceci-pass"},
+        {"id": "99999", "name": "Dennis Dunder", "password": "dennis-pass"},
+        {"id": "10000", "name": "Eva Evert", "password": "eva-pass"},
+        {"id": "10101", "name": "Fia Fjäril", "password": "fia-pass"},
+        {"id": "20202", "name": "Gösta Gök", "password": "gösta-pass"},
+        {"id": "30303", "name": "Hanna Hjärta", "password": "hanna-pass"},
+        {"id": "40404", "name": "Ivar Is", "password": "ivar-pass"},
+        {"id": "50505", "name": "Jenny Järn", "password": "jenny-pass"},
+        {"id": "60606", "name": "Kalle Katt", "password": "kalle-pass"},
+        {"id": "70707", "name": "Lena Löv", "password": "lena-pass"},
+        {"id": "80808", "name": "Mats Mås", "password": "mats-pass"},
+        {"id": "90909", "name": "Nina Natt", "password": "nina-pass"},
+        {"id": "01010", "name": "Olof Orm", "password": "olof-pass"},
+        {"id": "11112", "name": "Pia Pigg", "password": "pia-pass"},
+        {"id": "21213", "name": "Qvarn Qvist", "password": "qvarn-pass"},
+        {"id": "31314", "name": "Rolf Råtta", "password": "rolf-pass"},
+        {"id": "41415", "name": "Sara Sjö", "password": "sara-pass"},
+        {"id": "51516", "name": "Tobias Tjur", "password": "tobias-pass"},
+        {"id": "61617", "name": "Ulla Uggla", "password": "ulla-pass"},
+        {"id": "71718", "name": "Viktor Varg", "password": "viktor-pass"},
+        {"id": "81819", "name": "Wilma Warg", "password": "wilma-pass"},
+        {"id": "91920", "name": "Xerxes Xylofon", "password": "xerxes-pass"},
+        {"id": "02021", "name": "Ylva Ylle", "password": "ylva-pass"},
     ]
     for user in users:
         print(f"{Fore.YELLOW}Test 2: Creating user {user['id']} ({user['name']}) (expecting 200){Style.RESET_ALL}")
@@ -250,7 +276,10 @@ def run_tests():
     
     # 16. Delete users
     print(f"{Fore.YELLOW}\nTest 16a: Deleting user 44444 (expecting 200){Style.RESET_ALL}")
-    make_request("POST", "admin_delete_user/44444", None, tokens["admin"], expected_status=200)
+    data = {
+        "id": "44444"
+    }
+    make_request("POST", "admin_delete_user", data, tokens["admin"], expected_status=200)
 
     # try to log in as deleted user
     print(f"{Fore.YELLOW}\nTest 16b: Attempting to login as deleted user 44444 (expecting 401){Style.RESET_ALL}")
@@ -260,8 +289,12 @@ def run_tests():
     }, expected_status=404)
 
     # try to delete user as non admin
+    data = {
+        "id": "33333"
+    }
+    
     print(f"{Fore.YELLOW}\nTest 16c: Attempting to delete user as non-admin (expecting 403){Style.RESET_ALL}")
-    make_request("DELETE", "admin_delete_user/33333", None, tokens["22222"], expected_status=403)
+    make_request("POST", "admin_delete_user", data, tokens["22222"], expected_status=403)
 
     # 17. get num users
     print(f"{Fore.YELLOW}\nTest 17: Getting number of users (expecting 200){Style.RESET_ALL}")
