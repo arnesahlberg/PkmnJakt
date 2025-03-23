@@ -16,7 +16,7 @@ class DataMatrixScanner extends StatelessWidget {
       child: Container(
         child: AiBarcodeScanner(
           controller: MobileScannerController(
-            detectionSpeed: DetectionSpeed.noDuplicates,
+            detectionSpeed: DetectionSpeed.unrestricted,
           ),
           sheetTitle: sheetTitle,
           hideGalleryButton: true,
