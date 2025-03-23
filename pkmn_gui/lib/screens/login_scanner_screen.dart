@@ -171,6 +171,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 child: DataMatrixScanner(
                   onCodeScanned: _onGetResult,
                   sheetTitle: "Scanna QR-koden på ditt band för att logga in",
+                  scannerFormat:
+                      ScannerFormat.dataMatrix, // use singular custom enum
                 ),
               ),
               Padding(
