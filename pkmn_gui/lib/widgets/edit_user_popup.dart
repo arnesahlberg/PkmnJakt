@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pkmn_gui/api_calls.dart';
 import 'package:provider/provider.dart';
 import 'delete_user_popup.dart';
 import 'reset_user_password_popup.dart';
@@ -14,12 +13,12 @@ class EditUserDialog extends StatelessWidget {
   final VoidCallback? onUserUpdated;
 
   const EditUserDialog({
-    Key? key,
+    super.key,
     required this.userId,
     required this.userName,
     this.userIsAdmin = false,
     this.onUserUpdated,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
