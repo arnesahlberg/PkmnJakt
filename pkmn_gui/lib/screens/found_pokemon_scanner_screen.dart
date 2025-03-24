@@ -122,6 +122,9 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
             DataMatrixScanner(
               onCodeScanned: _onGetResult,
               sheetTitle: "Scanna QR koden för att registrera hittad Pokémon",
+              scannerFormat:
+                  ScannerFormat
+                      .qrCode, // use singular custom enum to scan QR codes
             ),
           if (_isProcessing)
             Container(
