@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../api_calls.dart';
 import '../main.dart'; // for UserSession
 import '../widgets/data_matrix_scanner.dart';
+import '../widgets/pokedex_container.dart';
+import '../widgets/pokedex_button.dart';
 import '../constants.dart';
 
 class FoundPokemonScannerScreen extends StatefulWidget {
@@ -12,9 +14,26 @@ class FoundPokemonScannerScreen extends StatefulWidget {
       _FoundPokemonScannerScreenState();
 }
 
-class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
+class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
+    with SingleTickerProviderStateMixin {
   bool _scanned = false;
   bool _isProcessing = false;
+  late AnimationController _rotationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _rotationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
 
   void _onGetResult(String result) async {
     if (_scanned) return;
@@ -22,117 +41,317 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
     setState(() => _isProcessing = true);
     try {
       final session = Provider.of<UserSession>(context, listen: false);
+      debugPrint("foundPokemon: $result");
+      debugPrint("token: ${session.token}");
+
       final foundResponse = await ApiService.foundPokemon(
         result,
         session.token!,
       );
+
+      debugPrint("catchResult: $foundResponse");
+
       // Check CallResultCode for errors
       if (foundResponse['result_code'] != CallResultCode.ok) {
         if (foundResponse['result_code'] ==
             CallResultCode.pokemonAlreadyFound) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Du har redan hittat denna Pokémon")),
+            const SnackBar(
+              content: Text(
+                "Du har redan hittat denna Pokémon",
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Color(0xFFE3350D),
+            ),
           );
         } else if (foundResponse['result_code'] ==
             CallResultCode.pokemonNotFound) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Koden du scannade tillhör inte en pokemon"),
+              content: Text(
+                "Koden du scannade tillhör inte en pokemon",
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Color(0xFFE3350D),
             ),
           );
         } else {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Fel: ${foundResponse['result_code']}")),
+            SnackBar(
+              content: Text(
+                "Fel: ${foundResponse['result_code']}",
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: const Color(0xFFE3350D),
+            ),
           );
         }
         _scanned = false;
         setState(() => _isProcessing = false);
         return;
       }
+
       final pokemonId = foundResponse['pokemon_id']?.toString();
+      final pokemonName = foundResponse['pokemon_name'];
+      final pokemonDescription = foundResponse['pokemon_description'];
+
       if (pokemonId == null) {
         throw Exception("Koden du scannade tillhör inte en pokemon.");
       }
-      // fetch detailed pokemon info
-      final pokemonInfo = await ApiService.getPokemon(pokemonId);
+
       if (!mounted) return;
+
+      // Set processing to false *before* showing the dialog
+      setState(() => _isProcessing = false);
+
       // show popup with pokemon info and image
       showDialog(
         context: context,
         barrierDismissible: false,
         builder:
-            (dialogContext) => AlertDialog(
-              title: const Text("Grattis!"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Du har fångat ${pokemonInfo['name']} ( Nr. ${pokemonInfo['number']})!",
-                  ),
-                  const SizedBox(height: 10),
-                  Image.asset(
-                    'assets/images/pkmn/$pokemonId.jpg',
-                    errorBuilder:
-                        (context, error, stackTrace) =>
-                            const Icon(Icons.image_outlined, size: 80),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(pokemonInfo['description'] ?? ''),
-                ],
+            (dialogContext) => Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    // Dispose scanner and refresh by replacing the route
-                    Navigator.pop(dialogContext); // close dialog
-                    Navigator.pushReplacementNamed(context, '/pokedex');
-                  },
-                  child: const Text("Mitt Pokédex"),
+              child: PokedexContainer(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.catching_pokemon,
+                        size: 64,
+                        color: Color(0xFFE3350D),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "Grattis!",
+                        style: TextStyle(
+                          fontFamily: 'PixelFontTitle',
+                          fontSize: 28,
+                          color: Color(0xFFE3350D),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Du har fångat $pokemonName!",
+                        style: const TextStyle(
+                          fontFamily: 'PixelFontTitle',
+                          fontSize: 20,
+                          color: Color(0xFF992109),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        "(Nr. $pokemonId)",
+                        style: TextStyle(
+                          fontFamily: 'PixelFont',
+                          fontSize: 16,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Container(
+                        width: 180,
+                        height: 180,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFF992109),
+                            width: 2,
+                          ),
+                        ),
+                        child: Image.asset(
+                          'assets/images/pkmn/$pokemonId.jpg',
+                          fit: BoxFit.contain,
+                          errorBuilder:
+                              (context, error, stackTrace) =>
+                                  const Icon(Icons.image_outlined, size: 80),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      if (pokemonDescription != null &&
+                          pokemonDescription.isNotEmpty)
+                        Text(
+                          pokemonDescription,
+                          style: TextStyle(
+                            fontFamily: 'PixelFont',
+                            fontSize: 16,
+                            color: Colors.grey.shade800,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0,
+                              ),
+                              child: PokedexButton(
+                                onPressed: () {
+                                  Navigator.pop(dialogContext);
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    '/pokedex',
+                                  );
+                                },
+                                child: const Text("Mitt Pokédex"),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0,
+                              ),
+                              child: PokedexButton(
+                                onPressed: () {
+                                  Navigator.pop(dialogContext);
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    '/home',
+                                  );
+                                },
+                                child: const Text("Tillbaka"),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    // Dispose scanner and refresh by replacing the route
-                    Navigator.pop(dialogContext); // close dialog
-                    Navigator.pushReplacementNamed(context, '/home');
-                  },
-                  child: const Text("Tillbaka"),
-                ),
-              ],
+              ),
             ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Fel: $e")));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Fel: $e", style: const TextStyle(color: Colors.white)),
+          backgroundColor: Colors.red,
+        ),
+      );
       _scanned = false;
-    } finally {
+      // Ensure processing is false even on error
       setState(() => _isProcessing = false);
+    } finally {
+      // No need to set _isProcessing here anymore
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          if (!_scanned) // Only show scanner when not processing a scan
-            DataMatrixScanner(
-              onCodeScanned: _onGetResult,
-              sheetTitle: "Scanna QR koden för att registrera hittad Pokémon",
-              scannerFormat:
-                  ScannerFormat
-                      .qrCode, // use singular custom enum to scan QR codes
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [const Color(0xFFFAF6F6), Colors.red.shade50],
             ),
-          if (_isProcessing)
-            Container(
-              color: Colors.black45,
-              child: const Center(child: CircularProgressIndicator()),
+          ),
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Column(
+              children: [
+                if (!_scanned) // Only show scanner when not processing a scan
+                  Expanded(
+                    child: DataMatrixScanner(
+                      onCodeScanned: _onGetResult,
+                      sheetTitle: "Scanna QR-koden för att fånga Pokémon",
+                      scannerFormat: ScannerFormat.qrCode,
+                    ),
+                  ),
+                PokedexContainer(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.catching_pokemon,
+                        size: 32,
+                        color: Color(0xFFE3350D),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Rikta kameran mot Pokémonens QR-kod för att fånga den!',
+                        style: TextStyle(
+                          fontFamily: 'PixelFont',
+                          fontSize: 14,
+                          color: Colors.grey.shade800,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-        ],
-      ),
+          ),
+        ),
+        if (_isProcessing)
+          Container(
+            color: Colors.black45,
+            child: Center(
+              child: PokedexContainer(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RotationTransition(
+                      turns: _rotationController,
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE3350D),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFF992109),
+                            width: 3,
+                          ),
+                        ),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.catching_pokemon,
+                              color: Color(0xFF992109),
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Fångar Pokémon...',
+                      style: TextStyle(
+                        fontFamily: 'PixelFont',
+                        fontSize: 16,
+                        color: Color(0xFF992109),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

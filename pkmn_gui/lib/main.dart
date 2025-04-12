@@ -13,7 +13,7 @@ class UserSession extends ChangeNotifier {
   String? userId;
   String? userName;
   String? token; // this will hold the encoded token only
-  String? validUntil; // new field to store validity info
+  String? validUntil; // field to store validity info
 
   UserSession() {
     _loadFromCookies();
@@ -101,11 +101,46 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Stensund Pokemon-Jakt 2025!',
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
         fontFamily: 'PixelFont',
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.deepPurple,
-        ).copyWith(secondary: Colors.yellowAccent),
+        colorScheme: ColorScheme(
+          brightness: Brightness.light,
+          primary: const Color(0xFFE3350D), // Classic Pokédex red
+          onPrimary: Colors.white,
+          secondary: const Color(0xFF62B1F6), // Pokédex accent blue
+          onSecondary: Colors.white,
+          tertiary: const Color(0xFFFFD700), // Pokemon yellow
+          error: Colors.red.shade700,
+          onError: Colors.white,
+          background: const Color(0xFFFAF6F6), // Slight off-white
+          onBackground: Colors.black87,
+          surface: const Color(0xFFE3350D), // Pokédex red for surfaces
+          onSurface: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Color(0xFF992109), width: 2),
+            ),
+          ),
+        ),
+        cardTheme: CardTheme(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: const Color(0xFFE3350D).withOpacity(0.5),
+              width: 2,
+            ),
+          ),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFE3350D),
+          elevation: 0,
+          centerTitle: true,
+        ),
+        scaffoldBackgroundColor: const Color(0xFFFAF6F6),
       ),
       home: const WelcomeScreen(),
       routes: {

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/data_matrix_scanner.dart';
+import '../widgets/pokedex_container.dart';
 import '../api_calls.dart';
-import '../main.dart'; // for UserSession
+import '../main.dart';
 import '../widgets/login_popup.dart';
 import '../widgets/new_user_prompt.dart';
 import '../constants.dart';
@@ -13,9 +14,26 @@ class QRScannerScreen extends StatefulWidget {
   State<QRScannerScreen> createState() => _QRScannerScreenState();
 }
 
-class _QRScannerScreenState extends State<QRScannerScreen> {
+class _QRScannerScreenState extends State<QRScannerScreen>
+    with SingleTickerProviderStateMixin {
   bool _scanned = false;
-  bool _isProcessing = false; // for ui feedback
+  bool _isProcessing = false;
+  late AnimationController _rotationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _rotationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
 
   void _onGetResult(String result) async {
     if (!_scanned) {
@@ -29,13 +47,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       String validUntil;
 
       try {
-        // check if this is a user_id and not something else (like pokemon_id)
-        // thing they should be 6 digits long, but just check it's shorter than 10 for now
-        // should implement better validation later here. also in backend.
         if (scannedId.length > 10) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Koden du scannade är inte en lägerdeltagares kod"),
+              content: Text(
+                "Koden du scannade är inte en lägerdeltagares kod",
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Color(0xFFE3350D),
             ),
           );
           setState(() {
@@ -44,10 +63,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           return;
         }
 
-        // Check if the user exists
         final exists = await ApiService.checkUserExists(scannedId);
         if (exists) {
-          // Existing user: prompt for password for login
           final password = await promptForPassword(context);
           if (password == null || password.isEmpty) {
             setState(() {
@@ -56,18 +73,25 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             return;
           }
           final loginResult = await ApiService.login(scannedId, password);
-          // Check CallResultCode instead of message string
           if (loginResult['result_code'] != CallResultCode.ok) {
             if (loginResult['result_code'] == CallResultCode.invalidPassword) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Fel lösenord, försök igen")),
+                const SnackBar(
+                  content: Text(
+                    "Fel lösenord, försök igen",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor: Color(0xFFE3350D),
+                ),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
                     "Något gick fel. Felkod: ${loginResult['result_code']}",
+                    style: const TextStyle(color: Colors.white),
                   ),
+                  backgroundColor: Colors.red,
                 ),
               );
             }
@@ -81,7 +105,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               loginResult['token']?['encoded_token'].toString() ?? "";
           validUntil = loginResult['token']?['valid_until']?.toString() ?? "";
         } else {
-          // new user: prompt for username, password and confirmation.
           final credentials = await promptForUserCredentials(
             context,
             scannedId,
@@ -97,7 +120,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           }
           if (credentials['password'] != credentials['confirm']) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Lösenorden matchar inte")),
+              const SnackBar(
+                content: Text(
+                  "Lösenorden matchar inte",
+                  style: TextStyle(color: Colors.white),
+                ),
+                backgroundColor: Color(0xFFE3350D),
+              ),
             );
             setState(() {
               _isProcessing = false;
@@ -111,17 +140,26 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             name,
             password,
           );
-          // Use CallResultCode to validate creation attempt
           if (createResult['result_code'] != CallResultCode.ok) {
             if (createResult['result_code'] ==
                 CallResultCode.userAlreadyExists) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Användaren finns redan")),
+                const SnackBar(
+                  content: Text(
+                    "Användaren finns redan",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor: Color(0xFFE3350D),
+                ),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text("Error: ${createResult['result_code']}"),
+                  content: Text(
+                    "Error: ${createResult['result_code']}",
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor: Colors.red,
                 ),
               );
             }
@@ -142,9 +180,15 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, '/home');
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Error: $e",
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
       } finally {
         setState(() {
           _isProcessing = false;
@@ -164,31 +208,102 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Scaffold(
-          body: Column(
-            children: [
-              Expanded(
-                child: DataMatrixScanner(
-                  onCodeScanned: _onGetResult,
-                  sheetTitle: "Scanna QR-koden på ditt band för att logga in",
-                  scannerFormat:
-                      ScannerFormat.dataMatrix, // use singular custom enum
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [const Color(0xFFFAF6F6), Colors.red.shade50],
+            ),
+          ),
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Column(
+              children: [
+                Expanded(
+                  child: DataMatrixScanner(
+                    onCodeScanned: _onGetResult,
+                    sheetTitle: "Scanna QR-koden på ditt band för att logga in",
+                    scannerFormat: ScannerFormat.dataMatrix,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'Rikta kameran mot ditt deltagarband. Om du inte loggat in tidigare kommer du få skapa ett konto.',
-                  style: Theme.of(context).textTheme.titleSmall,
+                PokedexContainer(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.qr_code_scanner,
+                        size: 32,
+                        color: Color(0xFFE3350D),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Rikta kameran mot ditt deltagarband. Om du inte loggat in tidigare kommer du få skapa ett konto.',
+                        style: TextStyle(
+                          fontFamily: 'PixelFont',
+                          fontSize: 14,
+                          color: Colors.grey.shade800,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         if (_isProcessing)
           Container(
             color: Colors.black45,
-            child: const Center(child: CircularProgressIndicator()),
+            child: Center(
+              child: PokedexContainer(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RotationTransition(
+                      turns: _rotationController,
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE3350D),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFF992109),
+                            width: 3,
+                          ),
+                        ),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.catching_pokemon,
+                              color: Color(0xFF992109),
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Processar...',
+                      style: TextStyle(
+                        fontFamily: 'PixelFont',
+                        fontSize: 16,
+                        color: Color(0xFF992109),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
       ],
     );

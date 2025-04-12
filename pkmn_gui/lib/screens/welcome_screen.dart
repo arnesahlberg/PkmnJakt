@@ -3,6 +3,8 @@ import 'package:pkmn_gui/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../widgets/common_app_bar.dart';
+import '../widgets/pokedex_container.dart';
+import '../widgets/pokedex_button.dart';
 import "login_scanner_screen.dart";
 import '../main.dart'; // for UserSession
 import '../api_calls.dart'; // for fetching statistics
@@ -45,97 +47,121 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         title: 'Stensund Pokemon-Jakt 2025!',
         showBackButton: false,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child:
-              session.isLoggedIn
-                  ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Välkommen tillbaka, ${session.userName}! Du är redan inloggad.',
-                        style: Theme.of(context).textTheme.headlineLarge
-                            ?.copyWith(color: Colors.redAccent),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 32),
-                      ElevatedButton(
-                        style: ButtonStyles.buttonStyleRounder,
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/home');
-                        },
-                        child: const Text('Fortsätt'),
-                      ),
-                    ],
-                  )
-                  : SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Välkommen till Stensund Pokemon-Jakt 2025!',
-                          style: Theme.of(context).textTheme.headlineLarge
-                              ?.copyWith(color: Colors.redAccent),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Klicka på knappen nedan och scanna ditt deltagar-band för rikslägret.',
-                          style: TextStyle(fontSize: 18),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 32),
-                        ElevatedButton(
-                          style: ButtonStyles.buttonStyleRounder,
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const QRScannerScreen(),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [const Color(0xFFFAF6F6), Colors.red.shade50],
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                PokedexContainer(
+                  child:
+                      session.isLoggedIn
+                          ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Välkommen tillbaka, ${session.userName}!',
+                                style: const TextStyle(
+                                  fontFamily: 'PixelFontTitle',
+                                  fontSize: 24,
+                                  color: Color(0xFFE3350D),
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                            );
-                          },
-                          child: const Text('Logga in genom att scanna bandet'),
-                        ),
-                        const SizedBox(height: 16),
-                        // New manual login button. unsure if we should have it
-                        // since we don't want users to be able to enter another
-                        // user's ID code´when creating a user
-                        // ElevatedButton(
-                        //   style: ButtonStyles.buttonStyleRounder,
-                        //   onPressed: () {
-                        //     Navigator.push(
-                        //       context,
-                        //       MaterialPageRoute(
-                        //         builder: (context) => const ManualLoginScreen(),
-                        //       ),
-                        //     );
-                        //   },
-                        //   child: const Text('Logga in med bandets ID nummer'),
-                        // ),
-                        const SizedBox(height: 32),
-                        FutureBuilder<Map<String, dynamic>>(
-                          future: _statsFuture,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const CircularProgressIndicator();
-                            }
-                            if (snapshot.hasError || !snapshot.hasData) {
-                              return const SizedBox();
-                            }
-                            final recent =
-                                snapshot.data!['recent'] as List<dynamic>;
-                            final highs =
-                                snapshot.data!['highscores'] as List<dynamic>;
-                            if (recent.isEmpty) return const SizedBox();
-                            return Column(
+                              const SizedBox(height: 24),
+                              PokedexButton(
+                                onPressed: () {
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    '/home',
+                                  );
+                                },
+                                child: const Text('Fortsätt'),
+                              ),
+                            ],
+                          )
+                          : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Välkommen till',
+                                style: TextStyle(
+                                  fontFamily: 'PixelFont',
+                                  fontSize: 20,
+                                  color: Color(0xFF992109),
+                                ),
+                              ),
+                              const Text(
+                                'Stensund Pokemon-Jakt 2025!',
+                                style: TextStyle(
+                                  fontFamily: 'PixelFontTitle',
+                                  fontSize: 28,
+                                  color: Color(0xFFE3350D),
+                                  height: 1.2,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 24),
+                              const Text(
+                                'Scanna ditt deltagar-band för rikslägret',
+                                style: TextStyle(fontSize: 16),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 24),
+                              PokedexButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => const QRScannerScreen(),
+                                    ),
+                                  );
+                                },
+                                child: const Text('Scanna Bandet'),
+                              ),
+                            ],
+                          ),
+                ),
+                if (!session.isLoggedIn) ...[
+                  const SizedBox(height: 24),
+                  FutureBuilder<Map<String, dynamic>>(
+                    future: _statsFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFFE3350D),
+                          ),
+                        );
+                      }
+                      if (snapshot.hasError || !snapshot.hasData) {
+                        return const SizedBox();
+                      }
+                      final recent = snapshot.data!['recent'] as List<dynamic>;
+                      final highs =
+                          snapshot.data!['highscores'] as List<dynamic>;
+                      if (recent.isEmpty) return const SizedBox();
+                      return Column(
+                        children: [
+                          PokedexContainer(
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
                                   "Senast fångade Pokémon:",
-                                  style: TextStyles.headerTextStyle,
+                                  style: TextStyle(
+                                    fontFamily: 'PixelFontTitle',
+                                    fontSize: 20,
+                                    color: Color(0xFFE3350D),
+                                  ),
                                 ),
                                 const SizedBox(height: 16),
                                 SizedBox(
@@ -145,9 +171,20 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                     itemCount: recent.length,
                                     itemBuilder: (context, index) {
                                       final pokemon = recent[index];
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                          right: 8.0,
+                                      return Container(
+                                        margin: const EdgeInsets.only(
+                                          right: 16,
+                                        ),
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          border: Border.all(
+                                            color: const Color(0xFF992109),
+                                            width: 2,
+                                          ),
                                         ),
                                         child: Column(
                                           children: [
@@ -169,20 +206,28 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             const SizedBox(height: 4),
                                             Text(
                                               "${pokemon['name']}",
-                                              style: TextStyles.smallTextBold,
+                                              style: const TextStyle(
+                                                fontFamily: 'PixelFont',
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                             Text(
                                               "Nr. ${pokemon['number']}",
-                                              style: TextStyles.smallText,
+                                              style: const TextStyle(
+                                                fontFamily: 'PixelFont',
+                                                fontSize: 12,
+                                              ),
                                             ),
                                             Text(
-                                              "Fångad av: ${pokemon['found_by_user']['name']}",
+                                              "${pokemon['found_by_user']['name']}",
                                               style: const TextStyle(
                                                 fontSize: 12,
                                               ),
                                             ),
                                             Text(
-                                              "Tid: ${_formatTime(pokemon['time_found'])}",
+                                              _formatTime(
+                                                pokemon['time_found'],
+                                              ),
                                               style: const TextStyle(
                                                 fontSize: 12,
                                               ),
@@ -193,68 +238,110 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                     },
                                   ),
                                 ),
-                                const SizedBox(height: 32),
-                                highs.isEmpty
-                                    ? const SizedBox()
-                                    : Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          "Global Highscore:",
-                                          style: TextStyles.headerTextStyle,
+                              ],
+                            ),
+                          ),
+                          if (highs.isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            PokedexContainer(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Global Highscore:",
+                                    style: TextStyle(
+                                      fontFamily: 'PixelFontTitle',
+                                      fontSize: 20,
+                                      color: Color(0xFFE3350D),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: highs.length,
+                                    itemBuilder: (context, index) {
+                                      final score = highs[index];
+                                      return Container(
+                                        margin: const EdgeInsets.only(
+                                          bottom: 8,
                                         ),
-                                        const SizedBox(height: 16),
-                                        ListView.builder(
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          itemCount: highs.length,
-                                          itemBuilder: (context, index) {
-                                            final score = highs[index];
-                                            return ListTile(
-                                              leading:
-                                                  index == 0
-                                                      ? const Icon(
-                                                        Icons.emoji_events,
-                                                        color: Colors.amber,
-                                                      )
-                                                      : index == 1
-                                                      ? const Icon(
-                                                        Icons.emoji_events,
-                                                        color: Colors.grey,
-                                                      )
-                                                      : index == 2
-                                                      ? const Icon(
-                                                        Icons.emoji_events,
-                                                        color: Colors.brown,
-                                                      )
-                                                      : Text(""),
-                                              title: Text(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          border: Border.all(
+                                            color: const Color(0xFF992109),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            if (index < 3) ...[
+                                              Icon(
+                                                Icons.emoji_events,
+                                                color:
+                                                    index == 0
+                                                        ? Colors.amber
+                                                        : index == 1
+                                                        ? Colors.grey[400]
+                                                        : Colors.brown[300],
+                                                size: 24,
+                                              ),
+                                              const SizedBox(width: 8),
+                                            ],
+                                            Expanded(
+                                              child: Text(
                                                 "${score['name']} (ID: ${score['id']})",
                                                 style: const TextStyle(
                                                   fontFamily: 'PixelFont',
-                                                  fontSize: 18,
-                                                ),
-                                              ),
-                                              trailing: Text(
-                                                "Fångade: ${score['score']}",
-                                                style: const TextStyle(
                                                   fontSize: 16,
                                                 ),
                                               ),
-                                            );
-                                          },
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 4,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFE3350D),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Text(
+                                                "${score['score']}",
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      );
+                    },
                   ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );
