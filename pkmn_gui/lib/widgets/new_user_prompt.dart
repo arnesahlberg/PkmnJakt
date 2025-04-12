@@ -90,6 +90,8 @@ class _NewUserPromptState extends State<NewUserPrompt> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Color(0xFF992109), width: 2),
@@ -97,7 +99,7 @@ class _NewUserPromptState extends State<NewUserPrompt> {
       title: const Text(
         "Skapa användare",
         style: TextStyle(
-          color: Color(0xFFE3350D),
+          color: Colors.black87,
           fontFamily: 'PixelFontTitle',
           fontSize: 20,
         ),
@@ -105,7 +107,11 @@ class _NewUserPromptState extends State<NewUserPrompt> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 8),
+          const Text(
+            'Band scannat för första gången. Skapa ny användare.',
+            style: TextStyle(color: Colors.black87),
+          ),
+          const SizedBox(height: 10),
           TextField(
             controller: _usernameController,
             style: const TextStyle(color: Colors.black87),

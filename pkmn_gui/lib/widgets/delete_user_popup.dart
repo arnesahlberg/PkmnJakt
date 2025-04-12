@@ -14,23 +14,15 @@ class DeleteUserDialog extends StatefulWidget {
 }
 
 class _DeleteUserDialogState extends State<DeleteUserDialog> {
-  final TextEditingController _confirmController1 = TextEditingController();
-  final TextEditingController _confirmController2 = TextEditingController();
+  final TextEditingController _confirmController = TextEditingController();
   bool _confirmChecked = false;
   String? _errorMessage;
   bool _isProcessing = false;
 
   void _deleteUser() async {
-    if (_confirmController1.text != widget.userId ||
-        _confirmController2.text != widget.userId) {
+    if (_confirmController.text != widget.userId) {
       setState(() {
         _errorMessage = "User ID måste matcha exakt!";
-      });
-      return;
-    }
-    if (!_confirmChecked) {
-      setState(() {
-        _errorMessage = "Du måste bekräfta att du förstår konsekvenserna.";
       });
       return;
     }
@@ -58,52 +50,58 @@ class _DeleteUserDialogState extends State<DeleteUserDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Bekräfta radering'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Sluta med de här dumheterna! Det här går inte att ångra!',
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Color(0xFF992109), width: 2),
+      ),
+      title: const Text(
+        'Ta bort användare',
+        style: TextStyle(
+          color: Colors.black87,
+          fontFamily: 'PixelFontTitle',
+          fontSize: 20,
+        ),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'För att ta bort användaren, skriv in användar-id:et.',
+            style: TextStyle(color: Colors.black87),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _confirmController,
+            decoration: InputDecoration(
+              labelText: 'Användar-id',
+              labelStyle: TextStyle(color: Colors.black87),
+              border: OutlineInputBorder(),
             ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _confirmController1,
-              decoration: const InputDecoration(labelText: 'Ange användar id'),
-            ),
-            TextField(
-              controller: _confirmController2,
-              decoration: const InputDecoration(
-                labelText: 'Ange användar id igen',
+            style: TextStyle(color: Colors.black87),
+          ),
+          if (_errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                _errorMessage!,
+                style: TextStyle(color: Colors.red.shade700),
               ),
             ),
-            Row(
-              children: [
-                Checkbox(
-                  value: _confirmChecked,
-                  onChanged: (value) {
-                    setState(() {
-                      _confirmChecked = value ?? false;
-                    });
-                  },
-                ),
-                const Expanded(
-                  child: Text('Jag förstår att detta inte går att ångra'),
-                ),
-              ],
-            ),
-            if (_errorMessage != null)
-              Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
-          ],
-        ),
+        ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
+          style: TextButton.styleFrom(foregroundColor: const Color(0xFF992109)),
           child: const Text('Avbryt'),
         ),
         ElevatedButton(
           onPressed: _isProcessing ? null : _deleteUser,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE3350D),
+            foregroundColor: Colors.white,
+          ),
           child:
               _isProcessing
                   ? const SizedBox(
@@ -111,7 +109,7 @@ class _DeleteUserDialogState extends State<DeleteUserDialog> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                  : const Text('Radera användare'),
+                  : const Text('Ta bort användare'),
         ),
       ],
     );

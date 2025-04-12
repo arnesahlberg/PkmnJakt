@@ -175,15 +175,21 @@ class _AdminScreenState extends State<AdminScreen> {
                   Expanded(
                     child: TextField(
                       controller: _adminIdController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Admin ID',
                         border: OutlineInputBorder(),
+                        labelStyle: TextStyle(color: Colors.black87),
                       ),
+                      style: TextStyle(color: Colors.black87),
                     ),
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: _handleAdminLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE3350D),
+                      foregroundColor: Colors.white,
+                    ),
                     child: const Text('Logga in admin'),
                   ),
                 ],
@@ -193,13 +199,14 @@ class _AdminScreenState extends State<AdminScreen> {
                   padding: const EdgeInsets.only(top: 10),
                   child: Text(
                     _loginError,
-                    style: const TextStyle(color: Colors.red),
+                    style: TextStyle(color: Colors.red.shade700),
                   ),
                 ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed:
                     () => Navigator.pushReplacementNamed(context, "/home"),
+                style: ButtonStyles.buttonStyleRounder,
                 child: const Text('Gå tillbaka'),
               ),
             ],
@@ -243,10 +250,12 @@ class _AdminScreenState extends State<AdminScreen> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Sök användare',
                 border: OutlineInputBorder(),
+                labelStyle: TextStyle(color: Colors.black87),
               ),
+              style: TextStyle(color: Colors.black87),
               onChanged: (value) => _onSearchChanged(),
             ),
           ),
@@ -260,9 +269,13 @@ class _AdminScreenState extends State<AdminScreen> {
                 final isAdmin = user['admin'] == true;
                 return Card(
                   child: ListTile(
-                    title: Text('Användar id: $userId'),
+                    title: Text(
+                      'Användar id: $userId',
+                      style: TextStyle(color: Colors.black87),
+                    ),
                     subtitle: Text(
                       'Namn: $userName${isAdmin ? " (Admin)" : ""}',
+                      style: TextStyle(color: Colors.black54),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -287,6 +300,10 @@ class _AdminScreenState extends State<AdminScreen> {
                                       },
                                     ),
                               ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFE3350D),
+                            foregroundColor: Colors.white,
+                          ),
                           child: const Text('Redigera'),
                         ),
                       ],
@@ -308,6 +325,10 @@ class _AdminScreenState extends State<AdminScreen> {
                     final token = session.token;
                     if (token != null) await _fetchUsers(token);
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFE3350D),
+                    foregroundColor: Colors.white,
+                  ),
                   child: const Text('Previous'),
                 ),
               if ((_currentPage + 1) * _pageSize < _totalUsers)
@@ -319,6 +340,10 @@ class _AdminScreenState extends State<AdminScreen> {
                     final token = session.token;
                     if (token != null) await _fetchUsers(token);
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFE3350D),
+                    foregroundColor: Colors.white,
+                  ),
                   child: const Text('Next'),
                 ),
             ],
@@ -327,7 +352,7 @@ class _AdminScreenState extends State<AdminScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               "Sida ${_currentPage + 1} / ${(_totalUsers / _pageSize).ceil()}",
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16, color: Colors.black87),
             ),
           ),
           const SizedBox(height: 10),

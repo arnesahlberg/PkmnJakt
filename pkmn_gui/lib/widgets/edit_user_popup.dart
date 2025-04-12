@@ -16,91 +16,107 @@ class EditUserDialog extends StatelessWidget {
     super.key,
     required this.userId,
     required this.userName,
-    this.userIsAdmin = false,
+    required this.userIsAdmin,
     this.onUserUpdated,
   });
 
   @override
   Widget build(BuildContext context) {
-    final currentIsMainAdmin =
-        Provider.of<UserSession>(context, listen: false).userId == 'admin';
     return AlertDialog(
-      title: Text('Redigera användare: $userId'),
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Color(0xFF992109), width: 2),
+      ),
+      title: Text(
+        'Hantera användare: $userId',
+        style: const TextStyle(
+          color: Colors.black87,
+          fontFamily: 'PixelFontTitle',
+          fontSize: 20,
+        ),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Namn: $userName'),
-          const SizedBox(height: 20),
-          // Återställ lösenord
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              showDialog(
-                context: context,
-                builder: (context) => ResetUserPasswordDialog(userId: userId),
-              );
-            },
-            child: const Text('Återställ lösenord'),
+          ListTile(
+            title: Text(
+              'Namn: $userName',
+              style: const TextStyle(color: Colors.black87),
+            ),
+            subtitle: Text(
+              userIsAdmin ? 'Admin' : 'Användare',
+              style: const TextStyle(color: Colors.black54),
+            ),
           ),
-          const SizedBox(height: 10),
-          userIsAdmin
-              ? ElevatedButton(
-                onPressed:
-                    currentIsMainAdmin
-                        ? () {
-                          Navigator.of(context).pop();
-                          showDialog(
-                            context: context,
-                            builder:
-                                (context) => DemoteUserDialog(
-                                  userId: userId,
-                                  onUserUpdated: onUserUpdated,
-                                ),
-                          );
-                        }
-                        : null,
-                child: const Text('Gör till icke administratör'),
-              )
-              : ElevatedButton(
-                onPressed: () {
-                  final isMainAdmin =
-                      Provider.of<UserSession>(context, listen: false).userId ==
-                      'admin';
-                  Navigator.of(context).pop();
-                  showDialog(
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () async {
+                  await showDialog(
                     context: context,
                     builder:
-                        (context) => PromoteUserDialog(
-                          userId: userId,
-                          isMainAdmin: isMainAdmin,
-                          onUserUpdated: onUserUpdated,
-                        ),
+                        (context) => ResetUserPasswordDialog(userId: userId),
                   );
                 },
-                child: const Text('Gör till administratör'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE3350D),
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Återställ lösenord'),
               ),
-          const SizedBox(height: 10),
-          // Radera användare
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              showDialog(
-                context: context,
-                builder:
-                    (context) => DeleteUserDialog(
-                      userId: userId,
-                      onDeleted: onUserUpdated,
-                    ),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Radera användare'),
+              ElevatedButton(
+                onPressed: () async {
+                  final result = await showDialog<bool>(
+                    context: context,
+                    builder:
+                        (context) => DeleteUserDialog(
+                          userId: userId,
+                          onDeleted: onUserUpdated,
+                        ),
+                  );
+                  if (result == true) {
+                    Navigator.of(context).pop();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade700,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Radera användare'),
+              ),
+            ],
           ),
+          if (!userIsAdmin) ...[
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                await showDialog(
+                  context: context,
+                  builder:
+                      (context) => PromoteUserDialog(
+                        userId: userId,
+                        isMainAdmin: false,
+                        onUserUpdated: onUserUpdated,
+                      ),
+                );
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE3350D),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Gör till administratör'),
+            ),
+          ],
         ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
+          style: TextButton.styleFrom(foregroundColor: const Color(0xFF992109)),
           child: const Text('Stäng'),
         ),
       ],

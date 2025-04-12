@@ -7,6 +7,8 @@ Future<String?> changeUserNamePopup(BuildContext context) async {
     context: context,
     builder: (context) {
       return AlertDialog(
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: Color(0xFF992109), width: 2),
@@ -14,7 +16,7 @@ Future<String?> changeUserNamePopup(BuildContext context) async {
         title: const Text(
           "Ange nytt användarnamn",
           style: TextStyle(
-            color: Color(0xFFE3350D),
+            color: Colors.black87,
             fontFamily: 'PixelFontTitle',
             fontSize: 20,
           ),
@@ -33,7 +35,7 @@ Future<String?> changeUserNamePopup(BuildContext context) async {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFE3350D), width: 2),
+              borderSide: const BorderSide(color: Color(0xFF992109), width: 2),
             ),
           ),
           onChanged: (value) {

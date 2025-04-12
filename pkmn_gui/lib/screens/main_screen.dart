@@ -174,8 +174,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) =>
-                                              const FoundPokemonScannerScreen(),
+                                          builder:
+                                              (_) =>
+                                                  const FoundPokemonScannerScreen(),
                                         ),
                                       );
                                     },

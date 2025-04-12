@@ -58,24 +58,42 @@ class _PromoteUserDialogState extends State<PromoteUserDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Bekräfta administratör'),
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Color(0xFF992109), width: 2),
+      ),
+      title: const Text(
+        'Ge administratörsrättigheter',
+        style: TextStyle(
+          color: Colors.black87,
+          fontFamily: 'PixelFontTitle',
+          fontSize: 20,
+        ),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Vill du verkligen göra ${widget.userId} till administratör?\nAnge användar-id för att bekräfta:',
+            'För att ge administratörsrättigheter, skriv in användar-id:et.',
+            style: TextStyle(color: Colors.black87),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           TextField(
             controller: _confirmController,
-            decoration: const InputDecoration(labelText: 'Användar-id'),
+            decoration: InputDecoration(
+              labelText: 'Användar-id',
+              labelStyle: TextStyle(color: Colors.black87),
+              border: OutlineInputBorder(),
+            ),
+            style: TextStyle(color: Colors.black87),
           ),
           if (_errorMessage != null)
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 _errorMessage!,
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: Colors.red.shade700),
               ),
             ),
         ],
@@ -83,10 +101,15 @@ class _PromoteUserDialogState extends State<PromoteUserDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
+          style: TextButton.styleFrom(foregroundColor: const Color(0xFF992109)),
           child: const Text('Avbryt'),
         ),
         ElevatedButton(
           onPressed: _isProcessing ? null : _promoteUser,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE3350D),
+            foregroundColor: Colors.white,
+          ),
           child:
               _isProcessing
                   ? const SizedBox(
@@ -94,7 +117,7 @@ class _PromoteUserDialogState extends State<PromoteUserDialog> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                  : const Text('Bekräfta'),
+                  : const Text('Ge administratörsrättigheter'),
         ),
       ],
     );

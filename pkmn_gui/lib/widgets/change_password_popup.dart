@@ -121,6 +121,8 @@ class _ChangePasswordPromptState extends State<ChangePasswordPrompt> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Color(0xFF992109), width: 2),
@@ -128,7 +130,7 @@ class _ChangePasswordPromptState extends State<ChangePasswordPrompt> {
       title: const Text(
         "Byt lösenord",
         style: TextStyle(
-          color: Color(0xFFE3350D),
+          color: Colors.black87,
           fontFamily: 'PixelFontTitle',
           fontSize: 20,
         ),
@@ -136,7 +138,6 @@ class _ChangePasswordPromptState extends State<ChangePasswordPrompt> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 8),
           TextField(
             controller: _oldPasswordController,
             style: const TextStyle(color: Colors.black87),

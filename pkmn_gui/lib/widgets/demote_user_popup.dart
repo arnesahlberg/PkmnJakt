@@ -52,24 +52,42 @@ class _DemoteUserDialogState extends State<DemoteUserDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Bekräfta demotering'),
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Color(0xFF992109), width: 2),
+      ),
+      title: const Text(
+        'Ta bort administratörsrättigheter',
+        style: TextStyle(
+          color: Colors.black87,
+          fontFamily: 'PixelFontTitle',
+          fontSize: 20,
+        ),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Vill du verkligen göra ${widget.userId} till icke administratör?\nAnge användar-id för att bekräfta:',
+            'För att ta bort administratörsrättigheter, skriv in användar-id:et.',
+            style: TextStyle(color: Colors.black87),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           TextField(
             controller: _confirmController,
-            decoration: const InputDecoration(labelText: 'Användar-id'),
+            decoration: InputDecoration(
+              labelText: 'Användar-id',
+              labelStyle: TextStyle(color: Colors.black87),
+              border: OutlineInputBorder(),
+            ),
+            style: TextStyle(color: Colors.black87),
           ),
           if (_errorMessage != null)
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 _errorMessage!,
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: Colors.red.shade700),
               ),
             ),
         ],
@@ -77,10 +95,15 @@ class _DemoteUserDialogState extends State<DemoteUserDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
+          style: TextButton.styleFrom(foregroundColor: const Color(0xFF992109)),
           child: const Text('Avbryt'),
         ),
         ElevatedButton(
           onPressed: _isProcessing ? null : _demoteUser,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE3350D),
+            foregroundColor: Colors.white,
+          ),
           child:
               _isProcessing
                   ? const SizedBox(
@@ -88,7 +111,7 @@ class _DemoteUserDialogState extends State<DemoteUserDialog> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                  : const Text('Bekräfta'),
+                  : const Text('Ta bort administratörsrättigheter'),
         ),
       ],
     );
