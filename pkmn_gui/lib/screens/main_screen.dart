@@ -147,7 +147,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.menu_book),
+                                        Icon(
+                                          Icons.menu_book,
+                                          color: AppColors.white,
+                                        ),
                                         SizedBox(width: 8),
                                         Text("Mitt Pokédex"),
                                       ],
