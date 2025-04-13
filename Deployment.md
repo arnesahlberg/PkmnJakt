@@ -9,14 +9,14 @@ git clone repo/url.git
 ## Install Required Dependencies
 Ensure that Nginx and SQLite3 are installed:
 ```sh
-sudo apt install nginx libsqlite3-dev
+sudo apt install nginx libsqlite3-dev python3.12-venv
 ```
 
 ### Install Certbot
 Install Certbot to manage SSL certificates:
 ```sh
 sudo apt update
-sudo apt install certbot python3-certbot-nginx
+sudo apt install certbot python3-certbot-nginx 
 ```
 
 ## API Setup
@@ -27,6 +27,9 @@ Ensure the API is built with Cargo:
 cd PkmnJakt/pkmn_api
 cargo build --release
 ```
+
+Make sure pkg-config and the OpenSSL development libraries are installed for your target architecture before building the project.
+
 
 ### Obtain an SSL Certificate
 Run the following command to obtain an SSL certificate for your API domain:
