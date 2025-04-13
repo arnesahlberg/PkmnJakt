@@ -2,6 +2,11 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
+Map<String, dynamic> decodeUtf8Json(http.Response response) {
+  final decodedString = utf8.decode(response.bodyBytes);
+  return jsonDecode(decodedString);
+}
+
 class ApiService {
   static const String baseUrl =
       'https://pkmnapi.notawebsitejustmynotebookgoaway.com'; // for release
@@ -11,6 +16,11 @@ class ApiService {
     "Content-Type": "application/json",
     if (token != null) "Authorization": token,
   };
+
+  static Map<String, dynamic> decodeUtf8Json(http.Response response) {
+    final decodedString = utf8.decode(response.bodyBytes);
+    return jsonDecode(decodedString);
+  }
 
   // login
   // look for response on the form:
@@ -31,14 +41,14 @@ class ApiService {
       body: jsonEncode({'id': id, 'password': password}),
       headers: _headers(),
     );
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   // check if user exists
   // look for response on the form:
   static Future<bool> checkUserExists(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/user_exists/$id'));
-    final json = jsonDecode(response.body);
+    final json = decodeUtf8Json(response);
     return json['exists'];
   }
 
@@ -70,7 +80,7 @@ class ApiService {
       body: jsonEncode({'id': id, 'name': name, 'password': password}),
       headers: _headers(),
     );
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   static Future<Map<String, dynamic>> setUserName(
@@ -83,7 +93,7 @@ class ApiService {
       body: jsonEncode({'name': name}),
       headers: _headers(token),
     );
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   static Future<Map<String, dynamic>> setNewPassword(
@@ -99,7 +109,7 @@ class ApiService {
       }),
       headers: _headers(token),
     );
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   static Future<Map<String, dynamic>> validatePassword(
@@ -111,7 +121,7 @@ class ApiService {
       body: jsonEncode({'password': password}),
       headers: _headers(token),
     );
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   static Future<bool> validateToken(String token) async {
@@ -134,7 +144,7 @@ class ApiService {
       body: jsonEncode({'catch_code': catchCode}),
       headers: _headers(token),
     );
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   static Future<Map<String, dynamic>> viewFoundPokemon(
@@ -148,20 +158,20 @@ class ApiService {
       body: jsonEncode({'n': n}),
       headers: _headers(token),
     );
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   //Get statistics (no Authorization required)
   static Future<Map<String, dynamic>> getStatisticsHighscore() async {
     final response = await http.get(Uri.parse('$baseUrl/statistics_highscore'));
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   static Future<Map<String, dynamic>> getStatisticsLatestPokemonFound() async {
     final response = await http.get(
       Uri.parse('$baseUrl/statistics_latest_pokemon_found'),
     );
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   // returns
@@ -174,7 +184,7 @@ class ApiService {
   */
   static Future<Map<String, dynamic>> getPokemon(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/get_pokemon/$id'));
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   static Future<Map<String, dynamic>> getMyPokedex(String token) async {
@@ -182,7 +192,7 @@ class ApiService {
       Uri.parse('$baseUrl/my_pokedex'),
       headers: _headers(token),
     );
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   // get user
@@ -200,7 +210,7 @@ class ApiService {
   //   }
   static Future<Map<String, dynamic>> getUser(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/get_user/$id'));
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 }
 
@@ -234,7 +244,7 @@ class AdminApiService {
       body: jsonEncode({'n': n, 'skip': skip}),
       headers: ApiService._headers(token),
     );
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   // get users filtering on id
@@ -249,7 +259,7 @@ class AdminApiService {
       body: jsonEncode({'filter': filter, 'n': n}),
       headers: ApiService._headers(token),
     );
-    return jsonDecode(response.body);
+    return decodeUtf8Json(response);
   }
 
   // delete user

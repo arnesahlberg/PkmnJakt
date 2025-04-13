@@ -12,7 +12,7 @@ with open('def.sqlite', 'r') as sql_file:
     sql_script = sql_file.read()
 cursor.executescript(sql_script)
 
-with open('../Pkmn/pkmn.csv', newline='', encoding='utf-8') as csvfile:
+with open('../Pkmn/pkmn.csv', 'r', newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         cursor.execute('''
@@ -21,7 +21,7 @@ with open('../Pkmn/pkmn.csv', newline='', encoding='utf-8') as csvfile:
         ''', (row['Nr'], row['Name'], row['Info'], float(row['Height (m)'])))
 
 
-with open('../Pkmn/catch_codes.csv', newline='', encoding='utf-8') as csvfile:
+with open('../Pkmn/catch_codes.csv', 'r', newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         cursor.execute('''
