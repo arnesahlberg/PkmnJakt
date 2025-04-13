@@ -6,6 +6,7 @@ import 'package:universal_html/html.dart' as html;
 import 'screens/main_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/profile_screen.dart';
+import 'constants.dart';
 
 // ------------------------------
 // User Session Provider
@@ -104,43 +105,37 @@ class MyApp extends StatelessWidget {
         fontFamily: 'PixelFont',
         colorScheme: ColorScheme(
           brightness: Brightness.light,
-          primary: const Color(0xFFE3350D), // Classic Pokédex red
-          onPrimary: Colors.white,
-          secondary: const Color(0xFF62B1F6), // Pokédex accent blue
-          onSecondary: Colors.white,
-          tertiary: const Color(0xFFFFD700), // Pokemon yellow
+          primary: AppColors.primaryRed,
+          onPrimary: AppColors.white,
+          secondary: AppColors.accentBlue,
+          onSecondary: AppColors.white,
+          tertiary: AppColors.accentYellow,
           error: Colors.red.shade700,
-          onError: Colors.white,
-          background: const Color(0xFFFAF6F6), // Slight off-white
-          onBackground: Colors.black87,
-          surface: const Color(0xFFE3350D), // Pokédex red for surfaces
-          onSurface: Colors.white,
+          onError: AppColors.white,
+          background: AppColors.backgroundLight,
+          onBackground: AppColors.textPrimary,
+          surface: AppColors.primaryRed,
+          onSurface: AppColors.white,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: const BorderSide(color: Color(0xFF992109), width: 2),
-            ),
-          ),
+          style: AppButtonStyles.primaryButtonStyle,
         ),
         cardTheme: CardTheme(
           elevation: 4,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(UIConstants.borderRadius12),
             side: BorderSide(
-              color: const Color(0xFFE3350D).withOpacity(0.5),
-              width: 2,
+              color: AppColors.primaryRed.withOpacity(0.5),
+              width: UIConstants.borderWidth2,
             ),
           ),
         ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFE3350D),
+        appBarTheme: AppBarTheme(
+          backgroundColor: AppColors.primaryRed,
           elevation: 0,
           centerTitle: true,
         ),
-        scaffoldBackgroundColor: const Color(0xFFFAF6F6),
+        scaffoldBackgroundColor: AppColors.backgroundLight,
       ),
       home: const WelcomeScreen(),
       routes: {

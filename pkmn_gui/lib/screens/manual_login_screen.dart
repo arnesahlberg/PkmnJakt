@@ -155,21 +155,18 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              // ...existing code...
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextField(
                   controller: _idController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Ange numret från ditt deltagarband',
-                    hintText: 'T.ex. 123456',
-                    hintStyle: TextStyle(color: Colors.grey),
+                  decoration: AppInputDecorations.defaultInputDecoration(
+                    'Ange numret från ditt deltagarband',
                   ),
+                  style: AppTextStyles.bodyLarge,
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  style: ButtonStyles.buttonStyleWide,
+                  style: AppButtonStyles.buttonStyleWide,
                   onPressed: _isProcessing ? null : _submitId,
                   child: const Text("Skicka"),
                 ),

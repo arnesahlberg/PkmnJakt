@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import '../constants.dart';
 
 enum ScannerFormat { dataMatrix, qrCode }
 
@@ -60,20 +61,25 @@ class _DataMatrixScannerState extends State<DataMatrixScanner>
           Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: const Color(0xFFE3350D),
+              color: AppColors.primaryRed,
               border: Border(
-                bottom: BorderSide(color: const Color(0xFF992109), width: 3.0),
+                bottom: BorderSide(
+                  color: AppColors.secondaryRed,
+                  width: UIConstants.borderWidth3,
+                ),
               ),
             ),
             child: Row(
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(
+                      UIConstants.borderRadius8,
+                    ),
                     border: Border.all(
-                      color: const Color(0xFF992109),
-                      width: 2,
+                      color: AppColors.secondaryRed,
+                      width: UIConstants.borderWidth2,
                     ),
                   ),
                   child: IconButton(
@@ -88,17 +94,11 @@ class _DataMatrixScannerState extends State<DataMatrixScanner>
                 Expanded(
                   child: Text(
                     widget.sheetTitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'PixelFont',
                       fontSize: 16,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          offset: Offset(1.0, 1.0),
-                          blurRadius: 3.0,
-                          color: Color(0xFF992109),
-                        ),
-                      ],
+                      color: AppColors.white,
+                      shadows: AppShadows.textShadow,
                     ),
                     softWrap: true,
                   ),
@@ -193,19 +193,31 @@ class _DataMatrixScannerState extends State<DataMatrixScanner>
         border: Border(
           top:
               isTop
-                  ? const BorderSide(color: Color(0xFFE3350D), width: 4)
+                  ? const BorderSide(
+                    color: AppColors.primaryRed,
+                    width: UIConstants.borderWidth4,
+                  )
                   : BorderSide.none,
           bottom:
               !isTop
-                  ? const BorderSide(color: Color(0xFFE3350D), width: 4)
+                  ? const BorderSide(
+                    color: AppColors.primaryRed,
+                    width: UIConstants.borderWidth4,
+                  )
                   : BorderSide.none,
           left:
               isLeft
-                  ? const BorderSide(color: Color(0xFFE3350D), width: 4)
+                  ? const BorderSide(
+                    color: AppColors.primaryRed,
+                    width: UIConstants.borderWidth4,
+                  )
                   : BorderSide.none,
           right:
               !isLeft
-                  ? const BorderSide(color: Color(0xFFE3350D), width: 4)
+                  ? const BorderSide(
+                    color: AppColors.primaryRed,
+                    width: UIConstants.borderWidth4,
+                  )
                   : BorderSide.none,
         ),
       ),

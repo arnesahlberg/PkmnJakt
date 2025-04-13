@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../api_calls.dart';
 import '../main.dart';
+import '../constants.dart';
 
 class DeleteUserDialog extends StatefulWidget {
   final String userId;
@@ -61,28 +62,25 @@ class _DeleteUserDialogState extends State<DeleteUserDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Colors.red, width: 2),
+        borderRadius: BorderRadius.circular(UIConstants.borderRadius12),
+        side: const BorderSide(
+          color: Colors.red,
+          width: UIConstants.borderWidth2,
+        ),
       ),
-      title: const Column(
+      title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Bekräfta radering',
-            style: TextStyle(
-              color: Colors.red,
-              fontFamily: 'PixelFontTitle',
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+            style: AppTextStyles.titleMedium.copyWith(color: Colors.red),
           ),
           Text(
             'Sluta! Det här går inte att ångra!',
-            style: TextStyle(
+            style: AppTextStyles.bodyLarge.copyWith(
               color: Colors.red,
-              fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -100,12 +98,29 @@ class _DeleteUserDialogState extends State<DeleteUserDialog> {
             const SizedBox(height: 16),
             TextField(
               controller: _confirmController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Användar-ID första gången',
-                labelStyle: TextStyle(color: Colors.black87),
-                border: OutlineInputBorder(),
+                labelStyle: TextStyle(color: Colors.grey.shade700),
+                hintStyle: TextStyle(color: Colors.grey.shade500),
+                filled: true,
+                fillColor: AppColors.white,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(
+                    UIConstants.borderRadius8,
+                  ),
+                  borderSide: BorderSide(
+                    color: Colors.red.shade200,
+                    width: UIConstants.borderWidth1,
+                  ),
+                ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red, width: 2),
+                  borderRadius: BorderRadius.circular(
+                    UIConstants.borderRadius8,
+                  ),
+                  borderSide: BorderSide(
+                    color: Colors.red,
+                    width: UIConstants.borderWidth2,
+                  ),
                 ),
               ),
               style: const TextStyle(color: Colors.black87),

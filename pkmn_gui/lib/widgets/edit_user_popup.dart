@@ -5,6 +5,7 @@ import 'reset_user_password_popup.dart';
 import 'promote_user_popup.dart';
 import 'demote_user_popup.dart';
 import '../main.dart';
+import '../constants.dart';
 
 class EditUserDialog extends StatelessWidget {
   final String userId;
@@ -27,18 +28,14 @@ class EditUserDialog extends StatelessWidget {
     final bool isMainAdmin = userSession.userId == 'admin';
 
     return AlertDialog(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFF992109), width: 2),
+        borderRadius: BorderRadius.circular(UIConstants.borderRadius12),
+        side: AppBorderStyles.primaryBorder,
       ),
       title: Text(
         'Hantera användare: $userId',
-        style: const TextStyle(
-          color: Colors.black87,
-          fontFamily: 'PixelFontTitle',
-          fontSize: 20,
-        ),
+        style: AppTextStyles.titleMedium,
       ),
       content: SingleChildScrollView(
         child: Column(
@@ -48,7 +45,7 @@ class EditUserDialog extends StatelessWidget {
             ListTile(
               title: Text(
                 'Namn: $userName',
-                style: const TextStyle(color: Colors.black87),
+                style: AppTextStyles.bodyLarge.copyWith(color: Colors.black87),
               ),
               subtitle: Text(
                 userIsAdmin ? 'Admin' : 'Användare',
@@ -64,11 +61,11 @@ class EditUserDialog extends StatelessWidget {
                   builder: (context) => const ResetUserPasswordDialog(),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE3350D),
-                foregroundColor: Colors.white,
+              style: AppButtonStyles.primaryButtonStyle,
+              child: const Text(
+                'Återställ lösenord',
+                style: AppTextStyles.buttonText,
               ),
-              child: const Text('Återställ lösenord'),
             ),
             const SizedBox(height: 8),
 
@@ -88,20 +85,17 @@ class EditUserDialog extends StatelessWidget {
                     Navigator.of(context).pop();
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade700,
-                  foregroundColor: Colors.white,
-                ),
+                style: AppButtonStyles.dangerButtonStyle,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: const [
                     Icon(
                       Icons.warning_amber_rounded,
                       size: 20,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
-                    SizedBox(width: 8),
-                    Text('Radera användare'),
+                    SizedBox(width: UIConstants.spacing8),
+                    Text('Radera användare', style: AppTextStyles.buttonText),
                   ],
                 ),
               ),
@@ -123,11 +117,11 @@ class EditUserDialog extends StatelessWidget {
                   );
                   Navigator.of(context).pop();
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE3350D),
-                  foregroundColor: Colors.white,
+                style: AppButtonStyles.primaryButtonStyle,
+                child: const Text(
+                  'Gör till administratör',
+                  style: AppTextStyles.buttonText,
                 ),
-                child: const Text('Gör till administratör'),
               ),
             ],
 
@@ -145,11 +139,11 @@ class EditUserDialog extends StatelessWidget {
                   );
                   Navigator.of(context).pop();
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE3350D),
-                  foregroundColor: Colors.white,
+                style: AppButtonStyles.primaryButtonStyle,
+                child: const Text(
+                  'Ta bort administratörsrättigheter',
+                  style: AppTextStyles.buttonText,
                 ),
-                child: const Text('Ta bort administratörsrättigheter'),
               ),
             ],
           ],
@@ -158,7 +152,7 @@ class EditUserDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          style: TextButton.styleFrom(foregroundColor: const Color(0xFF992109)),
+          style: TextButton.styleFrom(foregroundColor: AppColors.secondaryRed),
           child: const Text('Stäng'),
         ),
       ],

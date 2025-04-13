@@ -49,12 +49,14 @@ class _QRScannerScreenState extends State<QRScannerScreen>
       try {
         if (scannedId.length > 10) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
                 "Koden du scannade är inte en lägerdeltagares kod",
-                style: TextStyle(color: Colors.white),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.white,
+                ),
               ),
-              backgroundColor: Color(0xFFE3350D),
+              backgroundColor: AppColors.primaryRed,
             ),
           );
           setState(() {
@@ -209,13 +211,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
     return Stack(
       children: [
         Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [const Color(0xFFFAF6F6), Colors.red.shade50],
-            ),
-          ),
+          decoration: AppBoxDecorations.gradientBackground,
           child: Scaffold(
             backgroundColor: Colors.transparent,
             body: Column(
@@ -233,15 +229,13 @@ class _QRScannerScreenState extends State<QRScannerScreen>
                     children: [
                       const Icon(
                         Icons.qr_code_scanner,
-                        size: 32,
-                        color: Color(0xFFE3350D),
+                        size: UIConstants.iconSizeLarge,
+                        color: AppColors.primaryRed,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: UIConstants.spacing8),
                       Text(
                         'Rikta kameran mot ditt deltagarband. Om du inte loggat in tidigare kommer du få skapa ett konto.',
-                        style: TextStyle(
-                          fontFamily: 'PixelFont',
-                          fontSize: 14,
+                        style: AppTextStyles.bodyMedium.copyWith(
                           color: Colors.grey.shade800,
                         ),
                         textAlign: TextAlign.center,

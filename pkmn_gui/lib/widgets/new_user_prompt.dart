@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants.dart';
 
 Future<Map<String, String>?> promptForUserCredentials(
   BuildContext context,
@@ -62,48 +63,19 @@ class _NewUserPromptState extends State<NewUserPrompt> {
   }
 
   InputDecoration _getInputDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: Colors.grey.shade700),
-      hintStyle: TextStyle(color: Colors.grey.shade500),
-      filled: true,
-      fillColor: Colors.white,
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: Colors.grey.shade400),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFFE3350D), width: 2),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: Colors.red.shade700, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: Colors.red.shade300),
-      ),
-    );
+    return AppInputDecorations.defaultInputDecoration(label);
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFF992109), width: 2),
+        borderRadius: BorderRadius.circular(UIConstants.borderRadius12),
+        side: AppBorderStyles.primaryBorder,
       ),
-      title: const Text(
-        "Skapa användare",
-        style: TextStyle(
-          color: Colors.black87,
-          fontFamily: 'PixelFontTitle',
-          fontSize: 20,
-        ),
-      ),
+      title: const Text("Skapa användare", style: AppTextStyles.titleMedium),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -144,20 +116,13 @@ class _NewUserPromptState extends State<NewUserPrompt> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, null),
-          style: TextButton.styleFrom(foregroundColor: const Color(0xFF992109)),
+          style: TextButton.styleFrom(foregroundColor: AppColors.secondaryRed),
           child: const Text("Avbryt"),
         ),
         ElevatedButton(
           onPressed: _submit,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFE3350D),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: const BorderSide(color: Color(0xFF992109), width: 2),
-            ),
-          ),
-          child: const Text("Skapa"),
+          style: AppButtonStyles.primaryButtonStyle,
+          child: const Text("Skapa", style: AppTextStyles.buttonText),
         ),
       ],
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants.dart';
 
 class PokedexButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -22,39 +23,25 @@ class PokedexButton extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF992109).withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 2,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(UIConstants.borderRadius8),
+        boxShadow: AppShadows.containerShadow,
       ),
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: color ?? Theme.of(context).colorScheme.primary,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          backgroundColor: color ?? AppColors.primaryRed,
+          foregroundColor: AppColors.white,
+          padding: const EdgeInsets.symmetric(
+            horizontal: UIConstants.padding16,
+          ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: const BorderSide(color: Color(0xFF992109), width: 2),
+            borderRadius: BorderRadius.circular(UIConstants.borderRadius8),
+            side: AppBorderStyles.primaryBorder,
           ),
         ),
         child: DefaultTextStyle(
-          style: const TextStyle(
-            fontFamily: 'PixelFont',
-            fontSize: 16,
-            color: Colors.white,
-            shadows: [
-              Shadow(
-                offset: Offset(1.0, 1.0),
-                blurRadius: 2.0,
-                color: Color(0xFF992109),
-              ),
-            ],
+          style: AppTextStyles.buttonText.copyWith(
+            shadows: AppShadows.textShadow,
           ),
           child: child,
         ),

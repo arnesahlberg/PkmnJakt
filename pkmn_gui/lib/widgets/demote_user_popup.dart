@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../api_calls.dart';
 import '../main.dart';
+import '../constants.dart';
 
 class DemoteUserDialog extends StatefulWidget {
   final String userId;
@@ -52,18 +53,14 @@ class _DemoteUserDialogState extends State<DemoteUserDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFF992109), width: 2),
+        borderRadius: BorderRadius.circular(UIConstants.borderRadius12),
+        side: AppBorderStyles.primaryBorder,
       ),
       title: const Text(
         'Ta bort administratörsrättigheter',
-        style: TextStyle(
-          color: Colors.black87,
-          fontFamily: 'PixelFontTitle',
-          fontSize: 20,
-        ),
+        style: AppTextStyles.titleMedium,
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -95,23 +92,28 @@ class _DemoteUserDialogState extends State<DemoteUserDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          style: TextButton.styleFrom(foregroundColor: const Color(0xFF992109)),
+          style: TextButton.styleFrom(foregroundColor: AppColors.secondaryRed),
           child: const Text('Avbryt'),
         ),
         ElevatedButton(
           onPressed: _isProcessing ? null : _demoteUser,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFE3350D),
-            foregroundColor: Colors.white,
-          ),
+          style: AppButtonStyles.primaryButtonStyle,
           child:
               _isProcessing
                   ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.white,
+                      ),
+                      strokeWidth: 2,
+                    ),
                   )
-                  : const Text('Ta bort administratörsrättigheter'),
+                  : const Text(
+                    'Ta bort administratörsrättigheter',
+                    style: AppTextStyles.buttonText,
+                  ),
         ),
       ],
     );

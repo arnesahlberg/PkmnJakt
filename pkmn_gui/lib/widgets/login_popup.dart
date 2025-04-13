@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants.dart';
 
 Future<String?> promptForPassword(BuildContext context) async {
   String password = "";
@@ -8,18 +9,11 @@ Future<String?> promptForPassword(BuildContext context) async {
       return AlertDialog(
         contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Color(0xFF992109), width: 2),
+          borderRadius: BorderRadius.circular(UIConstants.borderRadius12),
+          side: AppBorderStyles.primaryBorder,
         ),
-        backgroundColor: Colors.white,
-        title: const Text(
-          "Ange lösenord",
-          style: TextStyle(
-            color: Colors.black87,
-            fontFamily: 'PixelFontTitle',
-            fontSize: 20,
-          ),
-        ),
+        backgroundColor: AppColors.white,
+        title: const Text("Ange lösenord", style: AppTextStyles.titleMedium),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -67,11 +61,11 @@ Future<String?> promptForPassword(BuildContext context) async {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, password),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE3350D),
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.primaryRed,
+              foregroundColor: AppColors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(color: Color(0xFF992109), width: 2),
+                borderRadius: BorderRadius.circular(UIConstants.borderRadius8),
+                side: AppBorderStyles.primaryBorder,
               ),
             ),
             child: const Text("OK"),

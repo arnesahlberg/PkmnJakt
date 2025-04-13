@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../api_calls.dart';
 import '../main.dart';
 import '../utils/auth_utils.dart';
+import '../constants.dart';
 
 class PokedexScreen extends StatefulWidget {
   const PokedexScreen({super.key});
@@ -41,19 +42,13 @@ class _PokedexScreenState extends State<PokedexScreen> {
     return Scaffold(
       appBar: const CommonAppBar(title: "Min Pokédex"),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [const Color(0xFFFAF6F6), Colors.red.shade50],
-          ),
-        ),
+        decoration: AppBoxDecorations.gradientBackground,
         child:
             _isLoading
                 ? const Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Color(0xFFE3350D),
+                      AppColors.primaryRed,
                     ),
                   ),
                 )
@@ -64,7 +59,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
                       return const Center(
                         child: CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFFE3350D),
+                            AppColors.primaryRed,
                           ),
                         ),
                       );
@@ -74,7 +69,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
                         child: Text(
                           "Error: ${snapshot.error}",
                           style: const TextStyle(
-                            color: Color(0xFFE3350D),
+                            color: AppColors.primaryRed,
                             fontFamily: 'PixelFont',
                           ),
                         ),
@@ -93,34 +88,22 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                 Row(
                                   children: [
                                     Container(
-                                      width: 12,
-                                      height: 12,
+                                      width: UIConstants.iconSizeSmall,
+                                      height: UIConstants.iconSizeSmall,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: Colors.blue.shade300,
                                         border: Border.all(
-                                          color: Colors.white,
-                                          width: 2,
+                                          color: AppColors.white,
+                                          width: UIConstants.borderWidth2,
                                         ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(
-                                              0.2,
-                                            ),
-                                            spreadRadius: 1,
-                                            blurRadius: 2,
-                                          ),
-                                        ],
+                                        boxShadow: AppShadows.lightShadow,
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
+                                    const SizedBox(width: UIConstants.spacing8),
                                     Text(
                                       "Fångade Pokémon: ${pokedex.length}",
-                                      style: const TextStyle(
-                                        fontFamily: 'PixelFontTitle',
-                                        fontSize: 20,
-                                        color: Color(0xFFE3350D),
-                                      ),
+                                      style: AppTextStyles.titleMedium,
                                     ),
                                   ],
                                 ),
@@ -132,20 +115,25 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                   itemBuilder: (context, index) {
                                     final pokemon = pokedex[index];
                                     return Container(
-                                      margin: const EdgeInsets.only(bottom: 12),
-                                      padding: const EdgeInsets.all(12),
+                                      margin: const EdgeInsets.only(
+                                        bottom: UIConstants.spacing12,
+                                      ),
+                                      padding: const EdgeInsets.all(
+                                        UIConstants.padding12,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(12),
+                                        color: AppColors.white,
+                                        borderRadius: BorderRadius.circular(
+                                          UIConstants.borderRadius12,
+                                        ),
                                         border: Border.all(
-                                          color: const Color(0xFF992109),
-                                          width: 2,
+                                          color: AppColors.secondaryRed,
+                                          width: UIConstants.borderWidth2,
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: const Color(
-                                              0xFF992109,
-                                            ).withOpacity(0.1),
+                                            color: AppColors.secondaryRed
+                                                .withOpacity(0.1),
                                             spreadRadius: 1,
                                             blurRadius: 4,
                                             offset: const Offset(2, 2),
@@ -162,10 +150,12 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                             decoration: BoxDecoration(
                                               color: Colors.grey.shade100,
                                               borderRadius:
-                                                  BorderRadius.circular(8),
+                                                  BorderRadius.circular(
+                                                    UIConstants.borderRadius8,
+                                                  ),
                                               border: Border.all(
-                                                color: const Color(0xFF992109),
-                                                width: 1,
+                                                color: AppColors.secondaryRed,
+                                                width: UIConstants.borderWidth1,
                                               ),
                                             ),
                                             child: ClipRRect(
@@ -200,7 +190,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                                     fontFamily:
                                                         'PixelFontTitle',
                                                     fontSize: 18,
-                                                    color: Color(0xFFE3350D),
+                                                    color: AppColors.primaryRed,
                                                   ),
                                                 ),
                                                 Text(
@@ -226,9 +216,8 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                                         vertical: 4,
                                                       ),
                                                   decoration: BoxDecoration(
-                                                    color: const Color(
-                                                      0xFFE3350D,
-                                                    ).withOpacity(0.1),
+                                                    color: AppColors.primaryRed
+                                                        .withOpacity(0.1),
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                           4,

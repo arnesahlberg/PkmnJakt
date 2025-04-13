@@ -1,47 +1,56 @@
 import 'package:flutter/material.dart';
+import '../constants.dart';
 
 class PokedexContainer extends StatelessWidget {
   final Widget child;
-  final EdgeInsets padding;
-  final double borderRadius;
+  final EdgeInsetsGeometry? padding;
+  final bool hasBorder;
+  final Color? backgroundColor;
 
   const PokedexContainer({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(16.0),
-    this.borderRadius = 12.0,
+    this.padding,
+    this.hasBorder = true,
+    this.backgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.symmetric(vertical: UIConstants.spacing8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: const Color(0xFF992109), width: 3.0),
+        borderRadius: BorderRadius.circular(UIConstants.borderRadius12),
+        border:
+            hasBorder
+                ? Border.all(
+                  color: AppColors.secondaryRed,
+                  width: UIConstants.borderWidth2,
+                )
+                : null,
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF992109).withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(2, 2),
+            color: AppColors.shadowColor.withOpacity(0.15),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius - 3),
+        borderRadius: BorderRadius.circular(
+          hasBorder ? UIConstants.borderRadius10 : UIConstants.borderRadius12,
+        ),
         child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Colors.white, Colors.grey.shade50],
-            ),
-          ),
+          padding: padding ?? const EdgeInsets.all(UIConstants.padding16),
+          decoration:
+              backgroundColor != null
+                  ? BoxDecoration(color: backgroundColor)
+                  : AppBoxDecorations.pokedexContainerDecoration,
           child: DefaultTextStyle(
-            style: TextStyle(color: Colors.grey.shade800, fontSize: 14),
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.grey.shade800,
+            ),
             child: child,
           ),
         ),

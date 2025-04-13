@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pkmn_gui/constants.dart';
 import 'package:provider/provider.dart';
 import '../api_calls.dart';
 import '../main.dart';
+import '../constants.dart';
 
 class ResetUserPasswordDialog extends StatefulWidget {
   const ResetUserPasswordDialog({super.key});
@@ -92,19 +92,12 @@ class ResetUserPasswordDialogState extends State<ResetUserPasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFF992109), width: 2),
+        borderRadius: BorderRadius.circular(UIConstants.borderRadius12),
+        side: AppBorderStyles.primaryBorder,
       ),
-      title: const Text(
-        'Återställ lösenord',
-        style: TextStyle(
-          color: Colors.black87,
-          fontFamily: 'PixelFontTitle',
-          fontSize: 20,
-        ),
-      ),
+      title: const Text('Återställ lösenord', style: AppTextStyles.titleMedium),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -195,27 +188,29 @@ class ResetUserPasswordDialogState extends State<ResetUserPasswordDialog> {
         if (!_success) ...[
           TextButton(
             onPressed: _isProcessing ? null : () => Navigator.of(context).pop(),
-            child: const Text('Avbryt', style: TextStyle(color: Colors.grey)),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.secondaryRed,
+            ),
+            child: const Text('Avbryt'),
           ),
           ElevatedButton(
             onPressed: _isProcessing ? null : _resetPassword,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE3350D),
-              foregroundColor: Colors.white,
-            ),
+            style: AppButtonStyles.primaryButtonStyle,
             child:
                 _isProcessing
                     ? const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.white,
+                        ),
                         strokeWidth: 2,
                       ),
                     )
                     : const Text(
                       'Återställ lösenord',
-                      style: TextStyle(color: Colors.white),
+                      style: AppTextStyles.buttonText,
                     ),
           ),
         ] else ...[

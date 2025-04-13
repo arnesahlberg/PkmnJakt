@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants.dart';
 
 // popup for changing user name
 Future<String?> changeUserNamePopup(BuildContext context) async {
@@ -8,35 +9,20 @@ Future<String?> changeUserNamePopup(BuildContext context) async {
     builder: (context) {
       return AlertDialog(
         contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Color(0xFF992109), width: 2),
+          borderRadius: BorderRadius.circular(UIConstants.borderRadius12),
+          side: AppBorderStyles.primaryBorder,
         ),
         title: const Text(
           "Ange nytt användarnamn",
-          style: TextStyle(
-            color: Colors.black87,
-            fontFamily: 'PixelFontTitle',
-            fontSize: 20,
-          ),
+          style: AppTextStyles.titleMedium,
         ),
         content: TextField(
           autofocus: true,
           style: const TextStyle(color: Colors.black87),
-          decoration: InputDecoration(
-            hintText: "Användarnamn",
-            hintStyle: TextStyle(color: Colors.grey.shade500),
-            filled: true,
-            fillColor: Colors.white,
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade400),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF992109), width: 2),
-            ),
+          decoration: AppInputDecorations.defaultInputDecoration(
+            "Användarnamn",
           ),
           onChanged: (value) {
             name = value;
@@ -46,7 +32,7 @@ Future<String?> changeUserNamePopup(BuildContext context) async {
           TextButton(
             onPressed: () => Navigator.pop(context, null),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF992109),
+              foregroundColor: AppColors.secondaryRed,
             ),
             child: const Text("Avbryt"),
           ),
@@ -65,15 +51,8 @@ Future<String?> changeUserNamePopup(BuildContext context) async {
                   else
                     Navigator.pop(context, name),
                 },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE3350D),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(color: Color(0xFF992109), width: 2),
-              ),
-            ),
-            child: const Text("OK"),
+            style: AppButtonStyles.primaryButtonStyle,
+            child: const Text("OK", style: AppTextStyles.buttonText),
           ),
         ],
       );

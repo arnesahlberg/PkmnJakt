@@ -57,24 +57,28 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
             CallResultCode.pokemonAlreadyFound) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
                 "Du har redan hittat denna Pokémon",
-                style: TextStyle(color: Colors.white),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.white,
+                ),
               ),
-              backgroundColor: Color(0xFFE3350D),
+              backgroundColor: AppColors.primaryRed,
             ),
           );
         } else if (foundResponse['result_code'] ==
             CallResultCode.pokemonNotFound) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
                 "Koden du scannade tillhör inte en pokemon",
-                style: TextStyle(color: Colors.white),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.white,
+                ),
               ),
-              backgroundColor: Color(0xFFE3350D),
+              backgroundColor: AppColors.primaryRed,
             ),
           );
         } else {
@@ -83,9 +87,11 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
             SnackBar(
               content: Text(
                 "Fel: ${foundResponse['result_code']}",
-                style: const TextStyle(color: Colors.white),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.white,
+                ),
               ),
-              backgroundColor: const Color(0xFFE3350D),
+              backgroundColor: AppColors.primaryRed,
             ),
           );
         }
@@ -130,33 +136,22 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
                     children: [
                       const Icon(
                         Icons.catching_pokemon,
-                        size: 64,
-                        color: Color(0xFFE3350D),
+                        size: UIConstants.iconSizeHuge,
+                        color: AppColors.primaryRed,
                       ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        "Grattis!",
-                        style: TextStyle(
-                          fontFamily: 'PixelFontTitle',
-                          fontSize: 28,
-                          color: Color(0xFFE3350D),
-                        ),
-                      ),
+                      const SizedBox(height: UIConstants.spacing16),
+                      const Text("Grattis!", style: AppTextStyles.titleLarge),
                       const SizedBox(height: 8),
                       Text(
                         "Du har fångat $pokemonName!",
-                        style: const TextStyle(
-                          fontFamily: 'PixelFontTitle',
-                          fontSize: 20,
-                          color: Color(0xFF992109),
+                        style: AppTextStyles.titleMedium.copyWith(
+                          color: AppColors.secondaryRed,
                         ),
                         textAlign: TextAlign.center,
                       ),
                       Text(
                         "(Nr. $pokemonId)",
-                        style: TextStyle(
-                          fontFamily: 'PixelFont',
-                          fontSize: 16,
+                        style: AppTextStyles.bodyLarge.copyWith(
                           color: Colors.grey.shade800,
                         ),
                       ),
@@ -164,13 +159,15 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
                       Container(
                         width: 180,
                         height: 180,
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(UIConstants.padding16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(
+                            UIConstants.borderRadius16,
+                          ),
                           border: Border.all(
-                            color: const Color(0xFF992109),
-                            width: 2,
+                            color: AppColors.secondaryRed,
+                            width: UIConstants.borderWidth2,
                           ),
                         ),
                         child: Image.asset(
@@ -260,13 +257,7 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
     return Stack(
       children: [
         Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [const Color(0xFFFAF6F6), Colors.red.shade50],
-            ),
-          ),
+          decoration: AppBoxDecorations.gradientBackground,
           child: Scaffold(
             backgroundColor: Colors.transparent,
             body: Column(
@@ -321,11 +312,11 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
                         height: 48,
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE3350D),
+                          color: AppColors.primaryRed,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFF992109),
-                            width: 3,
+                            color: AppColors.secondaryRed,
+                            width: UIConstants.borderWidth3,
                           ),
                         ),
                         child: Container(

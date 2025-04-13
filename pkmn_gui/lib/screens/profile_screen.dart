@@ -39,19 +39,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: const CommonAppBar(title: 'Min Profil'),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [const Color(0xFFFAF6F6), Colors.red.shade50],
-          ),
-        ),
+        decoration: AppBoxDecorations.gradientBackground,
         child:
             _isLoading
                 ? const Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Color(0xFFE3350D),
+                      AppColors.primaryRed,
                     ),
                   ),
                 )
@@ -64,27 +58,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             const Icon(
                               Icons.account_circle,
-                              size: 80,
-                              color: Color(0xFFE3350D),
+                              size: UIConstants.iconSizeMax,
+                              color: AppColors.primaryRed,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: UIConstants.spacing16),
                             Text(
                               session.userName ?? '',
-                              style: const TextStyle(
-                                fontFamily: 'PixelFontTitle',
-                                fontSize: 24,
-                                color: Color(0xFFE3350D),
-                              ),
+                              style: AppTextStyles.titleLarge,
                             ),
                             Text(
                               "Tränare ID: ${session.userId}",
-                              style: const TextStyle(
-                                fontFamily: 'PixelFont',
-                                fontSize: 16,
-                                color: Color(0xFF992109),
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                color: AppColors.secondaryRed,
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: UIConstants.spacing24),
                             PokedexButton(
                               onPressed: () async {
                                 final messenger = ScaffoldMessenger.of(context);
@@ -173,7 +161,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.logout, size: 20, color: Colors.white),
+                                  Icon(
+                                    Icons.logout,
+                                    size: 20,
+                                    color: Colors.white,
+                                  ),
                                   SizedBox(width: 8),
                                   Text("Logga ut"),
                                 ],

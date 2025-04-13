@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pkmn_gui/constants.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import '../widgets/common_app_bar.dart';
@@ -101,17 +102,13 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           _isLoading
               ? const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFE3350D)),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.primaryRed,
+                  ),
                 ),
               )
               : Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [const Color(0xFFFAF6F6), Colors.red.shade50],
-                  ),
-                ),
+                decoration: AppBoxDecorations.gradientBackground,
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -123,11 +120,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           children: [
                             Text(
                               "Välkommen ${session.userName}!",
-                              style: const TextStyle(
-                                fontFamily: 'PixelFontTitle',
-                                fontSize: 24,
-                                color: Color(0xFFE3350D),
-                              ),
+                              style: AppTextStyles.titleLarge,
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -138,10 +131,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                   : _ranking == 3
                                   ? "Du är rankad: #$_ranking 🥉"
                                   : "Du är rankad: #$_ranking",
-                              style: const TextStyle(
-                                fontFamily: 'PixelFont',
-                                fontSize: 18,
-                                color: Color(0xFF992109),
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                color: AppColors.secondaryRed,
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -184,7 +175,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.catching_pokemon),
+                                        Icon(
+                                          Icons.catching_pokemon,
+                                          color: AppColors.white,
+                                        ),
                                         SizedBox(width: 8),
                                         Text("Fånga Pokémon"),
                                       ],

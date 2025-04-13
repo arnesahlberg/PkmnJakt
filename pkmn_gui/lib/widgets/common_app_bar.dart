@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pkmn_gui/api_calls.dart';
+import 'package:pkmn_gui/constants.dart';
 import 'package:provider/provider.dart';
 import '../../main.dart'; // import UserSession from main.dart
 
@@ -23,7 +24,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading:
           showBackButton
               ? IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: const Icon(Icons.arrow_back, color: AppColors.white),
                 onPressed: () {
                   if (backRoute != null) {
                     Navigator.pushReplacementNamed(context, backRoute!);
@@ -35,22 +36,19 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
               : null,
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'PixelFontTitle',
-          shadows: [
-            Shadow(
-              offset: Offset(1.0, 1.0),
-              blurRadius: 3.0,
-              color: Color(0xFF992109),
-            ),
-          ],
+          shadows: AppShadows.titleShadow,
         ),
       ),
       flexibleSpace: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFE3350D),
+          color: AppColors.primaryRed,
           border: Border(
-            bottom: BorderSide(color: const Color(0xFF992109), width: 3.0),
+            bottom: BorderSide(
+              color: AppColors.secondaryRed,
+              width: UIConstants.borderWidth3,
+            ),
           ),
         ),
       ),
@@ -59,8 +57,11 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
           Container(
             margin: const EdgeInsets.only(right: 8.0),
             decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFF992109), width: 2),
-              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppColors.secondaryRed,
+                width: UIConstants.borderWidth2,
+              ),
+              borderRadius: BorderRadius.circular(UIConstants.borderRadius8),
             ),
             child: FutureBuilder<bool>(
               future: AdminApiService.amIAdmin(session.token!),
@@ -83,11 +84,10 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
                   data: Theme.of(context).copyWith(
                     popupMenuTheme: PopupMenuThemeData(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: const BorderSide(
-                          color: Color(0xFF992109),
-                          width: 2,
+                        borderRadius: BorderRadius.circular(
+                          UIConstants.borderRadius8,
                         ),
+                        side: AppBorderStyles.primaryBorder,
                       ),
                     ),
                   ),
