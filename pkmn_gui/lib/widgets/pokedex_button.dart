@@ -47,6 +47,7 @@ class PokedexButton extends StatelessWidget {
           style: const TextStyle(
             fontFamily: 'PixelFont',
             fontSize: 16,
+            color: Colors.white,
             shadows: [
               Shadow(
                 offset: Offset(1.0, 1.0),

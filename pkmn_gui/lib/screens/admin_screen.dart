@@ -206,7 +206,10 @@ class _AdminScreenState extends State<AdminScreen> {
               ElevatedButton(
                 onPressed:
                     () => Navigator.pushReplacementNamed(context, "/home"),
-                style: ButtonStyles.buttonStyleRounder,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE3350D),
+                  foregroundColor: Colors.white,
+                ),
                 child: const Text('Gå tillbaka'),
               ),
             ],
@@ -235,7 +238,10 @@ class _AdminScreenState extends State<AdminScreen> {
                 onPressed:
                     () => Navigator.pushReplacementNamed(context, "/home"),
                 style: ButtonStyles.buttonStyleRounder,
-                child: const Text('Gå tillbaka'),
+                child: const Text(
+                  'Gå tillbaka',
+                  style: TextStyles.buttonTextStyle,
+                ),
               ),
             ],
           ),
@@ -271,11 +277,15 @@ class _AdminScreenState extends State<AdminScreen> {
                   child: ListTile(
                     title: Text(
                       'Användar id: $userId',
-                      style: TextStyle(color: Colors.black87),
+                      style: TextStyle(
+                        color: Colors.black,
+                      ), // Changed to black for better contrast
                     ),
                     subtitle: Text(
                       'Namn: $userName${isAdmin ? " (Admin)" : ""}',
-                      style: TextStyle(color: Colors.black54),
+                      style: TextStyle(
+                        color: const Color.fromARGB(255, 36, 34, 34),
+                      ), // Changed to grey for better readability
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,

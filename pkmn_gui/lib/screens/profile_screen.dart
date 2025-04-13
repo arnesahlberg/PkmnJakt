@@ -101,7 +101,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     session.setUserName(newName);
                                     messenger.showSnackBar(
                                       const SnackBar(
-                                        content: Text("Användarnamn ändrat"),
+                                        content: Text(
+                                          "Användarnamn ändrat",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
                                         backgroundColor: Color(0xFFE3350D),
                                       ),
                                     );
@@ -110,6 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       const SnackBar(
                                         content: Text(
                                           "Kunde inte ändra användarnamn",
+                                          style: TextStyle(color: Colors.white),
                                         ),
                                         backgroundColor: Colors.red,
                                       ),
@@ -132,7 +136,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   if (resultCode == CallResultCode.ok) {
                                     messenger.showSnackBar(
                                       const SnackBar(
-                                        content: Text("Lösenord ändrat"),
+                                        content: Text(
+                                          "Lösenord ändrat",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
                                         backgroundColor: Color(0xFFE3350D),
                                       ),
                                     );
@@ -141,6 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       const SnackBar(
                                         content: Text(
                                           "Kunde inte ändra lösenord",
+                                          style: TextStyle(color: Colors.white),
                                         ),
                                         backgroundColor: Colors.red,
                                       ),
@@ -165,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.logout, size: 20),
+                                  Icon(Icons.logout, size: 20, color: Colors.white),
                                   SizedBox(width: 8),
                                   Text("Logga ut"),
                                 ],

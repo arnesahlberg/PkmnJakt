@@ -22,6 +22,10 @@ class EditUserDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check if the logged-in user is the main admin account
+    final userSession = Provider.of<UserSession>(context, listen: false);
+    final bool isMainAdmin = userSession.userId == 'admin';
+
     return AlertDialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
@@ -36,37 +40,40 @@ class EditUserDialog extends StatelessWidget {
           fontSize: 20,
         ),
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            title: Text(
-              'Namn: $userName',
-              style: const TextStyle(color: Colors.black87),
-            ),
-            subtitle: Text(
-              userIsAdmin ? 'Admin' : 'Användare',
-              style: const TextStyle(color: Colors.black54),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  await showDialog(
-                    context: context,
-                    builder:
-                        (context) => ResetUserPasswordDialog(userId: userId),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE3350D),
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Återställ lösenord'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ListTile(
+              title: Text(
+                'Namn: $userName',
+                style: const TextStyle(color: Colors.black87),
               ),
+              subtitle: Text(
+                userIsAdmin ? 'Admin' : 'Användare',
+                style: const TextStyle(color: Colors.black54),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Reset password button
+            ElevatedButton(
+              onPressed: () async {
+                await showDialog(
+                  context: context,
+                  builder: (context) => const ResetUserPasswordDialog(),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE3350D),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Återställ lösenord'),
+            ),
+            const SizedBox(height: 8),
+
+            // Only show delete user button for non-admins or if main admin is logged in
+            if (!userIsAdmin || (userIsAdmin && isMainAdmin)) ...[
               ElevatedButton(
                 onPressed: () async {
                   final result = await showDialog<bool>(
@@ -85,33 +92,68 @@ class EditUserDialog extends StatelessWidget {
                   backgroundColor: Colors.red.shade700,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Radera användare'),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                    SizedBox(width: 8),
+                    Text('Radera användare'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+
+            // Promote to admin button (only for non-admin users)
+            if (!userIsAdmin) ...[
+              ElevatedButton(
+                onPressed: () async {
+                  await showDialog(
+                    context: context,
+                    builder:
+                        (context) => PromoteUserDialog(
+                          userId: userId,
+                          isMainAdmin: isMainAdmin,
+                          onUserUpdated: onUserUpdated,
+                        ),
+                  );
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE3350D),
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Gör till administratör'),
               ),
             ],
-          ),
-          if (!userIsAdmin) ...[
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () async {
-                await showDialog(
-                  context: context,
-                  builder:
-                      (context) => PromoteUserDialog(
-                        userId: userId,
-                        isMainAdmin: false,
-                        onUserUpdated: onUserUpdated,
-                      ),
-                );
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE3350D),
-                foregroundColor: Colors.white,
+
+            // Demote from admin button (only if user is admin and main admin is logged in)
+            if (userIsAdmin && isMainAdmin) ...[
+              ElevatedButton(
+                onPressed: () async {
+                  await showDialog(
+                    context: context,
+                    builder:
+                        (context) => DemoteUserDialog(
+                          userId: userId,
+                          onUserUpdated: onUserUpdated,
+                        ),
+                  );
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE3350D),
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Ta bort administratörsrättigheter'),
               ),
-              child: const Text('Gör till administratör'),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
       actions: [
         TextButton(
