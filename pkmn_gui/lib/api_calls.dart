@@ -164,6 +164,14 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
+  // returns
+  /*
+    name: String,
+    number: u32,
+    photo_path: Option<String>, (won't use)
+    description: Option<String>,
+    height: f32,
+  */
   static Future<Map<String, dynamic>> getPokemon(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/get_pokemon/$id'));
     return jsonDecode(response.body);

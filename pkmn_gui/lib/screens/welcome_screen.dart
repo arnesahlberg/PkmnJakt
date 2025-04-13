@@ -8,7 +8,6 @@ import '../widgets/pokedex_button.dart';
 import "login_scanner_screen.dart";
 import '../main.dart'; // for UserSession
 import '../api_calls.dart'; // for fetching statistics
-import 'manual_login_screen.dart'; // added import for manual login
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});

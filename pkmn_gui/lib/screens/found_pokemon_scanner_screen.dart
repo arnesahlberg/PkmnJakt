@@ -95,11 +95,17 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
       }
 
       final pokemonId = foundResponse['pokemon_id']?.toString();
-      final pokemonName = foundResponse['pokemon_name'];
+      var pokemonName = foundResponse['pokemon_name'];
       final pokemonDescription = foundResponse['pokemon_description'];
 
       if (pokemonId == null) {
         throw Exception("Koden du scannade tillhör inte en pokemon.");
+      }
+
+      // Fetch pokemon name if not provided in the response
+      if (pokemonName == null || pokemonName.isEmpty) {
+        final pokemonDetails = await ApiService.getPokemon(pokemonId);
+        pokemonName = pokemonDetails['name'];
       }
 
       if (!mounted) return;

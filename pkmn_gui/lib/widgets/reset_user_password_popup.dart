@@ -5,14 +5,13 @@ import '../api_calls.dart';
 import '../main.dart';
 
 class ResetUserPasswordDialog extends StatefulWidget {
-  const ResetUserPasswordDialog({Key? key}) : super(key: key);
+  const ResetUserPasswordDialog({super.key});
 
   @override
-  _ResetUserPasswordDialogState createState() =>
-      _ResetUserPasswordDialogState();
+  ResetUserPasswordDialogState createState() => ResetUserPasswordDialogState();
 }
 
-class _ResetUserPasswordDialogState extends State<ResetUserPasswordDialog> {
+class ResetUserPasswordDialogState extends State<ResetUserPasswordDialog> {
   final TextEditingController _userIdController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -153,7 +152,7 @@ class _ResetUserPasswordDialogState extends State<ResetUserPasswordDialog> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: const Color.fromRGBO(255, 0, 0, 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.red),
                   ),
