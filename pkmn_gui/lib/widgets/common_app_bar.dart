@@ -73,10 +73,6 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
           Container(
             margin: const EdgeInsets.only(right: 8.0),
             decoration: BoxDecoration(
-              border: Border.all(
-                color: AppColors.secondaryRed,
-                width: UIConstants.borderWidth2,
-              ),
               borderRadius: BorderRadius.circular(UIConstants.borderRadius8),
             ),
             child: FutureBuilder<bool>(
@@ -120,6 +116,10 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
                     },
                     itemBuilder: (context) => menuItems,
                     icon: const Icon(Icons.menu, color: Colors.white),
+                    offset: const Offset(
+                      0,
+                      40,
+                    ), // Add offset to position menu lower
                   ),
                 );
               },
