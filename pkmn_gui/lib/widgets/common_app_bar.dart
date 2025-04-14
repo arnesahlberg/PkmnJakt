@@ -34,13 +34,29 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
                 },
               )
               : null,
-      title: Text(
-        title,
-        style: TextStyle(
-          fontFamily: 'PixelFontTitle',
-          shadows: AppShadows.titleShadow,
-        ),
+      title: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 12.0),
+            child: Image.asset(
+              'assets/images/title/frisksportlager.png',
+              height: 28,
+              fit: BoxFit.contain,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontFamily: 'PixelFontTitle',
+                shadows: AppShadows.titleShadow,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
+      titleSpacing: 0,
       flexibleSpace: Container(
         decoration: BoxDecoration(
           color: AppColors.primaryRed,

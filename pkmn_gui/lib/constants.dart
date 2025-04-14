@@ -394,7 +394,7 @@ class AppInputDecorations {
 
 // Shadow styles
 class AppShadows {
-  static List<Shadow> textShadow = const [
+  static const List<Shadow> textShadow = [
     Shadow(
       offset: Offset(1.0, 1.0),
       blurRadius: 2.0,
@@ -402,7 +402,7 @@ class AppShadows {
     ),
   ];
 
-  static List<Shadow> titleShadow = const [
+  static const List<Shadow> titleShadow = [
     Shadow(
       offset: Offset(1.0, 1.0),
       blurRadius: 3.0,

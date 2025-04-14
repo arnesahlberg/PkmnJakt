@@ -43,10 +43,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
     final session = Provider.of<UserSession>(context);
     return Scaffold(
-      appBar: const CommonAppBar(
-        title: 'Stensund Pokemon-Jakt 2025!',
-        showBackButton: false,
-      ),
+      appBar: const CommonAppBar(title: 'Pokémonjakt', showBackButton: false),
       body: Container(
         decoration: AppBoxDecorations.gradientBackground,
         child:

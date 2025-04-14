@@ -276,10 +276,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   Widget build(BuildContext context) {
     final session = Provider.of<UserSession>(context);
     return Scaffold(
-      appBar: const CommonAppBar(
-        title: "Stensund Pokémon-Jakt 2025",
-        showBackButton: false,
-      ),
+      appBar: const CommonAppBar(title: "Pokémonjakt", showBackButton: false),
       body:
           _isLoading
               ? const Center(

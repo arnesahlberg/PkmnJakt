@@ -189,7 +189,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CommonAppBar(title: "Min Pokédex"),
+      appBar: const CommonAppBar(title: "Pokédex"),
       body: Container(
         decoration: AppBoxDecorations.gradientBackground,
         child:
