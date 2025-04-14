@@ -79,6 +79,188 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     return formatter.format(dateTime);
   }
 
+  void _showInfoDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            "Hur man fångar Pokémon",
+            style: AppTextStyles.titleMedium,
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildInfoStep(
+                  "1",
+                  "Hitta en Pokémon QR-kod ute i den verkliga världen.",
+                ),
+                const SizedBox(height: UIConstants.spacing12),
+                _buildInfoStep(
+                  "2",
+                  "Tryck på 'Fånga Pokémon' knappen i appen.",
+                ),
+                const SizedBox(height: UIConstants.spacing12),
+                _buildInfoStep("3", "Använd kameran för att skanna QR-koden."),
+                const SizedBox(height: UIConstants.spacing12),
+                _buildInfoStep(
+                  "4",
+                  "Grattis! Pokémon läggs till i ditt Pokédex.",
+                ),
+                const SizedBox(height: UIConstants.spacing24),
+                Container(
+                  padding: const EdgeInsets.all(UIConstants.padding12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF8E1),
+                    borderRadius: BorderRadius.circular(
+                      UIConstants.borderRadius8,
+                    ),
+                    border: Border.all(
+                      color: const Color(0xFFFFB74D),
+                      width: UIConstants.borderWidth1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Tips för att hitta olika Pokémon:",
+                        style: TextStyle(
+                          fontFamily: 'PixelFontTitle',
+                          fontSize: 16,
+                          color: Color(0xFFE65100),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: UIConstants.spacing8),
+                      _buildTipItem(
+                        "Kolla anslagstavlan för ledtrådar om var olika Pokémon kan hittas!",
+                      ),
+                      const SizedBox(height: UIConstants.spacing8),
+                      _buildTipItem(
+                        "Olika Pokémon trivs i olika miljöer t.ex.",
+                      ),
+                      const SizedBox(height: UIConstants.spacing4),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildHabitatItem(
+                              "Vatten-Pokémon",
+                              "gillar sjöar och vattendrag",
+                            ),
+                            _buildHabitatItem(
+                              "Gräs-Pokémon",
+                              "föredrar skog och grönområden",
+                            ),
+                            _buildHabitatItem(
+                              "Sten-Pokémon",
+                              "gillar klippiga områden och höjder",
+                            ),
+                            _buildHabitatItem(
+                              "Spök-Pokémon",
+                              "hittas ofta vid gamla byggnader",
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: UIConstants.spacing12),
+                const Text(
+                  "Ju fler Pokémon du fångar, desto högre rankas du på topplistan!",
+                  style: AppTextStyles.bodyMedium,
+                ),
+              ],
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(UIConstants.borderRadius16),
+            side: AppBorderStyles.primaryBorder,
+          ),
+          backgroundColor: AppColors.white,
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: AppButtonStyles.secondaryButtonStyle,
+              child: const Text(
+                "OK",
+                style: TextStyle(
+                  fontFamily: 'PixelFontTitle',
+                  color: AppColors.primaryRed,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoStep(String number, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: AppColors.primaryRed,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Text(
+              number,
+              style: const TextStyle(
+                color: AppColors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: UIConstants.spacing10),
+        Expanded(child: Text(text, style: AppTextStyles.bodyMedium)),
+      ],
+    );
+  }
+
+  Widget _buildTipItem(String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(
+          Icons.tips_and_updates,
+          size: UIConstants.iconSizeSmall,
+          color: Color(0xFFE65100),
+        ),
+        const SizedBox(width: UIConstants.spacing8),
+        Expanded(child: Text(text, style: AppTextStyles.bodySmall)),
+      ],
+    );
+  }
+
+  Widget _buildHabitatItem(String pokemonType, String location) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: UIConstants.spacing4),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(text: "$pokemonType ", style: AppTextStyles.labelSmall),
+            TextSpan(text: location, style: AppTextStyles.bodySmall),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -135,7 +317,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 color: AppColors.secondaryRed,
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: UIConstants.spacing24),
                             Row(
                               children: [
                                 Expanded(
@@ -189,6 +371,28 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                   ),
                                 ),
                               ],
+                            ),
+                            const SizedBox(height: UIConstants.spacing16),
+                            GestureDetector(
+                              onTap: _showInfoDialog,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.info_outline,
+                                    size: 16,
+                                    color: AppColors.secondaryRed,
+                                  ),
+                                  const SizedBox(width: UIConstants.spacing8),
+                                  Text(
+                                    "Hur fångar jag Pokémon?",
+                                    style: AppTextStyles.labelMedium.copyWith(
+                                      color: AppColors.secondaryRed,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),

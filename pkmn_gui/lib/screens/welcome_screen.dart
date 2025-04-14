@@ -103,8 +103,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                       const SizedBox(
                                         height: UIConstants.spacing24,
                                       ),
-                                      Text(
-                                        'Scanna ditt deltagar-band för rikslägret',
+                                      const Text(
+                                        'Detta är en Pokémon-jakt du kan delta i om du är med på rikslägret. '
+                                        'Lite överallt på Stensund finns Pokémon gömda. Kan du hitta alla 151? \n\n'
+                                        'Du kan fånga Pokémon via telefonen om du först loggar in genom att klickar på knappen nedan '
+                                        'och scannar deltagarbandet du fick vid registreringen. \n\n'
+                                        'Du kan även delta analogt genom att hämta formulär i info.',
                                         style: AppTextStyles.bodyLarge,
                                         textAlign: TextAlign.center,
                                       ),
@@ -156,7 +160,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         const Text(
-                                          "Senast fångade Pokémon:",
+                                          "Senast fångade Pokémon",
                                           style: AppTextStyles.titleMedium,
                                         ),
                                         const SizedBox(height: 16),
@@ -250,7 +254,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           const Text(
-                                            "Global Highscore:",
+                                            "Global Highscore",
                                             style: TextStyle(
                                               fontFamily: 'PixelFontTitle',
                                               fontSize: 20,
