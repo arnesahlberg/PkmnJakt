@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants.dart';
+import '../utils/name_suggestions.dart';
 
 Future<Map<String, String>?> promptForUserCredentials(
   BuildContext context,
@@ -15,14 +16,14 @@ Future<Map<String, String>?> promptForUserCredentials(
 }
 
 class NewUserPrompt extends StatefulWidget {
-  const NewUserPrompt({Key? key, required this.scannedId}) : super(key: key);
+  const NewUserPrompt({super.key, required this.scannedId});
   final String scannedId;
 
   @override
-  _NewUserPromptState createState() => _NewUserPromptState();
+  NewUserPromptState createState() => NewUserPromptState();
 }
 
-class _NewUserPromptState extends State<NewUserPrompt> {
+class NewUserPromptState extends State<NewUserPrompt> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
@@ -62,6 +63,95 @@ class _NewUserPromptState extends State<NewUserPrompt> {
     });
   }
 
+  void _suggestUsername() {
+    setState(() {
+      _usernameController.text = NameSuggestions.generateSuggestion();
+      // Clear any existing error message that might be related to the username
+      if (errorMessage == "Användarnamn måste vara minst 2 tecken" ||
+          errorMessage == "Alla fält måste fyllas i") {
+        errorMessage = null;
+      }
+    });
+  }
+
+  // Show a dialog with multiple username suggestions
+  void _showSuggestionsDialog() {
+    _displaySuggestions();
+  }
+
+  void _displaySuggestions() {
+    final suggestions = NameSuggestions.generateMultipleSuggestions(5);
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text(
+              'Förslag på användarnamn',
+              style: AppTextStyles.titleSmall,
+            ),
+            backgroundColor: AppColors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(UIConstants.borderRadius12),
+              side: AppBorderStyles.primaryBorder,
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    'Klicka på ett namn för att använda det',
+                    style: AppTextStyles.bodySmall,
+                  ),
+                ),
+                for (final suggestion in suggestions)
+                  ListTile(
+                    title: Text(suggestion, style: AppTextStyles.bodyMedium),
+                    onTap: () {
+                      setState(() {
+                        _usernameController.text = suggestion;
+                        if (errorMessage ==
+                                "Användarnamn måste vara minst 2 tecken" ||
+                            errorMessage == "Alla fält måste fyllas i") {
+                          errorMessage = null;
+                        }
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.secondaryRed,
+                ),
+                child: const Text('Stäng'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _displaySuggestions(); // Show new suggestions
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primaryRed,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.refresh, size: 16),
+                    SizedBox(width: 4),
+                    Text('Nya förslag'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
   InputDecoration _getInputDecoration(String label) {
     return AppInputDecorations.defaultInputDecoration(label);
   }
@@ -86,10 +176,23 @@ class _NewUserPromptState extends State<NewUserPrompt> {
               style: TextStyle(color: Colors.black87),
             ),
             const SizedBox(height: 10),
-            TextField(
-              controller: _usernameController,
-              style: const TextStyle(color: Colors.black87),
-              decoration: _getInputDecoration("Användarnamn"),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _usernameController,
+                    style: const TextStyle(color: Colors.black87),
+                    decoration: _getInputDecoration("Användarnamn"),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: _showSuggestionsDialog,
+                  icon: const Icon(Icons.auto_awesome),
+                  tooltip: 'Föreslå användarnamn',
+                  color: AppColors.primaryRed,
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             TextField(
