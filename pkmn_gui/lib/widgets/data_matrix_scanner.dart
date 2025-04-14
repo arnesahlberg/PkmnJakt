@@ -141,27 +141,6 @@ class _DataMatrixScannerState extends State<DataMatrixScanner>
                         ),
                         child: Stack(
                           children: [
-                            // Corner decorations
-                            Positioned(
-                              top: 0,
-                              left: 0,
-                              child: _buildCorner(true, true),
-                            ),
-                            Positioned(
-                              top: 0,
-                              right: 0,
-                              child: _buildCorner(true, false),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              child: _buildCorner(false, true),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: _buildCorner(false, false),
-                            ),
                             // Scanning line
                             Positioned(
                               top: 280 * _animation.value - 2,
@@ -181,45 +160,6 @@ class _DataMatrixScannerState extends State<DataMatrixScanner>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCorner(bool isTop, bool isLeft) {
-    return Container(
-      width: 30,
-      height: 30,
-      decoration: BoxDecoration(
-        border: Border(
-          top:
-              isTop
-                  ? const BorderSide(
-                    color: AppColors.primaryRed,
-                    width: UIConstants.borderWidth4,
-                  )
-                  : BorderSide.none,
-          bottom:
-              !isTop
-                  ? const BorderSide(
-                    color: AppColors.primaryRed,
-                    width: UIConstants.borderWidth4,
-                  )
-                  : BorderSide.none,
-          left:
-              isLeft
-                  ? const BorderSide(
-                    color: AppColors.primaryRed,
-                    width: UIConstants.borderWidth4,
-                  )
-                  : BorderSide.none,
-          right:
-              !isLeft
-                  ? const BorderSide(
-                    color: AppColors.primaryRed,
-                    width: UIConstants.borderWidth4,
-                  )
-                  : BorderSide.none,
-        ),
       ),
     );
   }
