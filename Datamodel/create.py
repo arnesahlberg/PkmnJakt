@@ -5,7 +5,11 @@ import os
 import random   # added for salt generation
 import string   # added for salt generation
 
-conn = sqlite3.connect('../Database/base.db')
+db_path = '../Database/base.db'
+db_dir = os.path.dirname(db_path)
+if not os.path.exists(db_dir):
+    os.makedirs(db_dir)
+conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
 with open('def.sqlite', 'r') as sql_file:

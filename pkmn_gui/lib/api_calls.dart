@@ -9,8 +9,9 @@ Map<String, dynamic> decodeUtf8Json(http.Response response) {
 
 class ApiService {
   static const String baseUrl =
-      'https://pkmnapi.notawebsitejustmynotebookgoaway.com'; // for release
-  // 'https://192.168.0.73:8081'; // for local test
+      // 'https://pkmnapi.notawebsitejustmynotebookgoaway.com'; // for raspi
+      // 'https://192.168.0.73:8081'; // for local test
+      'https://api.pkmnrix.live'; // for raspi
 
   static Map<String, String> _headers([String? token]) => {
     "Content-Type": "application/json",

@@ -76,42 +76,45 @@ class _NewUserPromptState extends State<NewUserPrompt> {
         side: AppBorderStyles.primaryBorder,
       ),
       title: const Text("Skapa användare", style: AppTextStyles.titleMedium),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Band scannat för första gången. Skapa ny användare.',
-            style: TextStyle(color: Colors.black87),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _usernameController,
-            style: const TextStyle(color: Colors.black87),
-            decoration: _getInputDecoration("Användarnamn"),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _passwordController,
-            style: const TextStyle(color: Colors.black87),
-            decoration: _getInputDecoration("Lösenord"),
-            obscureText: true,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _confirmController,
-            style: const TextStyle(color: Colors.black87),
-            decoration: _getInputDecoration("Bekräfta lösenord"),
-            obscureText: true,
-          ),
-          if (errorMessage != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Text(
-                errorMessage!,
-                style: TextStyle(color: Colors.red.shade700),
-              ),
+      // used column here before, but it caused error text to disappear behind button
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Band scannat för första gången. Skapa ny användare.',
+              style: TextStyle(color: Colors.black87),
             ),
-        ],
+            const SizedBox(height: 10),
+            TextField(
+              controller: _usernameController,
+              style: const TextStyle(color: Colors.black87),
+              decoration: _getInputDecoration("Användarnamn"),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _passwordController,
+              style: const TextStyle(color: Colors.black87),
+              decoration: _getInputDecoration("Lösenord"),
+              obscureText: true,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _confirmController,
+              style: const TextStyle(color: Colors.black87),
+              decoration: _getInputDecoration("Bekräfta lösenord"),
+              obscureText: true,
+            ),
+            if (errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: Text(
+                  errorMessage!,
+                  style: TextStyle(color: Colors.red.shade700),
+                ),
+              ),
+          ],
+        ),
       ),
       actions: [
         TextButton(

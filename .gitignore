@@ -9,6 +9,7 @@ Pkmn/PicturesHQ
 Pkmn/PicturesHQ-Scaled
 Pkmn/QR_codes
 pkmn_gui/push_to_server.sh
+pkmn_gui/release.sh
 Testing/logincodes
 
 **/*.pem

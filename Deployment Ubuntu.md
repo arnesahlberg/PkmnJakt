@@ -3,28 +3,33 @@
 ## Clone the Repository
 Clone the repository using:
 ```sh
-git clone repo/url.git
+git clone https://github.com/arnesahlberg/PkmnJakt.git
 ```
 
 ## Install Required Dependencies
 Ensure that Nginx and SQLite3 are installed:
 ```sh
+sudo apt update
 sudo apt install nginx libsqlite3-dev
 ```
 
 ### Install Certbot
 Install Certbot to manage SSL certificates:
 ```sh
-sudo apt update
 sudo apt install certbot python3-certbot-nginx 
 ```
 
-### Install Cargo
+### Install OpenSSL development libraries
+Install OpenSSL development libraries:
+```sh
+sudo apt install libssl-dev pkg-config  build-essential
+```
+
+### Install Rust and Cargo  
 Install Rust and Cargo using rustup:
 ```sh
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
-
 Then follow the on-screen instructions to add Cargo to your PATH.
 
 
@@ -32,12 +37,11 @@ Then follow the on-screen instructions to add Cargo to your PATH.
 
 ### Build the database
 
-Go to Datamodel directory and execute the `create.py` script. 
+Enter the `PkmnJakt/Datamodel` directory execute the `create.py` script with python3.
 
 ### Build the API
-Ensure the API is built with Cargo:
+Ensure the API is built with Cargo. Go to the `PkmnJakt/pkmn_api` directory and run:
 ```sh
-cd PkmnJakt/pkmn_api
 cargo build --release
 ```
 
@@ -47,7 +51,7 @@ Make sure pkg-config and the OpenSSL development libraries are installed for you
 ### Obtain an SSL Certificate
 Run the following command to obtain an SSL certificate for your API domain:
 ```sh
-sudo certbot --nginx -d api.yourdomain.com
+sudo certbot --nginx -d api.pkmnrix.live
 ```
 
 #### Verify that we can renew certificates with a dry-run (optional)
@@ -61,15 +65,15 @@ Remove the default Nginx configuration:
 sudo vim /etc/nginx/sites-available/default
 ```
 
-Create a new configuration file under `/etc/nginx/sites-available/api.yourdomain.com`:
+Create a new configuration file under `/etc/nginx/sites-available/api.pkmnrix.live`:
 ```nginx
 server {
     listen 443 ssl;
-    server_name api.yourdomain.com;
+    server_name api.pkmnrix.live;
 
-    ssl_certificate     /etc/letsencrypt/live/yourdomain.com/fullchain.pem; 
-    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
-    
+    ssl_certificate     /etc/letsencrypt/live/api.pkmnrix.live/fullchain.pem; 
+    ssl_certificate_key /etc/letsencrypt/live/api.pkmnrix.live/privkey.pem; 
+
     ssl_protocols       TLSv1.2 TLSv1.3;
     ssl_ciphers         HIGH:!aNULL:!MD5;
 
@@ -86,7 +90,7 @@ server {
 ### Enable the Configuration
 Create a symbolic link to enable the configuration:
 ```sh
-sudo ln -s /etc/nginx/sites-available/api.yourdomain.com /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/api.pkmnrix.live /etc/nginx/sites-enabled/
 ```
 
 ### Validate and Reload Nginx
@@ -118,12 +122,12 @@ Description="Pkmn API for web app"
 After=network.target
 
 [Service]
-ExecStart=/path/to/PkmnJakt/pkmn_api/target/release/pkmn_api
-WorkingDirectory=/path/to/PkmnJakt/pkmn_api
+ExecStart=/home/arnesahlberg/PkmnJakt/pkmn_api/target/release/pkmn_api
+WorkingDirectory=/home/arnesahlberg/PkmnJakt/pkmn_api
 Restart=always
 User=arnesahlberg
 Group=arnesahlberg
-Environment="DATABASE_PATH=/path/to/PkmnJakt/Database/base.db"
+Environment="DATABASE_PATH=/home/arnesahlberg/PkmnJakt/Database/base.db"
 Environment="PORT=5401"
 Environment="EXPOSE_IP=127.0.0.1"
 
@@ -162,7 +166,7 @@ sudo journalctl -u pkmnapi.service --no-pager --lines=50
 ### Fetch certificate
 
 ```sh
-sudo certbot --nginx -d yourdomain.com
+sudo certbot --nginx -d pkmnrix.live
 ```
 
 #### Verify that we can renew certificates with a dry-run (optional)
@@ -170,24 +174,29 @@ sudo certbot --nginx -d yourdomain.com
 sudo certbot renew --dry-run
 ```
 
+#### Remove the default Nginx configuration
+```sh
+sudo vim /etc/nginx/sites-available/default
+```
+
 ### Configure Nginx
 
-Create a new configuration file under `/etc/nginx/sites-available/yourdomain.com`:
+Create a new configuration file under `/etc/nginx/sites-available/pkmnrix.live`:
 ```nginx
 server {
     listen 80;
-    server_name yourdomain.com;
+    server_name pkmnrix.live;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name yourdomain.com;
+    server_name pkmnrix.live;
 
-    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/pkmnrix.live/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/pkmnrix.live/privkey.pem;
 
-    root /path/to/pkmn_jakt_website;
+    root /home/arnesahlberg/deploy/pkmn_jakt_website;
     index index.html;
 
     location / {
@@ -199,7 +208,7 @@ server {
 ### Enable the Configuration
 Create a symbolic link to enable the configuration:
 ```sh
-sudo ln -s /etc/nginx/sites-available/yourdomain.com /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/pkmnrix.live /etc/nginx/sites-enabled/
 ```
 
 ### Validate and Reload Nginx
@@ -218,3 +227,12 @@ To debug issues, check the logs:
 ```sh
 sudo journalctl -u nginx --no-pager --lines=50
 ```
+
+or
+```sh
+sudo tail -n 50 /var/log/nginx/error.log
+```
+
+### Check the website
+
+Open your web browser and navigate to `https://pkmnrix.live` to verify that the website is up and running.
