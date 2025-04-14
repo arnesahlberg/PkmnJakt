@@ -7,21 +7,35 @@ class AuthUtils {
   /// Validates user token and redirects to welcome screen if invalid
   /// Returns true if token is valid, false otherwise
   static Future<bool> validateTokenAndRedirect(BuildContext context) async {
+    // Capture providers and navigator synchronously.
     final session = Provider.of<UserSession>(context, listen: false);
+    final navigator = Navigator.of(context);
+
     if (session.token == null) {
-      redirectToWelcome(context);
+      session.logout();
+      // Use the captured navigator, avoiding BuildContext after async gap.
+      Future.microtask(() {
+        navigator.pushNamedAndRemoveUntil('/', (route) => false);
+      });
       return false;
     }
 
     try {
-      final isValid = await ApiService.validateToken(session.token!);
+      final token = session.token;
+      final isValid = await ApiService.validateToken(token!);
       if (!isValid || session.isExpored()) {
-        redirectToWelcome(context);
+        session.logout();
+        Future.microtask(() {
+          navigator.pushNamedAndRemoveUntil('/', (route) => false);
+        });
         return false;
       }
       return true;
     } catch (e) {
-      redirectToWelcome(context);
+      session.logout();
+      Future.microtask(() {
+        navigator.pushNamedAndRemoveUntil('/', (route) => false);
+      });
       return false;
     }
   }
@@ -31,8 +45,9 @@ class AuthUtils {
     final session = Provider.of<UserSession>(context, listen: false);
     session.logout();
 
+    final navigator = Navigator.of(context);
     Future.delayed(Duration.zero, () {
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      navigator.pushNamedAndRemoveUntil('/', (route) => false);
     });
   }
 }
