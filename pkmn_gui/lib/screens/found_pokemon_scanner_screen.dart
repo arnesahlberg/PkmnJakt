@@ -122,112 +122,127 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
         barrierDismissible: false,
         builder:
             (dialogContext) => Dialog(
+              // insetPadding: const EdgeInsets.all(16), // wider
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: PokedexContainer(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.catching_pokemon,
-                        size: UIConstants.iconSizeHuge,
-                        color: AppColors.primaryRed,
-                      ),
-                      const SizedBox(height: UIConstants.spacing16),
-                      const Text("Grattis!", style: AppTextStyles.titleLarge),
-                      const SizedBox(height: 8),
-                      Text(
-                        "Du har fångat $pokemonName!",
-                        style: AppTextStyles.titleMedium.copyWith(
-                          color: AppColors.secondaryRed,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        "(Nr. $pokemonId)",
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          color: Colors.grey.shade800,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Container(
-                        width: 180,
-                        height: 180,
-                        padding: const EdgeInsets.all(UIConstants.padding16),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(
-                            UIConstants.borderRadius16,
-                          ),
-                          border: Border.all(
-                            color: AppColors.secondaryRed,
-                            width: UIConstants.borderWidth2,
-                          ),
-                        ),
-                        child: Image.asset(
-                          'assets/images/pkmn/$pokemonId.jpg',
-                          fit: BoxFit.contain,
-                          errorBuilder:
-                              (context, error, stackTrace) =>
-                                  const Icon(Icons.image_outlined, size: 80),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      if (pokemonDescription != null &&
-                          pokemonDescription.isNotEmpty)
-                        Text(
-                          pokemonDescription,
-                          style: TextStyle(
-                            fontFamily: 'PixelFont',
-                            fontSize: 16,
-                            color: Colors.grey.shade800,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              child: SizedBox(
+                // width:
+                //     MediaQuery.of(dialogContext).size.width * 0.9, // screen 90%
+                // height: MediaQuery.of(dialogContext).size.height * 0.9,
+                child: PokedexContainer(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0,
-                              ),
-                              child: PokedexButton(
-                                onPressed: () {
-                                  Navigator.pop(dialogContext);
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    '/pokedex',
-                                  );
-                                },
-                                child: const Text("Mitt Pokédex"),
-                              ),
+                          const Icon(
+                            Icons.catching_pokemon,
+                            size: UIConstants.iconSizeHuge,
+                            color: AppColors.primaryRed,
+                          ),
+                          const SizedBox(height: UIConstants.spacing16),
+                          const Text(
+                            "Grattis!",
+                            style: AppTextStyles.titleLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Du har fångat $pokemonName!",
+                            style: AppTextStyles.titleMedium.copyWith(
+                              color: AppColors.secondaryRed,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "(Nr. $pokemonId)",
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: Colors.grey.shade800,
                             ),
                           ),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0,
+                          const SizedBox(height: 24),
+                          Container(
+                            width: 180,
+                            height: 180,
+                            padding: const EdgeInsets.all(
+                              UIConstants.padding16,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(
+                                UIConstants.borderRadius16,
                               ),
-                              child: PokedexButton(
-                                onPressed: () {
-                                  Navigator.pop(dialogContext);
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    '/home',
-                                  );
-                                },
-                                child: const Text("Tillbaka"),
+                              border: Border.all(
+                                color: AppColors.secondaryRed,
+                                width: UIConstants.borderWidth2,
                               ),
                             ),
+                            child: Image.asset(
+                              'assets/images/pkmn/$pokemonId.jpg',
+                              fit: BoxFit.contain,
+                              errorBuilder:
+                                  (context, error, stackTrace) => const Icon(
+                                    Icons.image_outlined,
+                                    size: 80,
+                                  ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          if (pokemonDescription != null &&
+                              pokemonDescription.isNotEmpty)
+                            Text(
+                              pokemonDescription,
+                              style: TextStyle(
+                                fontFamily: 'PixelFont',
+                                fontSize: 16,
+                                color: Colors.grey.shade800,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                  ),
+                                  child: PokedexButton(
+                                    onPressed: () {
+                                      Navigator.pop(dialogContext);
+                                      Navigator.pushReplacementNamed(
+                                        context,
+                                        '/pokedex',
+                                      );
+                                    },
+                                    child: const Text("Mitt Pokédex"),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                  ),
+                                  child: PokedexButton(
+                                    onPressed: () {
+                                      Navigator.pop(dialogContext);
+                                      Navigator.pushReplacementNamed(
+                                        context,
+                                        '/home',
+                                      );
+                                    },
+                                    child: const Text("Tillbaka"),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -271,12 +286,6 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      const Icon(
-                        Icons.catching_pokemon,
-                        size: 32,
-                        color: Color(0xFFE3350D),
-                      ),
-                      const SizedBox(height: 8),
                       Text(
                         'Rikta kameran mot Pokémonens QR-kod för att fånga den!',
                         style: TextStyle(

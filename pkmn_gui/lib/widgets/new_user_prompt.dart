@@ -63,17 +63,6 @@ class NewUserPromptState extends State<NewUserPrompt> {
     });
   }
 
-  void _suggestUsername() {
-    setState(() {
-      _usernameController.text = NameSuggestions.generateSuggestion();
-      // Clear any existing error message that might be related to the username
-      if (errorMessage == "Användarnamn måste vara minst 2 tecken" ||
-          errorMessage == "Alla fält måste fyllas i") {
-        errorMessage = null;
-      }
-    });
-  }
-
   // Show a dialog with multiple username suggestions
   void _showSuggestionsDialog() {
     _displaySuggestions();
