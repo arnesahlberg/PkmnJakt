@@ -73,99 +73,111 @@ class NewUserPromptState extends State<NewUserPrompt> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        contentPadding: EdgeInsets.zero, // use manual padding inside scrollview
-        backgroundColor: AppColors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(UIConstants.borderRadius12),
-          side: AppBorderStyles.primaryBorder,
-        ),
-        // title and actions moved inside content scrollview
-        title: null,
-        actions: null,
-        content: SingleChildScrollView(
-          child: Padding(
-            // replicate default dialog padding
-            padding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch, // ensure title aligns left
-              children: [
-                // title
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 8.0), // space below title
-                  child: Text(
-                    'Förslag på användarnamn',
-                    style: AppTextStyles.titleSmall,
-                  ),
-                ),
-                // content (suggestions)
-                Column(
+      builder:
+          (context) => AlertDialog(
+            contentPadding:
+                EdgeInsets.zero, // use manual padding inside scrollview
+            backgroundColor: AppColors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(UIConstants.borderRadius12),
+              side: AppBorderStyles.primaryBorder,
+            ),
+            // title and actions moved inside content scrollview
+            title: null,
+            actions: null,
+            content: SingleChildScrollView(
+              child: Padding(
+                // replicate default dialog padding
+                padding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.stretch, // ensure title aligns left
                   children: [
+                    // title
                     const Padding(
-                      padding: EdgeInsets.only(bottom: 8.0),
+                      padding: EdgeInsets.only(
+                        bottom: 8.0,
+                      ), // space below title
                       child: Text(
-                        'Klicka på ett namn för att använda det',
-                        style: AppTextStyles.bodySmall,
+                        'Förslag på användarnamn',
+                        style: AppTextStyles.titleSmall,
                       ),
                     ),
-                    for (final suggestion in suggestions)
-                      ListTile(
-                        title: Text(suggestion, style: AppTextStyles.bodyMedium),
-                        onTap: () {
-                          setState(() {
-                            _usernameController.text = suggestion;
-                            if (errorMessage ==
-                                    "Användarnamn måste vara minst 2 tecken" ||
-                                errorMessage == "Alla fält måste fyllas i") {
-                              errorMessage = null;
-                            }
-                          });
-                          Navigator.of(context).pop();
-                        },
+                    // content (suggestions)
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 8.0),
+                          child: Text(
+                            'Klicka på ett namn för att använda det',
+                            style: AppTextStyles.bodySmall,
+                          ),
+                        ),
+                        for (final suggestion in suggestions)
+                          ListTile(
+                            title: Text(
+                              suggestion,
+                              style: AppTextStyles.bodyMedium,
+                            ),
+                            onTap: () {
+                              setState(() {
+                                _usernameController.text = suggestion;
+                                if (errorMessage ==
+                                        "Användarnamn måste vara minst 2 tecken" ||
+                                    errorMessage ==
+                                        "Alla fält måste fyllas i") {
+                                  errorMessage = null;
+                                }
+                              });
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                      ],
+                    ),
+                    // actions (buttons)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 8.0,
+                      ), // space above actions
+                      child: Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment.end, // align buttons right
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.secondaryRed,
+                            ),
+                            child: const Text('Stäng'),
+                          ),
+                          const SizedBox(width: 8), // space between buttons
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _displaySuggestions(); // Show new suggestions
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primaryRed,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(Icons.refresh, size: 16),
+                                SizedBox(width: 4),
+                                Text('Nya förslag'),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
                   ],
                 ),
-                // actions (buttons)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0), // space above actions
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end, // align buttons right
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.secondaryRed,
-                        ),
-                        child: const Text('Stäng'),
-                      ),
-                      const SizedBox(width: 8), // space between buttons
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          _displaySuggestions(); // Show new suggestions
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primaryRed,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.refresh, size: 16),
-                            SizedBox(width: 4),
-                            Text('Nya förslag'),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 
