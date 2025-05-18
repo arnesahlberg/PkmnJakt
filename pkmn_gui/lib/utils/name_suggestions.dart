@@ -245,6 +245,9 @@ class NameSuggestions {
     'kaffekopp',
     'knatteköping',
     'lergrop',
+    'rektor',
+    'mats',
+    'smoothie',
   ];
 
   // random suggestion
