@@ -98,6 +98,20 @@ class _AdminScreenState extends State<AdminScreen> {
     }
   }
 
+  Future<void> _refreshData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    final token = Provider.of<UserSession>(context, listen: false).token;
+    if (token != null) {
+      await _fetchTotalUsers(token);
+      await _fetchUsers(token);
+    }
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
   // New method to handle admin login when not logged in
   Future<void> _handleAdminLogin() async {
     setState(() {
@@ -262,57 +276,62 @@ class _AdminScreenState extends State<AdminScreen> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: _users.length,
-              itemBuilder: (_, index) {
-                final user = _users[index];
-                final userId = user['user_id']?.toString() ?? 'okänd';
-                final userName = user['name']?.toString() ?? '';
-                final isAdmin = user['admin'] == true;
-                return Card(
-                  child: ListTile(
-                    title: Text(
-                      'Användar id: $userId',
-                      style: AppTextStyles.bodyLarge,
-                    ),
-                    subtitle: Text(
-                      'Namn: $userName${isAdmin ? " (Admin)" : ""}',
-                      style: AppTextStyles.bodyMedium,
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ElevatedButton(
-                          onPressed:
-                              () => showDialog(
-                                context: context,
-                                builder:
-                                    (context) => EditUserDialog(
-                                      userId: userId,
-                                      userName: userName,
-                                      userIsAdmin: isAdmin,
-                                      onUserUpdated: () async {
-                                        final token =
-                                            Provider.of<UserSession>(
-                                              context,
-                                              listen: false,
-                                            ).token;
-                                        if (token != null)
-                                          await _fetchUsers(token);
-                                      },
-                                    ),
-                              ),
-                          style: AppButtonStyles.primaryButtonStyle,
-                          child: const Text(
-                            'Redigera',
-                            style: AppTextStyles.buttonText,
+            child: RefreshIndicator(
+              onRefresh: _refreshData,
+              color: AppColors.primaryRed,
+              backgroundColor: AppColors.white,
+              child: ListView.builder(
+                itemCount: _users.length,
+                itemBuilder: (_, index) {
+                  final user = _users[index];
+                  final userId = user['user_id']?.toString() ?? 'okänd';
+                  final userName = user['name']?.toString() ?? '';
+                  final isAdmin = user['admin'] == true;
+                  return Card(
+                    child: ListTile(
+                      title: Text(
+                        'Användar id: $userId',
+                        style: AppTextStyles.bodyLarge,
+                      ),
+                      subtitle: Text(
+                        'Namn: $userName${isAdmin ? " (Admin)" : ""}',
+                        style: AppTextStyles.bodyMedium,
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton(
+                            onPressed:
+                                () => showDialog(
+                                  context: context,
+                                  builder:
+                                      (context) => EditUserDialog(
+                                        userId: userId,
+                                        userName: userName,
+                                        userIsAdmin: isAdmin,
+                                        onUserUpdated: () async {
+                                          final token =
+                                              Provider.of<UserSession>(
+                                                context,
+                                                listen: false,
+                                              ).token;
+                                          if (token != null)
+                                            await _fetchUsers(token);
+                                        },
+                                      ),
+                                ),
+                            style: AppButtonStyles.primaryButtonStyle,
+                            child: const Text(
+                              'Redigera',
+                              style: AppTextStyles.buttonText,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
           Row(
