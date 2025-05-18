@@ -29,6 +29,14 @@ class _PokedexScreenState extends State<PokedexScreen> {
     return result['pokedex'] as List<dynamic>;
   }
 
+  Future<void> _refreshPokedex() async {
+    setState(() {
+      _isLoading = true;
+    });
+    _pokedexFuture = _fetchPokedex();
+    // Don't return anything - this is a void method
+  }
+
   @override
   void initState() {
     super.initState();
@@ -216,253 +224,261 @@ class _PokedexScreenState extends State<PokedexScreen> {
                     ),
                   ),
                 )
-                : FutureBuilder<List<dynamic>>(
-                  future: _pokedexFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.primaryRed,
+                : RefreshIndicator(
+                  onRefresh: _refreshPokedex,
+                  color: AppColors.primaryRed,
+                  backgroundColor: AppColors.white,
+                  child: FutureBuilder<List<dynamic>>(
+                    future: _pokedexFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primaryRed,
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Text(
-                          "Error: ${snapshot.error}",
-                          style: const TextStyle(
-                            color: AppColors.primaryRed,
-                            fontFamily: 'PixelFont',
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            "Error: ${snapshot.error}",
+                            style: const TextStyle(
+                              color: AppColors.primaryRed,
+                              fontFamily: 'PixelFont',
+                            ),
                           ),
-                        ),
+                        );
+                      }
+
+                      final caughtPokedex = snapshot.data!;
+                      final fullPokedex = _generateFullPokedexList(
+                        caughtPokedex,
                       );
-                    }
+                      final caughtCount = caughtPokedex.length;
 
-                    final caughtPokedex = snapshot.data!;
-                    final fullPokedex = _generateFullPokedexList(caughtPokedex);
-                    final caughtCount = caughtPokedex.length;
-
-                    return CustomScrollView(
-                      slivers: [
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: PokedexContainer(
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        width: UIConstants.iconSizeNormal,
-                                        height: UIConstants.iconSizeNormal,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: AppColors.primaryRed,
-                                          border: Border.all(
-                                            color: AppColors.secondaryRed,
-                                            width: UIConstants.borderWidth2,
-                                          ),
-                                          boxShadow: AppShadows.lightShadow,
-                                        ),
-                                        child: const Icon(
-                                          Icons.catching_pokemon,
-                                          color: Colors.white,
-                                          size: 16,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: UIConstants.spacing12,
-                                      ),
-                                      Text(
-                                        "Fångade Pokémon: $caughtCount",
-                                        style: AppTextStyles.titleMedium,
-                                      ),
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Row(
+                      return CustomScrollView(
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: PokedexContainer(
+                                child: Column(
+                                  children: [
+                                    Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Text(
-                                          "Visa endast fångade",
-                                          style: TextStyle(
-                                            fontFamily: 'PixelFont',
-                                            fontSize: 12,
-                                            color: Colors.grey.shade700,
+                                        Container(
+                                          width: UIConstants.iconSizeNormal,
+                                          height: UIConstants.iconSizeNormal,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: AppColors.primaryRed,
+                                            border: Border.all(
+                                              color: AppColors.secondaryRed,
+                                              width: UIConstants.borderWidth2,
+                                            ),
+                                            boxShadow: AppShadows.lightShadow,
+                                          ),
+                                          child: const Icon(
+                                            Icons.catching_pokemon,
+                                            color: Colors.white,
+                                            size: 16,
                                           ),
                                         ),
-                                        Transform.scale(
-                                          scale: 0.8,
-                                          child: Switch(
-                                            value: _showOnlyCaught,
-                                            onChanged: (value) {
-                                              setState(() {
-                                                _showOnlyCaught = value;
-                                              });
-                                            },
-                                            activeColor: AppColors.primaryRed,
-                                            inactiveThumbColor:
-                                                Colors.grey.shade400,
-                                            inactiveTrackColor:
-                                                Colors.grey.shade300,
+                                        const SizedBox(
+                                          width: UIConstants.spacing12,
+                                        ),
+                                        Text(
+                                          "Fångade Pokémon: $caughtCount",
+                                          style: AppTextStyles.titleMedium,
+                                        ),
+                                      ],
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "Visa endast fångade",
+                                            style: TextStyle(
+                                              fontFamily: 'PixelFont',
+                                              fontSize: 12,
+                                              color: Colors.grey.shade700,
+                                            ),
+                                          ),
+                                          Transform.scale(
+                                            scale: 0.8,
+                                            child: Switch(
+                                              value: _showOnlyCaught,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  _showOnlyCaught = value;
+                                                });
+                                              },
+                                              activeColor: AppColors.primaryRed,
+                                              inactiveThumbColor:
+                                                  Colors.grey.shade400,
+                                              inactiveTrackColor:
+                                                  Colors.grey.shade300,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12.0,
+                              vertical: 12.0,
+                            ),
+                            sliver: SliverGrid.builder(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    crossAxisSpacing: 8,
+                                    mainAxisSpacing: 12,
+                                    childAspectRatio: 0.75,
+                                  ),
+                              itemCount: fullPokedex.length,
+                              itemBuilder: (context, index) {
+                                final pokemon = fullPokedex[index];
+                                final bool isCaught =
+                                    _showOnlyCaught ||
+                                    (!pokemon.containsKey('caught') ||
+                                        pokemon['caught'] != false);
+
+                                return GestureDetector(
+                                  onTap:
+                                      () => _showPokemonDetails(
+                                        pokemon,
+                                        isCaught,
+                                      ),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(
+                                        UIConstants.borderRadius12,
+                                      ),
+                                      border: Border.all(
+                                        color: AppColors.secondaryRed,
+                                        width: UIConstants.borderWidth2,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppColors.shadowColor
+                                              .withOpacity(0.15),
+                                          spreadRadius: 1,
+                                          blurRadius: 3,
+                                          offset: const Offset(1, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Expanded(
+                                          child: Container(
+                                            margin: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey.shade100,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: AppColors.secondaryRed,
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(7),
+                                              child:
+                                                  isCaught
+                                                      ? Image.asset(
+                                                        'assets/images/pkmn/${pokemon['number']}.jpg',
+                                                        fit: BoxFit.contain,
+                                                        errorBuilder:
+                                                            (
+                                                              context,
+                                                              error,
+                                                              stackTrace,
+                                                            ) => const Icon(
+                                                              Icons
+                                                                  .image_outlined,
+                                                              size: 48,
+                                                            ),
+                                                      )
+                                                      : const Center(
+                                                        child: Icon(
+                                                          Icons.question_mark,
+                                                          size: 48,
+                                                          color:
+                                                              AppColors
+                                                                  .secondaryRed,
+                                                        ),
+                                                      ),
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 6,
+                                            horizontal: 4,
+                                          ),
+                                          decoration: const BoxDecoration(
+                                            color: AppColors.primaryRed,
+                                            borderRadius: BorderRadius.only(
+                                              bottomLeft: Radius.circular(10),
+                                              bottomRight: Radius.circular(10),
+                                            ),
+                                          ),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                isCaught
+                                                    ? pokemon['name']
+                                                    : "???",
+                                                style: const TextStyle(
+                                                  fontFamily: 'PixelFont',
+                                                  fontSize: 12,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                                textAlign: TextAlign.center,
+                                              ),
+                                              Text(
+                                                "#${pokemon['number']}",
+                                                style: const TextStyle(
+                                                  fontFamily: 'PixelFont',
+                                                  fontSize: 10,
+                                                  color: Colors.white70,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                ],
-                              ),
+                                );
+                              },
                             ),
                           ),
-                        ),
-                        SliverPadding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                            vertical: 12.0,
-                          ),
-                          sliver: SliverGrid.builder(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  crossAxisSpacing: 8,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: 0.75,
-                                ),
-                            itemCount: fullPokedex.length,
-                            itemBuilder: (context, index) {
-                              final pokemon = fullPokedex[index];
-                              final bool isCaught =
-                                  _showOnlyCaught ||
-                                  (!pokemon.containsKey('caught') ||
-                                      pokemon['caught'] != false);
-
-                              return GestureDetector(
-                                onTap:
-                                    () =>
-                                        _showPokemonDetails(pokemon, isCaught),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(
-                                      UIConstants.borderRadius12,
-                                    ),
-                                    border: Border.all(
-                                      color: AppColors.secondaryRed,
-                                      width: UIConstants.borderWidth2,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppColors.shadowColor
-                                            .withOpacity(0.15),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: const Offset(1, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          margin: const EdgeInsets.all(6),
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey.shade100,
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                            border: Border.all(
-                                              color: AppColors.secondaryRed,
-                                              width: 1,
-                                            ),
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              7,
-                                            ),
-                                            child:
-                                                isCaught
-                                                    ? Image.asset(
-                                                      'assets/images/pkmn/${pokemon['number']}.jpg',
-                                                      fit: BoxFit.contain,
-                                                      errorBuilder:
-                                                          (
-                                                            context,
-                                                            error,
-                                                            stackTrace,
-                                                          ) => const Icon(
-                                                            Icons
-                                                                .image_outlined,
-                                                            size: 48,
-                                                          ),
-                                                    )
-                                                    : const Center(
-                                                      child: Icon(
-                                                        Icons.question_mark,
-                                                        size: 48,
-                                                        color:
-                                                            AppColors
-                                                                .secondaryRed,
-                                                      ),
-                                                    ),
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 6,
-                                          horizontal: 4,
-                                        ),
-                                        decoration: const BoxDecoration(
-                                          color: AppColors.primaryRed,
-                                          borderRadius: BorderRadius.only(
-                                            bottomLeft: Radius.circular(10),
-                                            bottomRight: Radius.circular(10),
-                                          ),
-                                        ),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              isCaught
-                                                  ? pokemon['name']
-                                                  : "???",
-                                              style: const TextStyle(
-                                                fontFamily: 'PixelFont',
-                                                fontSize: 12,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                              textAlign: TextAlign.center,
-                                            ),
-                                            Text(
-                                              "#${pokemon['number']}",
-                                              style: const TextStyle(
-                                                fontFamily: 'PixelFont',
-                                                fontSize: 10,
-                                                color: Colors.white70,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                        ],
+                      );
+                    },
+                  ),
                 ),
       ),
     );
