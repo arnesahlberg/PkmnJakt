@@ -360,7 +360,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                         Navigator.pushNamed(
                                           context,
                                           '/pokedex',
-                                        );
+                                        ).then((_) {
+                                          // refresh data when returning from pokedex
+                                          _refreshData();
+                                        });
                                       },
                                       child: const Row(
                                         mainAxisAlignment:
@@ -391,7 +394,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                                 (_) =>
                                                     const FoundPokemonScannerScreen(),
                                           ),
-                                        );
+                                        ).then((_) {
+                                          // refresh data when returning from catching pokemon
+                                          _refreshData();
+                                        });
                                       },
                                       child: const Row(
                                         mainAxisAlignment:
