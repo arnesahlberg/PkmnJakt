@@ -5,6 +5,7 @@ import '../main.dart';
 import '../widgets/common_app_bar.dart';
 import '../widgets/pokedex_container.dart';
 import '../widgets/pokedex_button.dart';
+import '../widgets/highscore_list.dart';
 import 'package:intl/intl.dart';
 import '../api_calls.dart';
 import '../utils/auth_utils.dart';
@@ -561,113 +562,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         ),
                         if (!_isExtraLoading) ...[
                           const SizedBox(height: 24),
-                          PokedexContainer(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Global Highscore",
-                                  style: TextStyle(
-                                    fontFamily: 'PixelFontTitle',
-                                    fontSize: 20,
-                                    color: Color(0xFFE3350D),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                if (_highScores.isEmpty)
-                                  const Text("Ingen highscore data än.")
-                                else
-                                  ListView.builder(
-                                    shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    itemCount: _highScores.length,
-                                    itemBuilder: (context, index) {
-                                      final score = _highScores[index];
-                                      return Container(
-                                        margin: const EdgeInsets.only(
-                                          bottom: 8,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          border: Border.all(
-                                            color: const Color(0xFF992109),
-                                            width: 1,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            if (index < 3) ...[
-                                              Icon(
-                                                Icons.emoji_events,
-                                                color:
-                                                    index == 0
-                                                        ? Colors.amber
-                                                        : index == 1
-                                                        ? Colors.grey[400]
-                                                        : Colors.brown[300],
-                                                size: 24,
-                                              ),
-                                              const SizedBox(width: 8),
-                                            ],
-                                            Expanded(
-                                              child: Text(
-                                                "${score['name']}\n(Id: ${score['id']})",
-                                                style: const TextStyle(
-                                                  fontFamily: 'PixelFont',
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child:
-                                                  _hasDuplicateScore(score)
-                                                      ? Text(
-                                                        "Senast fångst:\n${DateFormat('dd/MM HH:mm:ss').format(DateTime.parse(score['latest_found']))}",
-                                                        style: const TextStyle(
-                                                          fontFamily:
-                                                              'PixelFont',
-                                                          fontSize: 12,
-                                                        ),
-                                                      )
-                                                      : const SizedBox(), // hide when no duplicate scores
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 4,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFFE3350D),
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
-                                              child: Text(
-                                                "${score['score']}",
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontFamily: 'PixelFont',
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
-                              ],
-                            ),
-                          ),
+                          HighscoreList(highscores: _highScores),
                           const SizedBox(height: 24),
                           PokedexContainer(
                             child: Column(
