@@ -20,14 +20,28 @@ window.addEventListener('load', function() {
     "Kollar med kansliet...",
     "Kollar internet...",
     "Kollar om vi följer alla regelverk...",
-    "Åh-nej, måste börja om igen...",
+    "Skickar kallelse till alla Pokémon...",
+    "Räknar Pokémon...",
+    "Räknar Pokébollar...",
+    "Räknar poäng...",
+    "Förbereder PokéDex...",
+    "Letar efter databas...",
+    "Laddar Pokédex...",
+    "Laddar poängsystem...",
+    "Gått vilse i skogen, vänta lite..."
   ];
   
-  // Function to cycle through loading messages
+  // Function to cycle through loading messages randomly
   var messageIndex = 0;
+  var previousIndex = -1;
   function cycleLoadingMessages() {
+    // avoid same message twice
+    do {
+      messageIndex = Math.floor(Math.random() * loadingMessages.length);
+    } while (messageIndex === previousIndex && loadingMessages.length > 1);
+    
     loadingText.textContent = loadingMessages[messageIndex];
-    messageIndex = (messageIndex + 1) % loadingMessages.length;
+    previousIndex = messageIndex;
   }
   
   // Start cycling messages

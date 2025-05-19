@@ -619,7 +619,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                             ],
                                             Expanded(
                                               child: Text(
-                                                "${score['name']} (${score['id']})",
+                                                "${score['name']}\n(Id: ${score['id']})",
                                                 style: const TextStyle(
                                                   fontFamily: 'PixelFont',
                                                   fontSize: 16,
@@ -630,7 +630,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                               child:
                                                   _hasDuplicateScore(score)
                                                       ? Text(
-                                                        "Senast fångst:\n${DateFormat('dd/MM HH:mm').format(DateTime.parse(score['latest_found']))}",
+                                                        "Senast fångst:\n${DateFormat('dd/MM HH:mm:ss').format(DateTime.parse(score['latest_found']))}",
                                                         style: const TextStyle(
                                                           fontFamily:
                                                               'PixelFont',
