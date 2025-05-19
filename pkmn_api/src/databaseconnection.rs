@@ -349,7 +349,7 @@ pub fn upload_photo_of_pokemon(user_id: &str, pokemon_id: &str, photo_path: &str
 
 // get user ranking
 pub fn user_ranking(user_id : &str, conn : &Connection) -> Result<u32> {
-    let mut stmt = conn.prepare("SELECT Ranking FROM ViewUserRanking WHERE UserId = ?1")?;
+    let mut stmt = conn.prepare("SELECT Ranking, LastFound FROM ViewUserRanking WHERE UserId = ?1")?;
     let ranking : u32 = stmt.query_row(params![user_id], |row| row.get(0)).unwrap_or(get_num_users(conn)? as u32);
     Ok(ranking)
 }
@@ -357,9 +357,9 @@ pub fn user_ranking(user_id : &str, conn : &Connection) -> Result<u32> {
 
 // highscore
 pub fn statistics_users_most_found(n : i32, conn : &Connection) -> Result<Vec<UserScore>> {
-    let mut stmt = conn.prepare("SELECT UserID, User, PokemonFound FROM ViewTopFinders LIMIT ?1")?;
+    let mut stmt = conn.prepare("SELECT UserID, User, PokemonFound, LastFound FROM ViewTopFinders LIMIT ?1")?;
     let rows = stmt.query_map(params![n], |row| {
-        Ok(UserScore{id : row.get(0)?, name: row.get(1)?, score: row.get(2)?})
+        Ok(UserScore{id : row.get(0)?, name: row.get(1)?, score: row.get(2)?, latest_found: row.get(3)?})
     })?;
     let mut result = Vec::new();
     for row in rows {

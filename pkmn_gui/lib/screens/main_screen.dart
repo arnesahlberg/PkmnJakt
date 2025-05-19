@@ -611,10 +611,19 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                             ],
                                             Expanded(
                                               child: Text(
-                                                "${score['name']} (ID: ${score['id']})",
+                                                "${score['name']} (${score['id']})",
                                                 style: const TextStyle(
                                                   fontFamily: 'PixelFont',
                                                   fontSize: 16,
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                "Senaste fångad:\n${DateFormat('dd/MM HH:mm').format(DateTime.parse(score['latest_found']))}",
+                                                style: const TextStyle(
+                                                  fontFamily: 'PixelFont',
+                                                  fontSize: 12,
                                                 ),
                                               ),
                                             ),
