@@ -1,5 +1,5 @@
 flutter run -d web-server \
-    --dart-define=API_URL="https://192.168.0.73:8081"
+    --dart-define=API_URL="https://pkmnapi.notawebsitejustmynotebookgoaway.com" \
     --web-hostname=0.0.0.0 \
     --web-port=5005 \
     --web-tls-cert-path=dev-cert/localhost+3.pem \
