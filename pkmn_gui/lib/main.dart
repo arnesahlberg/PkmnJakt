@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pkmn_gui/screens/admin_screen.dart';
 import 'package:pkmn_gui/screens/pokedex_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:universal_html/html.dart' as html;
+import 'package:shared_preferences/shared_preferences.dart'; // import shared_preferences
 import 'screens/main_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/profile_screen.dart';
@@ -15,66 +15,74 @@ class UserSession extends ChangeNotifier {
   String? userName;
   String? token; // this will hold the encoded token only
   String? validUntil; // field to store validity info
+  Future<void>? _initializationFuture; // to await loading
 
   UserSession() {
-    _loadFromCookies();
+    _initializationFuture = _loadFromStorage(); // call and store the future
   }
-  void _loadFromCookies() {
-    final cookies = html.document.cookie;
-    if (cookies != null) {
-      for (var part in cookies.split(';')) {
-        final trimmed = part.trim();
-        if (trimmed.startsWith("userId=")) {
-          userId = trimmed.substring("userId=".length);
-        } else if (trimmed.startsWith("userName=")) {
-          userName = trimmed.substring("userName=".length);
-        } else if (trimmed.startsWith("token=")) {
-          token = trimmed.substring("token=".length);
-        } else if (trimmed.startsWith("valid_until=")) {
-          validUntil = trimmed.substring("valid_until=".length);
-          debugPrint("Loaded validUntil: $validUntil");
-        }
+
+  Future<void> ensureInitialized() async {
+    await _initializationFuture; // allow awaiting the loading process
+  }
+
+  // load from shared preferences
+  Future<void> _loadFromStorage() async {
+    // ensure it returns Future<void>
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      userId = prefs.getString("userId");
+      userName = prefs.getString("userName");
+      token = prefs.getString("token");
+      validUntil = prefs.getString("valid_until");
+      if (validUntil != null) {
+        debugPrint("Loaded validUntil: $validUntil");
       }
       notifyListeners();
+    } catch (e, s) {
+      debugPrint('Error loading user session from SharedPreferences: $e');
+      debugPrint('Stack trace: $s');
+      rethrow; // Rethrow to indicate initialization failure
     }
   }
 
+  // login and save to shared preferences
   void login(
     String id,
     String name,
     String encodedToken,
     String validUntilValue,
-  ) {
+  ) async {
     userId = id;
     userName = name;
     token = encodedToken;
     validUntil = validUntilValue;
-    final expDate = DateTime.now().add(const Duration(days: 30));
-    final expDateStr = expDate.toUtc().toIso8601String();
-    html.document.cookie = "userId=$id; expires=$expDateStr; path=/";
-    html.document.cookie = "userName=$name; expires=$expDateStr; path=/";
-    html.document.cookie = "token=$encodedToken; expires=$expDateStr; path=/";
-    html.document.cookie =
-        "valid_until=$validUntilValue; expires=$expDateStr; path=/";
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("userId", id);
+    await prefs.setString("userName", name);
+    await prefs.setString("token", encodedToken);
+    await prefs.setString("valid_until", validUntilValue);
     notifyListeners();
   }
 
-  void logout() {
+  // logout and clear shared preferences
+  void logout() async {
     userId = null;
     userName = null;
     token = null;
-    html.document.cookie =
-        "userId=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-    html.document.cookie =
-        "userName=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-    html.document.cookie =
-        "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    validUntil = null; // clear validUntil
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove("userId");
+    await prefs.remove("userName");
+    await prefs.remove("token");
+    await prefs.remove("valid_until"); // remove valid_until
     notifyListeners();
   }
 
-  void setUserName(String newValue) {
+  // set username and save to shared preferences
+  void setUserName(String newValue) async {
     userName = newValue;
-    html.document.cookie = "userName=$newValue; path=/";
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("userName", newValue);
     notifyListeners();
   }
 
@@ -89,9 +97,26 @@ class UserSession extends ChangeNotifier {
 
 // ------------------------------
 // Main App
-void main() {
+void main() async {
+  // make main async
+  WidgetsFlutterBinding.ensureInitialized(); // ensure bindings are initialized
+
+  final userSession = UserSession(); // create instance
+  try {
+    debugPrint("Initializing user session...");
+    await userSession.ensureInitialized(); // wait for storage to load
+    debugPrint("User session initialization completed.");
+  } catch (e, s) {
+    debugPrint('Failed to initialize user session in main: $e');
+    debugPrint('Stack trace: $s');
+  }
+
   runApp(
-    ChangeNotifierProvider(create: (_) => UserSession(), child: const MyApp()),
+    ChangeNotifierProvider.value(
+      // use .value constructor
+      value: userSession,
+      child: const MyApp(),
+    ),
   );
 }
 
