@@ -28,7 +28,17 @@ window.addEventListener('load', function() {
     "Letar efter databas...",
     "Laddar Pokédex...",
     "Laddar poängsystem...",
-    "Gått vilse i skogen, vänta lite..."
+    "Gått vilse i skogen, vänta lite...",
+    "Hämtar borttappade Pokébollar...",
+    "Jagar rymda Pokémon...",
+    "Putsar Pokébollar...",
+    "Syncar med övriga programpunkter...",
+    "Stretchar lite...",
+    "Morgongyma...",
+    "Kollar med Mats...",
+    "Felsöker datacentret...",
+    "Aktiverar Pokéscan...",
+    "Ladda highscorelistan..."
   ];
   
   // Function to cycle through loading messages randomly
@@ -62,10 +72,10 @@ window.addEventListener('load', function() {
     setTimeout(hideLoading, 500);
   });
   
-  // Fallback - hide loading after 10 seconds
-  setTimeout(function() {
-    if (loading.style.opacity !== '0') {
-      hideLoading();
-    }
-  }, 10000);
+  // // Fallback - hide loading after 10 seconds (remove)
+  // setTimeout(function() {
+  //   if (loading.style.opacity !== '0') {
+  //     hideLoading();
+  //   }
+  // }, 10000);
 });
