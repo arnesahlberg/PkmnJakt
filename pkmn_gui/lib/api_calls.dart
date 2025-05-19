@@ -162,6 +162,7 @@ class ApiService {
   //Get statistics (no Authorization required)
   static Future<Map<String, dynamic>> getStatisticsHighscore() async {
     final response = await http.get(Uri.parse('$baseUrl/statistics_highscore'));
+    // print(response.body);
     return decodeUtf8Json(response);
   }
 

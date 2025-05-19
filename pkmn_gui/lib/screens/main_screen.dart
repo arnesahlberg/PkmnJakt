@@ -294,6 +294,14 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
+  // helper to check if score has duplicates
+  bool _hasDuplicateScore(dynamic currentScore) {
+    return _highScores
+            .where((s) => s['score'] == currentScore['score'])
+            .length >
+        1;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -619,13 +627,17 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                               ),
                                             ),
                                             Expanded(
-                                              child: Text(
-                                                "Senaste fångad:\n${DateFormat('dd/MM HH:mm').format(DateTime.parse(score['latest_found']))}",
-                                                style: const TextStyle(
-                                                  fontFamily: 'PixelFont',
-                                                  fontSize: 12,
-                                                ),
-                                              ),
+                                              child:
+                                                  _hasDuplicateScore(score)
+                                                      ? Text(
+                                                        "Senast fångst:\n${DateFormat('dd/MM HH:mm').format(DateTime.parse(score['latest_found']))}",
+                                                        style: const TextStyle(
+                                                          fontFamily:
+                                                              'PixelFont',
+                                                          fontSize: 12,
+                                                        ),
+                                                      )
+                                                      : const SizedBox(), // hide when no duplicate scores
                                             ),
                                             const SizedBox(width: 8),
                                             Container(
