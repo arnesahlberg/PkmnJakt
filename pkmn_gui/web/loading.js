@@ -8,15 +8,20 @@ window.addEventListener('load', function() {
   var loadingMessages = [
     "Laddar Pokémon...",
     "Synkar med lägerledningen...",
-    "Kollar internet...",
     "Kompenserar för väder...",
-    "Startar Pokédex...",
+    "Läser Pokémon-stadgarna...",
     "Letar efter Pokébollar i bollförrådet...",
     "Försöker starta upp QR läsaren...",
-    "Letar efter sällsynta Pokémon...",
-    "Förbereder jakten...",
+    "Startar Pokédex...",
     "Det kan ta en liten stund...",
     "Ber Mats om hjälp...",
+    "Letar efter sällsynta Pokémon...",
+    "Äter lite kruska...",
+    "Förbereder jakten...",
+    "Kollar med kansliet...",
+    "Kollar internet...",
+    "Kollar om vi följer alla regelverk...",
+    "Åh-nej, måste börja om igen...",
   ];
   
   // Function to cycle through loading messages
