@@ -71,27 +71,45 @@ class HighscoreList extends StatelessWidget {
                       const SizedBox(width: 8),
                     ],
                     Expanded(
-                      child: Text(
-                        "${score['name']} (ID: ${score['id']})",
-                        style: const TextStyle(
-                          fontFamily: 'PixelFont',
-                          fontSize: 16,
-                        ),
+                      flex: 3,
+                      child: Row(
+                        children: [
+                          Text(
+                            "${score['name']} ",
+                            style: const TextStyle(
+                              fontFamily: 'PixelFont',
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            "(ID: ${score['id']})",
+                            style: const TextStyle(
+                              fontFamily: 'PixelFont',
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Expanded(
-                      child: _hasDuplicateScore(score)
-                          ? Text(
-                              DateFormat('dd/MM HH:mm:ss').format(
-                                DateTime.parse(score['latest_found']),
-                              ),
-                              style: const TextStyle(
-                                fontFamily: 'PixelFont',
-                                fontSize: 10,
-                              ),
-                            )
-                          : const SizedBox(),
-                    ),
+                    if (_hasDuplicateScore(score)) ...[
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          DateFormat('dd/MM HH:mm:ss').format(
+                            DateTime.parse(score['latest_found']),
+                          ),
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            fontFamily: 'PixelFont',
+                            fontSize: 10,
+                            color: Color(0xFF992109),
+                          ),
+                        ),
+                      ),
+                    ] else ...[
+                      const Expanded(flex: 2, child: SizedBox()),
+                    ],
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
