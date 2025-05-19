@@ -16,7 +16,8 @@ class HighscoreList extends StatelessWidget {
   });
 
   bool _hasDuplicateScore(dynamic currentScore) {
-    return highscores.where((s) => s['score'] == currentScore['score']).length > 1;
+    return highscores.where((s) => s['score'] == currentScore['score']).length >
+        1;
   }
 
   @override
@@ -51,21 +52,19 @@ class HighscoreList extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color(0xFF992109),
-                    width: 1,
-                  ),
+                  border: Border.all(color: const Color(0xFF992109), width: 1),
                 ),
                 child: Row(
                   children: [
                     if (index < 3) ...[
                       Icon(
                         Icons.emoji_events,
-                        color: index == 0
-                            ? Colors.amber
-                            : index == 1
-                            ? Colors.grey[400]
-                            : Colors.brown[300],
+                        color:
+                            index == 0
+                                ? Colors.amber
+                                : index == 1
+                                ? Colors.grey[400]
+                                : Colors.brown[300],
                         size: 24,
                       ),
                       const SizedBox(width: 8),
@@ -96,9 +95,9 @@ class HighscoreList extends StatelessWidget {
                       Expanded(
                         flex: 2,
                         child: Text(
-                          DateFormat('dd/MM HH:mm:ss').format(
-                            DateTime.parse(score['latest_found']),
-                          ),
+                          DateFormat(
+                            'dd/MM HH:mm:ss',
+                          ).format(DateTime.parse(score['latest_found'])),
                           textAlign: TextAlign.right,
                           style: const TextStyle(
                             fontFamily: 'PixelFont',
