@@ -21,8 +21,45 @@
 
   <title>Stensund Pokemonjakt</title>
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Load the loading screen styles -->
+  <link rel="stylesheet" href="loading.css">
 </head>
 <body>
-  <script src="flutter_bootstrap.js?version=21" async></script>
+  <!-- Loading screen -->
+  <div id="loading">
+    <div class="pokedex-container">
+      <div class="pokedex">
+        <div class="pokedex-top">
+          <div class="pokedex-detail">
+            <div class="led led-blue"></div>
+            <div class="led led-yellow"></div>
+            <div class="led led-green"></div>
+          </div>
+          <div class="pokedex-screen-border">
+            <div class="pokedex-screen">
+              <div id="loading-title">Stensund Pokemonjakt</div>
+              <div class="spinner"></div>
+              <div id="loading-text">Laddar ...</div>
+            </div>
+          </div>
+        </div>
+        <div class="pokedex-bottom">
+          <div class="yellow-accent"></div>
+          <div class="loading-container">
+            <div class="logo-container">
+              <img class="white-logo" src="assets/assets/images/title/frisksportlager.png" alt="Frisksportläger Logo">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Load the loading screen script -->
+  <script src="loading.js"></script>
+  
+  <!-- Load the Flutter bootstrap script -->
+  <script src="flutter_bootstrap.js?version=30" async></script>
 </body>
 </html>

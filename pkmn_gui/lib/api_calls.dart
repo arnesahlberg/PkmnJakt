@@ -8,10 +8,7 @@ Map<String, dynamic> decodeUtf8Json(http.Response response) {
 }
 
 class ApiService {
-  static const String baseUrl =
-      // 'https://pkmnapi.notawebsitejustmynotebookgoaway.com'; // for raspi
-      // 'https://192.168.0.73:8081'; // for local test
-      'https://api.pkmnrix.live'; // for raspi
+  static const String baseUrl = String.fromEnvironment('API_URL');
 
   static Map<String, String> _headers([String? token]) => {
     "Content-Type": "application/json",
@@ -165,6 +162,7 @@ class ApiService {
   //Get statistics (no Authorization required)
   static Future<Map<String, dynamic>> getStatisticsHighscore() async {
     final response = await http.get(Uri.parse('$baseUrl/statistics_highscore'));
+    // print(response.body);
     return decodeUtf8Json(response);
   }
 

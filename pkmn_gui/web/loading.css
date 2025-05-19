@@ -1,0 +1,177 @@
+@font-face {
+  font-family: 'PixelFontTitle';
+  src: url('assets/assets/fonts/salty9.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PixelFont';
+  src: url('assets/assets/fonts/compass9.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #FAF6F6;
+}
+
+#loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, #FAF6F6, #FFEBEE);
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.pokedex-container {
+  position: relative;
+  width: 420px;
+  max-width: 90%;
+  margin-bottom: 40px;
+}
+
+.pokedex {
+  position: relative;
+  width: 100%;
+  background-color: #E3350D;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+.pokedex-top {
+  position: relative;
+  padding: 30px;
+  border-radius: 16px 16px 0 0;
+  border: 3px solid #992109;
+  background-color: #E3350D;
+}
+
+.pokedex-screen-border {
+  background-color: #992109;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.pokedex-screen {
+  background-color: #000;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 140px;
+}
+
+.logo-container {
+  width: 100%;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.white-logo {
+  width: 85%;
+  max-height: 80px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.pokedex-bottom {
+  position: relative;
+  background-color: #E3350D;
+  padding: 30px;
+  border-radius: 0 0 16px 16px;
+  border: 3px solid #992109;
+  border-top: none;
+}
+
+.pokedex-detail {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  display: flex;
+}
+
+.led {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-right: 8px;
+  opacity: 0.7;
+}
+
+.led-blue {
+  background-color: #62B1F6;
+}
+
+.led-yellow {
+  background-color: #FFD700;
+}
+
+.led-green {
+  background-color: #4CAF50;
+}
+
+.loading-container {
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#loading-title {
+  font-family: 'PixelFontTitle', sans-serif;
+  font-size: 24px;
+  color: white;
+  text-shadow: 2px 2px 3px #992109;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+#loading-text {
+  font-family: 'PixelFont', sans-serif;
+  font-size: 20px;
+  color: white;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: 10px auto;
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.yellow-accent {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 30px 30px;
+  border-color: transparent transparent #FFD700 transparent;
+  bottom: 25px;
+  left: 25px;
+}

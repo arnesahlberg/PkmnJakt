@@ -18,6 +18,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
   bool _isLoading = true;
   // Maximum number of standard Pokémon
   final int _maxStandardPokemon = 151;
+  bool _showOnlyCaught = true; // default to show only caught
 
   Future<List<dynamic>> _fetchPokedex() async {
     final session = Provider.of<UserSession>(context, listen: false);
@@ -26,6 +27,14 @@ class _PokedexScreenState extends State<PokedexScreen> {
       _isLoading = false;
     });
     return result['pokedex'] as List<dynamic>;
+  }
+
+  Future<void> _refreshPokedex() async {
+    setState(() {
+      _isLoading = true;
+    });
+    _pokedexFuture = _fetchPokedex();
+    // Don't return anything - this is a void method
   }
 
   @override
@@ -51,22 +60,36 @@ class _PokedexScreenState extends State<PokedexScreen> {
     // Generate the full list with placeholders
     final List<Map<String, dynamic>> fullList = [];
 
-    // Add standard Pokémon (1-151) with placeholders if not caught
-    for (int i = 1; i <= _maxStandardPokemon; i++) {
-      if (caughtMap.containsKey(i)) {
-        fullList.add(caughtMap[i]!);
-      } else {
-        fullList.add({'number': i, 'caught': false, 'name': '???'});
+    if (_showOnlyCaught) {
+      // Add only caught Pokémon, sorted by number
+      fullList.addAll(caughtPokemon.map((p) => p as Map<String, dynamic>));
+      fullList.sort(
+        (a, b) => (a['number'] as int).compareTo(b['number'] as int),
+      );
+    } else {
+      // Add standard Pokémon (1-151) with placeholders if not caught
+      for (int i = 1; i <= _maxStandardPokemon; i++) {
+        if (caughtMap.containsKey(i)) {
+          fullList.add(caughtMap[i]!);
+        } else {
+          fullList.add({'number': i, 'caught': false, 'name': '???'});
+        }
       }
-    }
 
-    // Add special Pokémon (>151) only if caught
-    for (var pokemon in caughtPokemon) {
-      if (pokemon['number'] > _maxStandardPokemon) {
-        fullList.add(pokemon);
+      // Add special Pokémon (>151) only if caught
+      for (var pokemon in caughtPokemon) {
+        if (pokemon['number'] > _maxStandardPokemon) {
+          // Ensure not to add duplicates if already added via caughtMap
+          if (!fullList.any((p) => p['number'] == pokemon['number'])) {
+            fullList.add(pokemon);
+          }
+        }
       }
+      // Sort the full list by Pokémon number to ensure special Pokémon are in order
+      fullList.sort(
+        (a, b) => (a['number'] as int).compareTo(b['number'] as int),
+      );
     }
-
     return fullList;
   }
 
@@ -201,75 +224,123 @@ class _PokedexScreenState extends State<PokedexScreen> {
                     ),
                   ),
                 )
-                : FutureBuilder<List<dynamic>>(
-                  future: _pokedexFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.primaryRed,
-                          ),
-                        ),
-                      );
-                    }
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Text(
-                          "Error: ${snapshot.error}",
-                          style: const TextStyle(
-                            color: AppColors.primaryRed,
-                            fontFamily: 'PixelFont',
-                          ),
-                        ),
-                      );
-                    }
-
-                    final caughtPokedex = snapshot.data!;
-                    final fullPokedex = _generateFullPokedexList(caughtPokedex);
-                    final caughtCount = caughtPokedex.length;
-
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: PokedexContainer(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: UIConstants.iconSizeNormal,
-                                  height: UIConstants.iconSizeNormal,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: AppColors.primaryRed,
-                                    border: Border.all(
-                                      color: AppColors.secondaryRed,
-                                      width: UIConstants.borderWidth2,
-                                    ),
-                                    boxShadow: AppShadows.lightShadow,
-                                  ),
-                                  child: const Icon(
-                                    Icons.catching_pokemon,
-                                    color: Colors.white,
-                                    size: 16,
-                                  ),
-                                ),
-                                const SizedBox(width: UIConstants.spacing12),
-                                Text(
-                                  "Fångade Pokémon: $caughtCount",
-                                  style: AppTextStyles.titleMedium,
-                                ),
-                              ],
+                : RefreshIndicator(
+                  onRefresh: _refreshPokedex,
+                  color: AppColors.primaryRed,
+                  backgroundColor: AppColors.white,
+                  child: FutureBuilder<List<dynamic>>(
+                    future: _pokedexFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primaryRed,
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: Padding(
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            "Error: ${snapshot.error}",
+                            style: const TextStyle(
+                              color: AppColors.primaryRed,
+                              fontFamily: 'PixelFont',
+                            ),
+                          ),
+                        );
+                      }
+
+                      final caughtPokedex = snapshot.data!;
+                      final fullPokedex = _generateFullPokedexList(
+                        caughtPokedex,
+                      );
+                      final caughtCount = caughtPokedex.length;
+
+                      return CustomScrollView(
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: PokedexContainer(
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          width: UIConstants.iconSizeNormal,
+                                          height: UIConstants.iconSizeNormal,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: AppColors.primaryRed,
+                                            border: Border.all(
+                                              color: AppColors.secondaryRed,
+                                              width: UIConstants.borderWidth2,
+                                            ),
+                                            boxShadow: AppShadows.lightShadow,
+                                          ),
+                                          child: const Icon(
+                                            Icons.catching_pokemon,
+                                            color: Colors.white,
+                                            size: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: UIConstants.spacing12,
+                                        ),
+                                        Text(
+                                          "Fångade Pokémon: $caughtCount",
+                                          style: AppTextStyles.titleMedium,
+                                        ),
+                                      ],
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "Visa endast fångade",
+                                            style: TextStyle(
+                                              fontFamily: 'PixelFont',
+                                              fontSize: 12,
+                                              color: Colors.grey.shade700,
+                                            ),
+                                          ),
+                                          Transform.scale(
+                                            scale: 0.8,
+                                            child: Switch(
+                                              value: _showOnlyCaught,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  _showOnlyCaught = value;
+                                                });
+                                              },
+                                              activeColor: AppColors.primaryRed,
+                                              inactiveThumbColor:
+                                                  Colors.grey.shade400,
+                                              inactiveTrackColor:
+                                                  Colors.grey.shade300,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          SliverPadding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12.0,
+                              vertical: 12.0,
                             ),
-                            child: GridView.builder(
+                            sliver: SliverGrid.builder(
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 3,
@@ -281,8 +352,9 @@ class _PokedexScreenState extends State<PokedexScreen> {
                               itemBuilder: (context, index) {
                                 final pokemon = fullPokedex[index];
                                 final bool isCaught =
-                                    !pokemon.containsKey('caught') ||
-                                    pokemon['caught'] != false;
+                                    _showOnlyCaught ||
+                                    (!pokemon.containsKey('caught') ||
+                                        pokemon['caught'] != false);
 
                                 return GestureDetector(
                                   onTap:
@@ -403,10 +475,10 @@ class _PokedexScreenState extends State<PokedexScreen> {
                               },
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
+                        ],
+                      );
+                    },
+                  ),
                 ),
       ),
     );

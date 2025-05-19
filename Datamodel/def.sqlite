@@ -108,7 +108,9 @@ CREATE VIEW IF NOT EXISTS ViewNumPokemonFound AS
 SELECT 
     Users.user_id AS UserID,
     Users.name AS User, 
-    COUNT(FoundPokemon.pokemon_id) AS PokemonFound
+    COUNT(FoundPokemon.pokemon_id) AS PokemonFound,
+    -- time of last found pokemon
+    MAX(FoundPokemon.found_timestamp) AS LastFound
 FROM FoundPokemon
 JOIN Users ON FoundPokemon.user_id = Users.user_id
 WHERE UserID != 'admin' -- exclude admin user
@@ -116,16 +118,17 @@ GROUP BY Users.name;
 
 -- Top finders
 CREATE VIEW IF NOT EXISTS ViewTopFinders AS
-SELECT UserID, User, PokemonFound FROM ViewNumPokemonFound
-ORDER BY PokemonFound DESC;
+SELECT UserID, User, PokemonFound, LastFound FROM ViewNumPokemonFound
+ORDER BY PokemonFound DESC, LastFound ASC;
 
 -- view where we get user's ranking in ViewTopFinders
 CREATE VIEW IF NOT EXISTS ViewUserRanking AS
 SELECT 
     UserID, 
     User, 
-    PokemonFound, 
-    (SELECT COUNT(*) FROM ViewTopFinders WHERE PokemonFound > t.PokemonFound) + 1 AS Ranking
+    PokemonFound,
+    LastFound,
+    (SELECT COUNT(*) FROM ViewTopFinders WHERE PokemonFound > t.PokemonFound OR (PokemonFound = t.PokemonFound AND LastFound < t.LastFound)) + 1 AS Ranking
 FROM ViewTopFinders AS t;
 
 -- view users without the admin user included

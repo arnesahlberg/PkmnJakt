@@ -55,6 +55,13 @@ pub struct Pkmn {
 pub struct UserScore {
     pub id : String,
     pub name : String,
-    pub score : u32
+    pub score : u32,
+    pub latest_found : DateTime<Utc>,
 }
 
+impl UserScore {
+    pub fn cet_latest_found(&self) -> DateTime<Tz> {
+        let cet_timezone: Tz = Berlin;
+        self.latest_found.with_timezone(&cet_timezone)
+    }
+}
