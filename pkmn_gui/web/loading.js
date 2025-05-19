@@ -2,7 +2,6 @@
 window.addEventListener('load', function() {
   var loading = document.getElementById('loading');
   var loadingText = document.getElementById('loading-text');
-  var loadingOpacity = 1;
   
   // Loading messages to cycle through
   var loadingMessages = [
@@ -35,29 +34,21 @@ window.addEventListener('load', function() {
   cycleLoadingMessages();
   var messageInterval = setInterval(cycleLoadingMessages, 2000);
   
-  // Function to hide loading screen with fade effect
+  // Function to hide loading screen
   function hideLoading() {
-    // Clear the message cycling interval
     clearInterval(messageInterval);
-    
-    // Simply fade out the loading screen
-    if (loadingOpacity > 0) {
-      loadingOpacity -= 0.05;
-      loading.style.opacity = loadingOpacity;
-      if (loadingOpacity <= 0) {
-        loading.style.display = 'none';
-      } else {
-        requestAnimationFrame(hideLoading);
-      }
-    }
+    loading.style.opacity = '0';
+    setTimeout(function() {
+      loading.style.display = 'none';
+    }, 500);
   }
   
-  // Start hiding the loading screen when Flutter is initialized
+  // Hide loading screen when Flutter is initialized
   window.addEventListener('flutter-first-frame', function() {
     setTimeout(hideLoading, 500);
   });
   
-  // Fallback - hide loading after 10 seconds even if Flutter doesn't initialize
+  // Fallback - hide loading after 10 seconds
   setTimeout(function() {
     if (loading.style.opacity !== '0') {
       hideLoading();
