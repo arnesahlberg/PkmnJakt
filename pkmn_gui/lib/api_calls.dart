@@ -8,8 +8,7 @@ Map<String, dynamic> decodeUtf8Json(http.Response response) {
 }
 
 class ApiService {
-  static const String baseUrl =
-      'https://pkmnapi.notawebsitejustmynotebookgoaway.com'; // for raspi
+  static const String baseUrl = String.fromEnvironment('API_URL');
   // 'https://192.168.0.73:8081'; // for local test
   // 'https://api.pkmnrix.live'; // for raspi
 
