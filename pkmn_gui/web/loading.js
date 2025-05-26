@@ -56,7 +56,7 @@ window.addEventListener('load', function() {
   
   // Start cycling messages
   cycleLoadingMessages();
-  var messageInterval = setInterval(cycleLoadingMessages, 1000);
+  var messageInterval = setInterval(cycleLoadingMessages, 1800);
   
   // Function to hide loading screen
   function hideLoading() {
