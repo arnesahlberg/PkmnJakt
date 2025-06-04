@@ -89,6 +89,10 @@ class NameSuggestions {
     'helensk',
     'sjuk',
     'nykommen',
+    'fantastisk',
+    'underbar',
+    'blandad',
+    'förvirrad',
   ];
 
   static const List<String> nouns = [
@@ -248,6 +252,11 @@ class NameSuggestions {
     'rektor',
     'mats',
     'smoothie',
+    'frukt',
+    'smoothie',
+    'vitamin',
+    'grönsak',
+    'stafett',
   ];
 
   // random suggestion

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../widgets/common_app_bar.dart';
 import '../widgets/pokedex_container.dart';
 import '../widgets/pokedex_button.dart';
+import '../widgets/highscore_list.dart';
 import "login_scanner_screen.dart";
 import '../main.dart'; // for UserSession
 import '../api_calls.dart'; // for fetching statistics
@@ -47,6 +48,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   String _formatTime(String isoTime) {
     final dateTime = DateTime.parse(isoTime);
     return DateFormat('yyyy-MM-dd HH:mm').format(dateTime);
+  }
+
+  bool _hasDuplicateScore(dynamic currentScore, List<dynamic> allScores) {
+    return allScores.where((s) => s['score'] == currentScore['score']).length >
+        1;
   }
 
   @override
@@ -266,116 +272,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                     ),
                                     if (highs.isNotEmpty) ...[
                                       const SizedBox(height: 24),
-                                      PokedexContainer(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const Text(
-                                              "Global Highscore",
-                                              style: TextStyle(
-                                                fontFamily: 'PixelFontTitle',
-                                                fontSize: 20,
-                                                color: Color(0xFFE3350D),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 16),
-                                            ListView.builder(
-                                              shrinkWrap: true,
-                                              physics:
-                                                  const NeverScrollableScrollPhysics(),
-                                              itemCount: highs.length,
-                                              itemBuilder: (context, index) {
-                                                final score = highs[index];
-                                                return Container(
-                                                  margin: const EdgeInsets.only(
-                                                    bottom: 8,
-                                                  ),
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical: 8,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
-                                                    border: Border.all(
-                                                      color: const Color(
-                                                        0xFF992109,
-                                                      ),
-                                                      width: 1,
-                                                    ),
-                                                  ),
-                                                  child: Row(
-                                                    children: [
-                                                      if (index < 3) ...[
-                                                        Icon(
-                                                          Icons.emoji_events,
-                                                          color:
-                                                              index == 0
-                                                                  ? Colors.amber
-                                                                  : index == 1
-                                                                  ? Colors
-                                                                      .grey[400]
-                                                                  : Colors
-                                                                      .brown[300],
-                                                          size: 24,
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 8,
-                                                        ),
-                                                      ],
-                                                      Expanded(
-                                                        child: Text(
-                                                          "${score['name']} (ID: ${score['id']})",
-                                                          style:
-                                                              const TextStyle(
-                                                                fontFamily:
-                                                                    'PixelFont',
-                                                                fontSize: 16,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Container(
-                                                        padding:
-                                                            const EdgeInsets.symmetric(
-                                                              horizontal: 8,
-                                                              vertical: 4,
-                                                            ),
-                                                        decoration: BoxDecoration(
-                                                          color: const Color(
-                                                            0xFFE3350D,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                12,
-                                                              ),
-                                                        ),
-                                                        child: Text(
-                                                          "${score['score']}",
-                                                          style:
-                                                              const TextStyle(
-                                                                color:
-                                                                    Colors
-                                                                        .white,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                      HighscoreList(highscores: highs),
                                     ],
                                   ],
                                 );
