@@ -6,6 +6,27 @@ use crate::misc::{self, validate_token};
 use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore};
 use crate::databaseconnection;
 
+macro_rules! db_or_500 {
+    ($expr:expr) => {
+        match $expr {
+            Ok(val) => val,
+            Err(e) => {
+                eprintln!("Database error: {:?}", e);
+                return HttpResponse::InternalServerError().finish();
+            }
+        }
+    };
+}
+
+macro_rules! token_or_unauthorized {
+    ($expr:expr) => {
+        match $expr {
+            Ok(val) => val,
+            Err(_) => return HttpResponse::Unauthorized().finish(),
+        }
+    };
+}
+
 pub const USER_NAME_MIN_LENGTH: usize = 3;
 pub const USER_NAME_MAX_LENGTH: usize = 20;
 pub const PASSWORD_MIN_LENGTH: usize = 4;
@@ -63,8 +84,8 @@ pub struct LoginResponse {
 }
 
 pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let user_exists = databaseconnection::user_id_exists(&info.id, &conn).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let user_exists = db_or_500!(databaseconnection::user_id_exists(&info.id, &conn));
     if !user_exists {
         let response = LoginResponse {
             id: info.id.clone(),
@@ -75,7 +96,7 @@ pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
         };
         return HttpResponse::NotFound().json(response);
     }
-    let (user, token) = match databaseconnection::login_and_get_user_by_id_pwd(&info.id, &info.password, &conn).unwrap() {
+    let (user, token) = match db_or_500!(databaseconnection::login_and_get_user_by_id_pwd(&info.id, &info.password, &conn)) {
         Some((user, token)) => (user, token),
         None => {
             let response = LoginResponse {
@@ -106,8 +127,8 @@ pub struct CreateUserRequest {
 }
 
 pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let user_exists = databaseconnection::user_id_exists(&info.id, &conn).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let user_exists = db_or_500!(databaseconnection::user_id_exists(&info.id, &conn));
     if user_exists {
         let response = LoginResponse {
             id: info.id.clone(),
@@ -155,7 +176,7 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
     }
 
     // if good then create user
-    let (user, token) = databaseconnection::create_user(&info.id, &info.name, &info.password, &conn).unwrap();
+    let (user, token) = db_or_500!(databaseconnection::create_user(&info.id, &info.name, &info.password, &conn));
     let response = LoginResponse {
         id: user.user_id,
         name: Some(user.name),
@@ -182,11 +203,11 @@ pub struct VerifyPasswordResponse {
 }
 
 pub async fn validate_password(req: HttpRequest, info: web::Json<VerifyPasswordRequest>) -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = token_or_unauthorized!(misc::get_user_id_from_token(token));
     if !validate_token(&user_id, token, &conn) {
         let response = VerifyPasswordResponse {
             id: user_id.clone(),
@@ -196,7 +217,7 @@ pub async fn validate_password(req: HttpRequest, info: web::Json<VerifyPasswordR
         };
         return HttpResponse::Unauthorized().json(response);
     }
-    let valid = databaseconnection::validate_password(&user_id, &info.password, &conn).unwrap();
+    let valid = db_or_500!(databaseconnection::validate_password(&user_id, &info.password, &conn));
 
     if !valid {
         let response = VerifyPasswordResponse {
@@ -233,11 +254,11 @@ pub struct SetPasswordResponse {
 }
 
 pub async fn set_user_password(req: HttpRequest, info: web::Json<SetPasswordRequest>) -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = token_or_unauthorized!(misc::get_user_id_from_token(token));
     if !validate_token(&user_id, token, &conn) {
         let response = SetPasswordResponse {
             id : user_id.clone(),
@@ -247,7 +268,7 @@ pub async fn set_user_password(req: HttpRequest, info: web::Json<SetPasswordRequ
         return HttpResponse::Unauthorized().json(response);
     }
     // check if user exists
-    let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
+    let user_exists = db_or_500!(databaseconnection::user_id_exists(&user_id, &conn));
     if !user_exists {
         let response = SetUserNameResponse {
             id: user_id.clone(),
@@ -259,7 +280,7 @@ pub async fn set_user_password(req: HttpRequest, info: web::Json<SetPasswordRequ
     }
 
     // validate old password
-    if !databaseconnection::validate_password(&user_id, &info.old_password, &conn).unwrap() {
+    if !db_or_500!(databaseconnection::validate_password(&user_id, &info.old_password, &conn)) {
         let response = SetPasswordResponse {
             id: user_id.clone(),
             message: "Invalid old password".to_string(),
@@ -279,7 +300,7 @@ pub async fn set_user_password(req: HttpRequest, info: web::Json<SetPasswordRequ
     }
 
     // now set new password
-    databaseconnection::set_user_password(&user_id, &info.new_password, &conn).unwrap();
+    db_or_500!(databaseconnection::set_user_password(&user_id, &info.new_password, &conn));
     let response = SetPasswordResponse {
         id: user_id.clone(),
         message: "Password updated".to_string(),
@@ -304,11 +325,11 @@ pub struct SetUserNameResponse {
 }
 
 pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>) -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = token_or_unauthorized!(misc::get_user_id_from_token(token));
     if !validate_token(&user_id, token, &conn) {
         let response = SetUserNameResponse {
             id: user_id.clone(),
@@ -319,7 +340,7 @@ pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>
         return HttpResponse::BadRequest().json(response);
     }
 
-    let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
+    let user_exists = db_or_500!(databaseconnection::user_id_exists(&user_id, &conn));
     if !user_exists {
         let response = SetUserNameResponse {
             id: user_id.clone(),
@@ -350,7 +371,7 @@ pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>
         return HttpResponse::BadRequest().json(response);
     }
 
-    databaseconnection::set_user_name(&user_id, &info.name, &conn).unwrap();
+    db_or_500!(databaseconnection::set_user_name(&user_id, &info.name, &conn));
     let response = SetUserNameResponse {
         id: user_id.clone(),
         name: Some(info.name.clone()),
@@ -373,8 +394,8 @@ pub async fn logout(req: HttpRequest) -> HttpResponse {
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
 
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let user_id = token_or_unauthorized!(misc::get_user_id_from_token(token));
     if !validate_token(&user_id, token, &conn) {
         let response = LogoutResponse {
             logged_out: false,
@@ -383,7 +404,7 @@ pub async fn logout(req: HttpRequest) -> HttpResponse {
         };
         return HttpResponse::BadRequest().json(response);
     }
-    databaseconnection::remove_token(&user_id, token, &conn).unwrap();
+    db_or_500!(databaseconnection::remove_token(&user_id, token, &conn));
     let response = LogoutResponse {
         logged_out: true,
         message: "Logged out".to_string(),
@@ -398,8 +419,8 @@ pub async fn logout_everywhere(req: HttpRequest) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let user_id = token_or_unauthorized!(misc::get_user_id_from_token(token));
     if !validate_token(&user_id, token, &conn) {
         let response = LogoutResponse {
             logged_out: false,
@@ -408,7 +429,7 @@ pub async fn logout_everywhere(req: HttpRequest) -> HttpResponse {
         };
         return HttpResponse::BadRequest().json(response);
     }
-    databaseconnection::remove_all_tokens_for_user(&user_id, &conn).unwrap();
+    db_or_500!(databaseconnection::remove_all_tokens_for_user(&user_id, &conn));
     let response = LogoutResponse {
         logged_out: true,
         message: "Logged out everywhere".to_string(),
@@ -422,16 +443,16 @@ pub async fn delete_user(req: HttpRequest) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let user_id = token_or_unauthorized!(misc::get_user_id_from_token(token));
     if !validate_token(&user_id, token, &conn) {
         return HttpResponse::Unauthorized().finish();
     }
-    let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
+    let user_exists = db_or_500!(databaseconnection::user_id_exists(&user_id, &conn));
     if !user_exists {
         return HttpResponse::NotFound().finish();
     }
-    databaseconnection::delete_user(&user_id, &conn).unwrap();
+    db_or_500!(databaseconnection::delete_user(&user_id, &conn));
     HttpResponse::Ok().finish()
 }
 
@@ -450,11 +471,11 @@ pub struct FoundPokemonResponse {
 }
 
 pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokemonRequest>) -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = token_or_unauthorized!(misc::get_user_id_from_token(token));
     if !validate_token(&user_id, token, &conn) {
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
@@ -464,7 +485,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
         };
         return HttpResponse::BadRequest().json(response);
     }
-    let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
+    let user_exists = db_or_500!(databaseconnection::user_id_exists(&user_id, &conn));
     if !user_exists {
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
@@ -474,7 +495,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
         };
         return HttpResponse::BadRequest().json(response);
     }
-    let pokemon_exists = databaseconnection::check_if_pokemon_exists_by_catch_code(&info.catch_code, &conn).unwrap();
+    let pokemon_exists = db_or_500!(databaseconnection::check_if_pokemon_exists_by_catch_code(&info.catch_code, &conn));
     if !pokemon_exists {
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
@@ -484,9 +505,9 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
         };
         return HttpResponse::BadRequest().json(response);
     }
-    let pokemon = databaseconnection::get_pokemon_by_catch_code(&info.catch_code, &conn).unwrap();
+    let pokemon = db_or_500!(databaseconnection::get_pokemon_by_catch_code(&info.catch_code, &conn));
     let found_before =
-        databaseconnection::check_if_you_found_pokemon_before(&user_id, &info.catch_code, &conn).unwrap();
+        db_or_500!(databaseconnection::check_if_you_found_pokemon_before(&user_id, &info.catch_code, &conn));
     if found_before {
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
@@ -496,7 +517,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
         };
         return HttpResponse::Ok().json(response);
     }
-    databaseconnection::found_pokemon(&user_id, &info.catch_code, &conn).unwrap();
+    db_or_500!(databaseconnection::found_pokemon(&user_id, &info.catch_code, &conn));
     let response = FoundPokemonResponse {
         user_id: user_id.clone(),
         pokemon_id: Some(pokemon.number.clone()),
@@ -521,11 +542,11 @@ pub struct ViewFoundPokemonResponse {
 }
 
 pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokemonRequest>) -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = token_or_unauthorized!(misc::get_user_id_from_token(token));
     if !validate_token(&user_id, token, &conn) {
         let response = ViewFoundPokemonResponse {
             id: user_id.clone(),
@@ -535,7 +556,7 @@ pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokem
         };
         return HttpResponse::BadRequest().json(response);
     }
-    let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
+    let user_exists = db_or_500!(databaseconnection::user_id_exists(&user_id, &conn));
     if !user_exists {
         let response = ViewFoundPokemonResponse {
             id: user_id.clone(),
@@ -545,7 +566,7 @@ pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokem
         };
         return HttpResponse::BadRequest().json(response);
     }
-    let pokemon = databaseconnection::view_found_pokemon(&user_id, info.n, &conn).unwrap();
+    let pokemon = db_or_500!(databaseconnection::view_found_pokemon(&user_id, info.n, &conn));
     let response = ViewFoundPokemonResponse {
         id: user_id.clone(),
         pokemon_found: pokemon,
@@ -563,8 +584,8 @@ pub struct GetHighScoreResponse {
 }
 
 pub async fn get_statistics_highscore() -> HttpResponse  {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let scores = databaseconnection::statistics_users_most_found(10, &conn).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let scores = db_or_500!(databaseconnection::statistics_users_most_found(10, &conn));
     let res = 
         GetHighScoreResponse {
             user_scores : scores,
@@ -581,8 +602,8 @@ pub struct GetLatestFoundPokemonResponse {
 }
 
 pub async fn get_statistics_latest_pokemon_found() -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let found_pokemon = databaseconnection::statistics_latest_pokemon_found(10, &conn).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let found_pokemon = db_or_500!(databaseconnection::statistics_latest_pokemon_found(10, &conn));
     let res = GetLatestFoundPokemonResponse {
         found_pokemon : found_pokemon,
         result_code: CallResultCode::Ok,
@@ -599,8 +620,8 @@ pub struct GetUserResponse {
 
 pub async fn get_user(path: web::Path<String>) -> HttpResponse {
     let user_id = path.into_inner();
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let user = databaseconnection::get_user_by_id(&user_id, &conn).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let user = db_or_500!(databaseconnection::get_user_by_id(&user_id, &conn));
     match user {
         Some(user) => {
             let res = GetUserResponse {
@@ -623,8 +644,8 @@ pub async fn get_user(path: web::Path<String>) -> HttpResponse {
 
 // get num users
 pub async fn num_users() -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let num_users = databaseconnection::get_num_users(&conn).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let num_users = db_or_500!(databaseconnection::get_num_users(&conn));
     HttpResponse::Ok().body(num_users.to_string())
 }
 
@@ -648,9 +669,9 @@ pub async fn get_users(req: HttpRequest, info: web::Json<GetUsersRequest>) -> Ht
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    let user_id = token_or_unauthorized!(misc::get_user_id_from_token(token));
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let is_admin = db_or_500!(databaseconnection::user_is_admin(&user_id, &conn));
     let valid_token = validate_token(&user_id, token, &conn);
     if !valid_token {
         let response = GetUsersResponse {
@@ -669,7 +690,7 @@ pub async fn get_users(req: HttpRequest, info: web::Json<GetUsersRequest>) -> Ht
         return HttpResponse::Forbidden().json(response);
     }
     
-    let users = databaseconnection::get_users(info.n, info.skip, &conn).unwrap();
+    let users = db_or_500!(databaseconnection::get_users(info.n, info.skip, &conn));
     let num_users = users.len();
     let res = GetUsersResponse {
         users: users,
@@ -690,9 +711,9 @@ pub async fn get_users_filter_id(req : HttpRequest, info: web::Json<GetUsersFilt
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    let user_id = token_or_unauthorized!(misc::get_user_id_from_token(token));
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let is_admin = db_or_500!(databaseconnection::user_is_admin(&user_id, &conn));
     let valid_token = validate_token(&user_id, token, &conn);
     if !valid_token {
         let response = GetUsersResponse {
@@ -711,8 +732,8 @@ pub async fn get_users_filter_id(req : HttpRequest, info: web::Json<GetUsersFilt
         return HttpResponse::Forbidden().json(response);
     }
     let filter = format!("%{}%", info.filter);
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let users = databaseconnection::get_users_filter_id(&filter, info.n, &conn).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let users = db_or_500!(databaseconnection::get_users_filter_id(&filter, info.n, &conn));
     let num_users = users.len();
     let res = GetUsersResponse {
         users: users,
@@ -726,9 +747,9 @@ pub async fn get_users_filter_id_name(req: HttpRequest, info: web::Json<GetUsers
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    let user_id = token_or_unauthorized!(misc::get_user_id_from_token(token));
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let is_admin = db_or_500!(databaseconnection::user_is_admin(&user_id, &conn));
     let valid_token = validate_token(&user_id, token, &conn);
     if !valid_token {
         let response = GetUsersResponse {
@@ -747,8 +768,8 @@ pub async fn get_users_filter_id_name(req: HttpRequest, info: web::Json<GetUsers
         return HttpResponse::Forbidden().json(response);
     }
     let filter = format!("%{}%", info.filter);
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let users = databaseconnection::get_users_filter_id_name(&filter, info.n, &conn).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let users = db_or_500!(databaseconnection::get_users_filter_id_name(&filter, info.n, &conn));
     let num_users = users.len();
     let res = GetUsersResponse {
         users: users,
@@ -768,8 +789,8 @@ pub struct UserExistsResponse {
 
 pub async fn user_exists(path: web::Path<String>) -> HttpResponse {
     let user_id = path.into_inner();
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let exists = db_or_500!(databaseconnection::user_id_exists(&user_id, &conn));
     let res = UserExistsResponse {
         exists: exists,
         result_code: CallResultCode::Ok,
@@ -782,8 +803,8 @@ pub async fn user_exists(path: web::Path<String>) -> HttpResponse {
 // get pokemon request
 pub async fn get_pokemon(path: web::Path<u32>) -> HttpResponse {
     let number = path.into_inner();
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let pokemon = databaseconnection::get_pokemon(number, &conn).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let pokemon = db_or_500!(databaseconnection::get_pokemon(number, &conn));
     match pokemon {
         Some(pokemon) => {
             HttpResponse::Ok().json(pokemon)
@@ -799,11 +820,11 @@ pub async fn get_pokemon(path: web::Path<u32>) -> HttpResponse {
 pub async fn get_user_ranking(path: web::Path<String>) -> HttpResponse {
     let user_id = path.into_inner();
     // first check if user exists
-    if !databaseconnection::user_id_exists(&user_id, &databaseconnection::get_conn(get_env_dbpath()).unwrap()).unwrap() {
+    if !db_or_500!(databaseconnection::user_id_exists(&user_id, &db_or_500!(databaseconnection::get_conn(get_env_dbpath())))) {
         return HttpResponse::NotFound().finish();
     }
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let ranking = databaseconnection::user_ranking(&user_id, &conn).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
+    let ranking = db_or_500!(databaseconnection::user_ranking(&user_id, &conn));
     HttpResponse::Ok().json(ranking)
 }
 
@@ -819,9 +840,9 @@ pub async fn get_my_pokedex(req: HttpRequest) -> HttpResponse {
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
     
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let conn = db_or_500!(databaseconnection::get_conn(get_env_dbpath()));
 
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = token_or_unauthorized!(misc::get_user_id_from_token(token));
     if !validate_token(&user_id, token, &conn) {
         let response = SetUserNameResponse {
             id: user_id.clone(),
@@ -831,7 +852,7 @@ pub async fn get_my_pokedex(req: HttpRequest) -> HttpResponse {
         };
         return HttpResponse::BadRequest().json(response);
     }
-    let pokedex = databaseconnection::user_pokedex(&user_id, &conn).unwrap();
+    let pokedex = db_or_500!(databaseconnection::user_pokedex(&user_id, &conn));
     let res = MyPokedexResponse {
         pokedex: pokedex,
         result_code: CallResultCode::Ok,

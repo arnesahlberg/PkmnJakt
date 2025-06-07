@@ -9,14 +9,18 @@ pub fn encode_string_base64(input : String) -> String {
     general_purpose::STANDARD.encode(input.as_bytes())
 }
 
-pub fn decode_string_base64(input : String) -> String {
-    let bytes = general_purpose::STANDARD.decode(input)
-        .expect("Failed to decode Base64 string!");
+pub fn decode_string_base64(input : String) -> Result<String,String> {
+    let bytes = match general_purpose::STANDARD.decode(input) {
+        Ok(b) => b,
+        Err(_) => return Err("Failed to decode Base64 string.".to_string()),
+    };
 
-    let decoded_string = String::from_utf8(bytes)
-        .expect("Decoded bytes are not a UTF-8 string.");
+    let decoded_string = match String::from_utf8(bytes) {
+        Ok(s) => s,
+        Err(_) => return Err("Decoded bytes are not a UTF-8 string.".to_string()),
+    };
 
-    decoded_string
+    Ok(decoded_string)
 }
 
 
@@ -54,7 +58,7 @@ pub fn verify_hash_password(password : &str, hash : &str, salt : &str) -> bool {
 
 
 // database connected functions too
-pub fn create_token(user_id : &str, valid_until : DateTime<Utc>, conn : &Connection) -> Result<String, String> {
+pub fn create_token(user_id : &str, valid_until : DateTime<Utc>, conn : &Connection) -> Result<String, rusqlite::Error> {
     let token = format!("[TOKEN--{}--{}--{}--{}]", random_string(11), user_id, valid_until, random_string(3));
     let encoded_token = encode_string_base64(token);
 
@@ -62,13 +66,13 @@ pub fn create_token(user_id : &str, valid_until : DateTime<Utc>, conn : &Connect
     conn.execute(
         "INSERT INTO Tokens(token, user_id, expiry) VALUES(?1, ?2, ?3)",
         params![encoded_token, user_id, valid_until.to_rfc3339()]
-    ).expect("Failed to insert token into database.");
+    )?;
 
     Ok(encoded_token)
 }
 
 pub fn get_user_id_from_token(token : &str) -> Result<String,String> {
-    let decoded_token = decode_string_base64(token.to_string());
+    let decoded_token = decode_string_base64(token.to_string())?;
     let token_parts : Vec<&str> = decoded_token.split("--").collect();
     if token_parts.len() != 5 {
         return Err("Invalid token format.".to_string());
@@ -78,7 +82,10 @@ pub fn get_user_id_from_token(token : &str) -> Result<String,String> {
 }
 
 pub fn validate_token(user_id : &str, token : &str, conn : &Connection) -> bool {
-    let decoded_token = decode_string_base64(token.to_string());
+    let decoded_token = match decode_string_base64(token.to_string()) {
+        Ok(t) => t,
+        Err(_) => return false,
+    };
     let token_parts : Vec<&str> = decoded_token.split("--").collect();
     if token_parts.len() != 5 {
         return false;
@@ -95,24 +102,30 @@ pub fn validate_token(user_id : &str, token : &str, conn : &Connection) -> bool 
         return false;
     }
 
-    let expiry = DateTime::parse_from_rfc3339(token_expiry.replace(" UTC", "Z").replace(" " , "T").as_str())
-        .expect("Failed to parse token expiry date.");
+    let expiry = match DateTime::parse_from_rfc3339(token_expiry.replace(" UTC", "Z").replace(" " , "T").as_str()) {
+        Ok(e) => e,
+        Err(_) => return false,
+    };
 
     if expiry < Utc::now() {
         return false;
     }
     // check if token exists in database with user_id. don't check the validuntil field here
     // it seems to not work for some reason. 
-    let mut stmt = conn.prepare(
+    let mut stmt = match conn.prepare(
         "SELECT token FROM Tokens WHERE token = ?1 AND user_id = ?2"
-    ).expect("Failed to prepare statement for token validation.");
+    ) {
+        Ok(s) => s,
+        Err(_) => return false,
+    };
 
-
-    let mut rows = stmt.query(params![token, user_id])
-        .expect("Failed to query token for validation.");
+    let mut rows = match stmt.query(params![token, user_id]) {
+        Ok(r) => r,
+        Err(_) => return false,
+    };
 
     let mut count = 0;
-    while let Some(_) = rows.next().unwrap() {
+    while let Ok(Some(_)) = rows.next() {
         count += 1;
     }
 

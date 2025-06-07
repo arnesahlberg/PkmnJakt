@@ -155,7 +155,10 @@ pub fn login_and_get_user_by_id_pwd(user_id: &str, pwd: &str, conn: &Connection)
     for user in user_iter {
         // create token and return
         let valid_until = Utc::now() + Duration::days(7);
-        let encoded_token = create_token(user_id, valid_until, conn).unwrap();
+        let encoded_token = match create_token(user_id, valid_until, conn) {
+            Ok(t) => t,
+            Err(e) => return Err(e),
+        };
         let token = Token {
             encoded_token : encoded_token,
             valid_until : valid_until,
@@ -196,7 +199,10 @@ pub fn create_user(user_id: &str, name: &str, password : &str, conn: &Connection
     )?;
 
     let valid_until = Utc::now() + Duration::days(7);
-    let encoded_token = create_token(user_id, valid_until, conn).unwrap();
+    let encoded_token = match create_token(user_id, valid_until, conn) {
+        Ok(t) => t,
+        Err(e) => return Err(e),
+    };
     let token = Token {
         encoded_token: encoded_token,
         valid_until: valid_until,
@@ -282,7 +288,10 @@ pub fn view_found_pokemon(user_id: &str, n: i32, conn: &Connection) -> Result<Ve
     // use view ViewFoundPokemon
     let mut stmt = conn.prepare("SELECT Pokemon, PokemonNumber, TimeStamp, PhotoPath, Comment, Rating FROM ViewFoundPokemon WHERE UserId = ?1 ORDER BY TimeStamp DESC LIMIT ?2")?;
     let rows = stmt.query_map(params![user_id, n], |row| {
-        let user = get_user_by_id_str(user_id, conn)?.unwrap();
+        let user = match get_user_by_id_str(user_id, conn)? {
+            Some(u) => u,
+            None => return Err(rusqlite::Error::QueryReturnedNoRows),
+        };
         Ok(FoundPkmn {
             found_by_user: User {
                 user_id: user_id.to_string(),
@@ -350,7 +359,11 @@ pub fn upload_photo_of_pokemon(user_id: &str, pokemon_id: &str, photo_path: &str
 // get user ranking
 pub fn user_ranking(user_id : &str, conn : &Connection) -> Result<u32> {
     let mut stmt = conn.prepare("SELECT Ranking FROM ViewUserRanking WHERE UserId = ?1")?;
-    let ranking : u32 = stmt.query_row(params![user_id], |row| row.get(0)).unwrap_or(get_num_users(conn)? as u32);
+    let ranking : u32 = match stmt.query_row(params![user_id], |row| row.get(0)) {
+        Ok(r) => r,
+        Err(rusqlite::Error::QueryReturnedNoRows) => get_num_users(conn)? as u32,
+        Err(e) => return Err(e),
+    };
     Ok(ranking)
 }
 
