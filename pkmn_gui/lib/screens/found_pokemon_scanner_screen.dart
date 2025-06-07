@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../api_calls.dart';
@@ -48,7 +49,13 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
             SnackBar(content: Text("Fel: ${foundResponse['result_code']}")),
           );
         }
-        _scanned = false;
+        Future.delayed(const Duration(seconds: 5), () {
+          if (mounted) {
+            setState(() {
+              _scanned = false;
+            });
+          }
+        });
         setState(() => _isProcessing = false);
         return;
       }
@@ -107,7 +114,13 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Fel: $e")));
-      _scanned = false;
+      Future.delayed(const Duration(seconds: 5), () {
+        if (mounted) {
+          setState(() {
+            _scanned = false;
+          });
+        }
+      });
     } finally {
       setState(() => _isProcessing = false);
     }
