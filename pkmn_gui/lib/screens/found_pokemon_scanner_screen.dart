@@ -95,7 +95,6 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
             ),
           );
         }
-        _scanned = false;
         setState(() => _isProcessing = false);
         return;
       }
@@ -256,11 +255,16 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
           backgroundColor: Colors.red,
         ),
       );
-      _scanned = false;
       // Ensure processing is false even on error
       setState(() => _isProcessing = false);
     } finally {
-      // No need to set _isProcessing here anymore
+      // Allow scanning again after a short delay to prevent spam
+      Future.delayed(const Duration(seconds: 5), () {
+        if (!mounted) return;
+        setState(() {
+          _scanned = false;
+        });
+      });
     }
   }
 
