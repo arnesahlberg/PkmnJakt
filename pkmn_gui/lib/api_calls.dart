@@ -166,6 +166,23 @@ class ApiService {
     return decodeUtf8Json(response);
   }
 
+  static Future<Map<String, dynamic>> getGlobalHighscore(
+    int n,
+    int skip, {
+    String? filter,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/global_highscores'),
+      body: jsonEncode({
+        'n': n,
+        'skip': skip,
+        'filter': filter,
+      }),
+      headers: _headers(),
+    );
+    return decodeUtf8Json(response);
+  }
+
   static Future<Map<String, dynamic>> getStatisticsLatestPokemonFound() async {
     final response = await http.get(
       Uri.parse('$baseUrl/statistics_latest_pokemon_found'),

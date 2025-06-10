@@ -573,6 +573,34 @@ pub async fn get_statistics_highscore() -> HttpResponse  {
     HttpResponse::Ok().json(res)
 }
 
+#[derive(Debug, Deserialize)]
+pub struct GetPagedHighscoreRequest {
+    pub n: u32,
+    pub skip: u32,
+    pub filter: Option<String>,
+}
+
+pub async fn get_statistics_highscore_paged(info: web::Json<GetPagedHighscoreRequest>) -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let n = info.n as i32;
+    let skip = info.skip as i32;
+    let scores = if let Some(f) = &info.filter {
+        if !f.is_empty() {
+            let filter = format!("%{}%", f);
+            databaseconnection::statistics_users_most_found_filter(&filter, n, skip, &conn).unwrap()
+        } else {
+            databaseconnection::statistics_users_most_found_paginated(n, skip, &conn).unwrap()
+        }
+    } else {
+        databaseconnection::statistics_users_most_found_paginated(n, skip, &conn).unwrap()
+    };
+    let res = GetHighScoreResponse {
+        user_scores: scores,
+        result_code: CallResultCode::Ok,
+    };
+    HttpResponse::Ok().json(res)
+}
+
 
 #[derive(Debug, Serialize)]
 pub struct GetLatestFoundPokemonResponse {
@@ -1006,6 +1034,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/found_pokemon", web::post().to(register_found_pokemon))
         .route("/view_found_pokemon", web::post().to(view_found_pokemon))
         .route("/statistics_highscore", web::get().to(get_statistics_highscore))
+        .route("/global_highscores", web::post().to(get_statistics_highscore_paged))
         .route("/statistics_latest_pokemon_found", web::get().to(get_statistics_latest_pokemon_found))
         .route("/get_user/{user_id}", web::get().to(get_user))
         .route("/num_users", web::get().to(num_users))

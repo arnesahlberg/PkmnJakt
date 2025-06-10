@@ -368,6 +368,30 @@ pub fn statistics_users_most_found(n : i32, conn : &Connection) -> Result<Vec<Us
     Ok(result)
 }
 
+pub fn statistics_users_most_found_paginated(n: i32, skip: i32, conn: &Connection) -> Result<Vec<UserScore>> {
+    let mut stmt = conn.prepare("SELECT UserID, User, PokemonFound, LastFound FROM ViewTopFinders LIMIT ?1 OFFSET ?2")?;
+    let rows = stmt.query_map(params![n, skip], |row| {
+        Ok(UserScore { id: row.get(0)?, name: row.get(1)?, score: row.get(2)?, latest_found: row.get(3)? })
+    })?;
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?)
+    }
+    Ok(result)
+}
+
+pub fn statistics_users_most_found_filter(filter: &str, n: i32, skip: i32, conn: &Connection) -> Result<Vec<UserScore>> {
+    let mut stmt = conn.prepare("SELECT UserID, User, PokemonFound, LastFound FROM ViewTopFinders WHERE User LIKE ?1 OR UserID LIKE ?1 LIMIT ?2 OFFSET ?3")?;
+    let rows = stmt.query_map(params![filter, n, skip], |row| {
+        Ok(UserScore { id: row.get(0)?, name: row.get(1)?, score: row.get(2)?, latest_found: row.get(3)? })
+    })?;
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?)
+    }
+    Ok(result)
+}
+
 
 pub fn statistics_latest_pokemon_found(n: i32, conn: &Connection) -> Result<Vec<FoundPkmn>> {
     let mut stmt = conn.prepare("Select UserID, User, Pokemon, PokemonNumber, TimeStamp, PhotoPath, Comment, Rating FROM ViewLatestFoundPokemon LIMIT ?1")?;

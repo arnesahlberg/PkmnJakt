@@ -563,6 +563,13 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         if (!_isExtraLoading) ...[
                           const SizedBox(height: 24),
                           HighscoreList(highscores: _highScores),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () => Navigator.pushNamed(context, '/highscore'),
+                              child: const Text('Se mer >'),
+                            ),
+                          ),
                           const SizedBox(height: 24),
                           PokedexContainer(
                             child: Column(
