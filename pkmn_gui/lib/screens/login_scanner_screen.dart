@@ -61,6 +61,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
           );
           setState(() {
             _isProcessing = false;
+            _scanned = false; // Allow scanning again after error
           });
           return;
         }
@@ -71,6 +72,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
           if (password == null || password.isEmpty) {
             setState(() {
               _isProcessing = false;
+              _scanned = false; // Allow scanning again if user cancels
             });
             return;
           }
@@ -99,6 +101,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
             }
             setState(() {
               _isProcessing = false;
+              _scanned = false; // Allow scanning again after error
             });
             return;
           }
@@ -117,6 +120,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
               credentials['confirm']?.isEmpty == true) {
             setState(() {
               _isProcessing = false;
+              _scanned = false; // Allow scanning again if user cancels
             });
             return;
           }
@@ -132,6 +136,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
             );
             setState(() {
               _isProcessing = false;
+              _scanned = false; // Allow scanning again after error
             });
             return;
           }
@@ -167,6 +172,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
             }
             setState(() {
               _isProcessing = false;
+              _scanned = false; // Allow scanning again after error
             });
             return;
           }
@@ -195,13 +201,17 @@ class _QRScannerScreenState extends State<QRScannerScreen>
         setState(() {
           _isProcessing = false;
         });
-        Future.delayed(const Duration(seconds: 1), () {
-          if (mounted) {
-            setState(() {
-              _scanned = false;
-            });
-          }
-        });
+        // Only reset _scanned if still mounted and if we didn't successfully login
+        // (successful login navigates away from this screen)
+        if (mounted) {
+          Future.delayed(const Duration(seconds: 1), () {
+            if (mounted) {
+              setState(() {
+                _scanned = false;
+              });
+            }
+          });
+        }
       }
     }
   }
@@ -216,13 +226,15 @@ class _QRScannerScreenState extends State<QRScannerScreen>
             backgroundColor: Colors.transparent,
             body: Column(
               children: [
-                Expanded(
-                  child: DataMatrixScanner(
-                    onCodeScanned: _onGetResult,
-                    sheetTitle: "Scanna QR-koden på ditt band för att logga in",
-                    scannerFormat: ScannerFormat.dataMatrix,
+                if (!_scanned) // Only show scanner when not processing a scan
+                  Expanded(
+                    child: DataMatrixScanner(
+                      onCodeScanned: _onGetResult,
+                      sheetTitle:
+                          "Scanna QR-koden på ditt band för att logga in",
+                      scannerFormat: ScannerFormat.dataMatrix,
+                    ),
                   ),
-                ),
                 PokedexContainer(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
