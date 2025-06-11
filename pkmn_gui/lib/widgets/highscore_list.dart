@@ -71,20 +71,22 @@ class HighscoreList extends StatelessWidget {
                     ],
                     Expanded(
                       flex: 3,
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "${score['name']} ",
+                            score['name'],
                             style: const TextStyle(
                               fontFamily: 'PixelFont',
                               fontSize: 16,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            "(ID: ${score['id']})",
+                            "ID: ${score['id']}",
                             style: const TextStyle(
                               fontFamily: 'PixelFont',
-                              fontSize: 12,
+                              fontSize: 10,
                               color: Colors.grey,
                             ),
                           ),
