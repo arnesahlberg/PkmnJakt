@@ -56,31 +56,117 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
         if (foundResponse['result_code'] ==
             CallResultCode.pokemonAlreadyFound) {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "Du har redan hittat denna Pokémon",
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.white,
+
+          // Set processing to false *before* showing the dialog
+          setState(() => _isProcessing = false);
+
+          // Show dialog for already caught Pokemon
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder:
+                (dialogContext) => Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: PokedexContainer(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.info_outline,
+                            size: UIConstants.iconSizeHuge,
+                            color: AppColors.primaryRed,
+                          ),
+                          const SizedBox(height: UIConstants.spacing16),
+                          const Text(
+                            "Redan fångad!",
+                            style: AppTextStyles.titleLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Du har redan hittat denna Pokémon",
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: AppColors.secondaryRed,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          PokedexButton(
+                            onPressed: () {
+                              Navigator.pop(dialogContext);
+                              Navigator.pushReplacementNamed(context, '/home');
+                            },
+                            child: const Text("Okej"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              backgroundColor: AppColors.primaryRed,
-            ),
           );
+
+          // Reset scanning after dialog is closed
+          _scanned = false;
         } else if (foundResponse['result_code'] ==
             CallResultCode.pokemonNotFound) {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "Koden du scannade tillhör inte en pokemon",
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.white,
+
+          // Set processing to false *before* showing the dialog
+          setState(() => _isProcessing = false);
+
+          // Show dialog for invalid code
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder:
+                (dialogContext) => Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: PokedexContainer(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.warning_amber_rounded,
+                            size: UIConstants.iconSizeHuge,
+                            color: AppColors.primaryRed,
+                          ),
+                          const SizedBox(height: UIConstants.spacing16),
+                          const Text(
+                            "Ogiltig kod",
+                            style: AppTextStyles.titleLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Koden du scannade tillhör inte en Pokémon",
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: AppColors.secondaryRed,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          PokedexButton(
+                            onPressed: () {
+                              Navigator.pop(dialogContext);
+                              Navigator.pushReplacementNamed(context, '/home');
+                            },
+                            child: const Text("Okej"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              backgroundColor: AppColors.primaryRed,
-            ),
           );
+
+          // Reset scanning after dialog is closed
+          _scanned = false;
         } else {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -94,9 +180,9 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
               backgroundColor: AppColors.primaryRed,
             ),
           );
+          _scanned = false;
+          setState(() => _isProcessing = false);
         }
-        _scanned = false;
-        setState(() => _isProcessing = false);
         return;
       }
 
