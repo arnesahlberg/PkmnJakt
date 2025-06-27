@@ -447,6 +447,7 @@ pub struct FoundPokemonResponse {
     pub pokemon_id: Option<u32>,
     pub message: String,
     pub result_code: CallResultCode,
+    pub milestone_reached: Option<u32>,
 }
 
 pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokemonRequest>) -> HttpResponse {
@@ -461,6 +462,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
             pokemon_id: None,
             message: "Invalid token".to_string(),
             result_code: CallResultCode::InvalidToken,
+            milestone_reached: None,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -471,6 +473,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
             pokemon_id: None,
             message: format!("User does not exist {}", user_id),
             result_code: CallResultCode::UserNotFound,
+            milestone_reached: None,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -481,6 +484,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
             pokemon_id: None,
             message: "Cannot find pokemon".to_string(),
             result_code: CallResultCode::PokemonNotFound,
+            milestone_reached: None,
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -493,15 +497,39 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
             pokemon_id: Some(pokemon.number.clone()),
             message: format!("Already found pokemon"),
             result_code: CallResultCode::PokemonAlreadyFound,
+            milestone_reached: None,
         };
         return HttpResponse::Ok().json(response);
     }
     databaseconnection::found_pokemon(&user_id, &info.catch_code, &conn).unwrap();
+    
+    // Check for milestone achievement (only for Pokemon with ID <= 151)
+    let mut milestone_reached = None;
+    if pokemon.number <= 151 {
+        let pokemon_count = databaseconnection::user_pokemon_count_for_milestones(&user_id, &conn).unwrap();
+        
+        // Check if this count is a milestone (every 10 up to 150, plus 151)
+        let milestones = vec![10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 151];
+        
+        for milestone in milestones {
+            if pokemon_count == milestone {
+                // Check if user already has this milestone
+                if !databaseconnection::user_has_milestone(&user_id, milestone, &conn).unwrap() {
+                    // Record the milestone
+                    databaseconnection::record_milestone(&user_id, milestone, &conn).unwrap();
+                    milestone_reached = Some(milestone);
+                }
+                break;
+            }
+        }
+    }
+    
     let response = FoundPokemonResponse {
         user_id: user_id.clone(),
         pokemon_id: Some(pokemon.number.clone()),
         message: format!("Caught {} (#{})", pokemon.name, pokemon.number),
         result_code: CallResultCode::Ok,
+        milestone_reached,
     };
     HttpResponse::Ok().json(response)
 }
@@ -850,6 +878,17 @@ pub async fn get_user_pokedex(path: web::Path<String>) -> HttpResponse {
     HttpResponse::Ok().json(pokedex)
 }
 
+pub async fn get_user_milestones(path: web::Path<String>) -> HttpResponse {
+    let user_id = path.into_inner();
+    // first check if user exists
+    if !databaseconnection::user_id_exists(&user_id, &databaseconnection::get_conn(get_env_dbpath()).unwrap()).unwrap() {
+        return HttpResponse::NotFound().finish();
+    }
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let milestones = databaseconnection::get_user_milestones(&user_id, &conn).unwrap();
+    HttpResponse::Ok().json(milestones)
+}
+
 pub async fn validate_token_request(req: HttpRequest) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
@@ -1025,6 +1064,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/user_ranking/{user_id}", web::get().to(get_user_ranking))
         .route("/my_pokedex", web::get().to(get_my_pokedex))
         .route("/user_pokedex/{user_id}", web::get().to(get_user_pokedex))
+        .route("/user_milestones/{user_id}", web::get().to(get_user_milestones))
         // admin endpoints
         .route("/am_i_admin", web::get().to(am_i_admin))
         .route("/is_user_admin/{user_id}", web::get().to(is_user_admin))

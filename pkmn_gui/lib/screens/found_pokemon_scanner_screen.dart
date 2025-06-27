@@ -196,11 +196,116 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
       final pokemonDetails = await ApiService.getPokemon(pokemonId);
       final pokemonName = pokemonDetails['name'];
       final pokemonDescription = pokemonDetails['description'];
+      
+      // Check if a milestone was reached
+      final milestoneReached = foundResponse['milestone_reached'];
 
       if (!mounted) return;
 
       // Set processing to false *before* showing the dialog
       setState(() => _isProcessing = false);
+      
+      // If milestone was reached, show milestone dialog first
+      if (milestoneReached != null) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: PokedexContainer(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.stars,
+                        size: UIConstants.iconSizeHuge * 1.5,
+                        color: Colors.amber,
+                      ),
+                      const SizedBox(height: UIConstants.spacing16),
+                      const Text(
+                        "MILSTOLPE!",
+                        style: TextStyle(
+                          fontFamily: 'PixelFontTitle',
+                          fontSize: 28,
+                          color: AppColors.primaryRed,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Du har fångat $milestoneReached Pokémon!",
+                        style: const TextStyle(
+                          fontFamily: 'PixelFont',
+                          fontSize: 20,
+                          color: AppColors.secondaryRed,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        milestoneReached == 151 
+                          ? "Grattis! Du har fångat alla 151 original Pokémon!"
+                          : "Grattis! Här får du en $milestoneReached-medalj!",
+                        style: TextStyle(
+                          fontFamily: 'PixelFont',
+                          fontSize: 16,
+                          color: Colors.grey.shade800,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+                      // Milestone badge icon
+                      Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade100,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.amber,
+                            width: 4,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.amber.withOpacity(0.5),
+                              blurRadius: 20,
+                              spreadRadius: 5,
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            "$milestoneReached",
+                            style: const TextStyle(
+                              fontFamily: 'PixelFontTitle',
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryRed,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      PokedexButton(
+                        onPressed: () {
+                          Navigator.pop(dialogContext);
+                        },
+                        child: const Text("Fortsätt"),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        
+        if (!mounted) return;
+      }
 
       // show popup with pokemon info and image
       showDialog(

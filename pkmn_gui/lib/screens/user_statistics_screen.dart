@@ -3,6 +3,7 @@ import 'package:pkmn_gui/widgets/common_app_bar.dart';
 import 'package:pkmn_gui/widgets/pokedex_container.dart';
 import '../api_calls.dart';
 import '../constants.dart';
+import '../widgets/milestone_badge.dart';
 
 class UserStatisticsScreen extends StatefulWidget {
   final String userId;
@@ -21,12 +22,14 @@ class UserStatisticsScreen extends StatefulWidget {
 class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
   late Future<Map<String, dynamic>> _userDataFuture;
   late Future<List<dynamic>> _pokedexFuture;
+  late Future<List<int>> _milestonesFuture;
 
   @override
   void initState() {
     super.initState();
     _userDataFuture = ApiService.getUser(widget.userId);
     _pokedexFuture = ApiService.getUserPokedex(widget.userId);
+    _milestonesFuture = ApiService.getUserMilestones(widget.userId);
   }
 
   void _showPokemonDetails(Map<String, dynamic> pokemon) {
@@ -150,7 +153,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
       body: Container(
         decoration: AppBoxDecorations.gradientBackground,
         child: FutureBuilder<List<dynamic>>(
-          future: Future.wait([_userDataFuture, _pokedexFuture]),
+          future: Future.wait([_userDataFuture, _pokedexFuture, _milestonesFuture]),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -196,6 +199,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
             }
 
             final caughtPokemon = snapshot.data![1] as List<dynamic>;
+            final milestones = snapshot.data![2] as List<int>;
             final caughtCount = caughtPokemon.length;
 
             // Sort Pokemon by number
@@ -269,6 +273,41 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                       ),
                     ),
                   ),
+                ),
+                if (milestones.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: PokedexContainer(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Milstolpar",
+                              style: TextStyle(
+                                fontFamily: 'PixelFontTitle',
+                                fontSize: 18,
+                                color: AppColors.primaryRed,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: milestones.map((milestone) {
+                                return MilestoneBadge(
+                                  milestone: milestone,
+                                  size: 40,
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 16),
                 ),
                 if (caughtPokemon.isEmpty)
                   SliverToBoxAdapter(

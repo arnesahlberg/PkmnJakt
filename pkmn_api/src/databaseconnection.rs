@@ -440,3 +440,46 @@ pub fn user_pokedex(user_id: &str, conn: &Connection) -> Result<Vec<Pkmn>> {
 
     Ok(result)
 }
+
+// get count of pokemon caught by user (excluding MissingNo for milestones)
+pub fn user_pokemon_count_for_milestones(user_id: &str, conn: &Connection) -> Result<u32> {
+    let mut stmt = conn.prepare(
+        "SELECT COUNT(DISTINCT pokemon_id) FROM FoundPokemon WHERE user_id = ?1 AND pokemon_id <= 151"
+    )?;
+    let count: u32 = stmt.query_row(params![user_id], |row| row.get(0))?;
+    Ok(count)
+}
+
+// check if user has achieved a milestone
+pub fn user_has_milestone(user_id: &str, milestone_count: u32, conn: &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare(
+        "SELECT COUNT(*) FROM UserMilestones WHERE user_id = ?1 AND milestone_count = ?2"
+    )?;
+    let count: i32 = stmt.query_row(params![user_id, milestone_count], |row| row.get(0))?;
+    Ok(count > 0)
+}
+
+// record milestone achievement
+pub fn record_milestone(user_id: &str, milestone_count: u32, conn: &Connection) -> Result<()> {
+    conn.execute(
+        "INSERT INTO UserMilestones (user_id, milestone_count) VALUES (?1, ?2)",
+        params![user_id, milestone_count],
+    )?;
+    Ok(())
+}
+
+// get all milestones for a user
+pub fn get_user_milestones(user_id: &str, conn: &Connection) -> Result<Vec<u32>> {
+    let mut stmt = conn.prepare(
+        "SELECT milestone_count FROM UserMilestones WHERE user_id = ?1 ORDER BY milestone_count"
+    )?;
+    let rows = stmt.query_map(params![user_id], |row| {
+        row.get(0)
+    })?;
+    
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?);
+    }
+    Ok(result)
+}

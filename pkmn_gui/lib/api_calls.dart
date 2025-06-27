@@ -224,6 +224,16 @@ class ApiService {
     final decodedString = utf8.decode(response.bodyBytes);
     return jsonDecode(decodedString) as List<dynamic>;
   }
+
+  static Future<List<int>> getUserMilestones(String userId) async {
+    final response = await http.get(Uri.parse('$baseUrl/user_milestones/$userId'));
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load user milestones: ${response.statusCode}');
+    }
+    final decodedString = utf8.decode(response.bodyBytes);
+    final List<dynamic> jsonList = jsonDecode(decodedString) as List<dynamic>;
+    return jsonList.map((e) => e as int).toList();
+  }
 }
 
 // admin stuff

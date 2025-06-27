@@ -65,3 +65,16 @@ impl UserScore {
         self.latest_found.with_timezone(&cet_timezone)
     }
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Milestone {
+    pub milestone_count: u32,
+    pub achieved_at: DateTime<Utc>,
+}
+
+impl Milestone {
+    pub fn cet_achieved_at(&self) -> DateTime<Tz> {
+        let cet_timezone: Tz = Berlin;
+        self.achieved_at.with_timezone(&cet_timezone)
+    }
+}
