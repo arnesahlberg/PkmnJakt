@@ -101,8 +101,9 @@ class _HighscorePageState extends State<HighscorePage> {
       appBar: const CommonAppBar(title: "Highscore"),
       body: Container(
         decoration: AppBoxDecorations.gradientBackground,
-        child: Column(
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
             // Search bar
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
@@ -110,10 +111,7 @@ class _HighscorePageState extends State<HighscorePage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFF992109),
-                    width: 2,
-                  ),
+                  border: Border.all(color: AppColors.secondaryRed, width: 2),
                 ),
                 child: TextField(
                   controller: _searchController,
@@ -132,7 +130,7 @@ class _HighscorePageState extends State<HighscorePage> {
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: 8,
+                      vertical: 12,
                     ),
                   ),
                   style: const TextStyle(
@@ -159,7 +157,7 @@ class _HighscorePageState extends State<HighscorePage> {
               ),
 
             // Highscore list
-            Expanded(child: _buildContent()),
+            _buildContent(),
 
             // Pagination
             if (_totalPages > 1)
@@ -198,7 +196,8 @@ class _HighscorePageState extends State<HighscorePage> {
                   ),
                 ),
               ),
-          ],
+            ],
+          ),
         ),
       ),
     );
