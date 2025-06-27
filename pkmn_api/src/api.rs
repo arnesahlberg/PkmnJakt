@@ -7,7 +7,7 @@ use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore};
 use crate::databaseconnection;
 
 pub const USER_NAME_MIN_LENGTH: usize = 3;
-pub const USER_NAME_MAX_LENGTH: usize = 20;
+pub const USER_NAME_MAX_LENGTH: usize = 40;
 pub const PASSWORD_MIN_LENGTH: usize = 4;
 
 pub const AUHTORIZATION_HEADER_LABEL : &str = "Authorization";

@@ -2,6 +2,7 @@
 use core::panic;
 
 use chrono::{Utc, Duration};
+use chrono_tz::Europe::Stockholm;
 use rusqlite::{params, Connection, Result};
 use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore};
 use crate::misc::{self, create_token};
@@ -265,9 +266,15 @@ pub fn get_pokemon_id_by_catch_code(catch_code: &str, conn: &Connection) -> Resu
 // to call if oyu've found a pokemon
 pub fn found_pokemon(user_id: &str, catch_code: &str, conn: &Connection) -> Result<()> {
     let pokemon_id = get_pokemon_id_by_catch_code(catch_code, conn)?;
+    
+    // Generate timestamp in Stockholm timezone (CET/CEST)
+    let now_utc = Utc::now();
+    let now_stockholm = now_utc.with_timezone(&Stockholm);
+    let timestamp_str = now_stockholm.format("%Y-%m-%d %H:%M:%S").to_string();
+    
     conn.execute(
-        "INSERT INTO FoundPokemon (user_id, pokemon_id) VALUES (?1, ?2)",
-        params![user_id, pokemon_id],
+        "INSERT INTO FoundPokemon (user_id, pokemon_id, found_timestamp) VALUES (?1, ?2, ?3)",
+        params![user_id, pokemon_id, timestamp_str],
     )?;
     Ok(())
 }

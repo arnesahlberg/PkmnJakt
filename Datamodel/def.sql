@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS FoundPokemon (
     found_id       INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id        TEXT NOT NULL,
     pokemon_id     INTEGER NOT NULL,
-    found_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    found_timestamp DATETIME NOT NULL,
     photo_path     TEXT, 
     comment        TEXT,
     rating         INTEGER CHECK (rating >= 0 AND rating <= 4),
