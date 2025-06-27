@@ -4,7 +4,7 @@ import '../constants.dart';
 import 'pokedex_container.dart';
 import '../screens/user_statistics_screen.dart';
 
-class HighscoreList extends StatelessWidget {
+class HighscoreList extends StatefulWidget {
   final List<dynamic> highscores;
   final String title;
   final bool showContainer;
@@ -18,8 +18,15 @@ class HighscoreList extends StatelessWidget {
     this.clickable = false,
   });
 
+  @override
+  State<HighscoreList> createState() => _HighscoreListState();
+}
+
+class _HighscoreListState extends State<HighscoreList> {
+  int? _pressedIndex;
+
   bool _hasDuplicateScore(dynamic currentScore) {
-    return highscores.where((s) => s['score'] == currentScore['score']).length >
+    return widget.highscores.where((s) => s['score'] == currentScore['score']).length >
         1;
   }
 
@@ -29,7 +36,7 @@ class HighscoreList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          title,
+          widget.title,
           style: const TextStyle(
             fontFamily: 'PixelFontTitle',
             fontSize: 20,
@@ -37,15 +44,15 @@ class HighscoreList extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        if (highscores.isEmpty)
+        if (widget.highscores.isEmpty)
           const Text("Ingen highscore data än.")
         else
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: highscores.length,
+            itemCount: widget.highscores.length,
             itemBuilder: (context, index) {
-              final score = highscores[index];
+              final score = widget.highscores[index];
 
               // build the normal row
               Widget row = Container(
@@ -55,7 +62,9 @@ class HighscoreList extends StatelessWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: _pressedIndex == index 
+                      ? Colors.grey[100] 
+                      : Colors.white,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: const Color(0xFF992109), width: 1),
                 ),
@@ -136,7 +145,7 @@ class HighscoreList extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (clickable) ...[
+                    if (widget.clickable) ...[
                       const SizedBox(width: 8),
                       const Icon(
                         Icons.chevron_right,
@@ -149,8 +158,23 @@ class HighscoreList extends StatelessWidget {
               );
 
               // if clickable, wrap with tap navigation
-              if (clickable) {
+              if (widget.clickable) {
                 return GestureDetector(
+                  onTapDown: (_) {
+                    setState(() {
+                      _pressedIndex = index;
+                    });
+                  },
+                  onTapUp: (_) {
+                    setState(() {
+                      _pressedIndex = null;
+                    });
+                  },
+                  onTapCancel: () {
+                    setState(() {
+                      _pressedIndex = null;
+                    });
+                  },
                   onTap: () {
                     Navigator.push(
                       context,
@@ -173,7 +197,7 @@ class HighscoreList extends StatelessWidget {
       ],
     );
 
-    if (showContainer) {
+    if (widget.showContainer) {
       return PokedexContainer(child: content);
     } else {
       return content;
