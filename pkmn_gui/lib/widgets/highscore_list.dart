@@ -9,6 +9,7 @@ class HighscoreList extends StatefulWidget {
   final String title;
   final bool showContainer;
   final bool clickable;
+  final bool showFirstPlacesIcons;
 
   const HighscoreList({
     super.key,
@@ -16,6 +17,7 @@ class HighscoreList extends StatefulWidget {
     this.title = "Global Highscore",
     this.showContainer = true,
     this.clickable = false,
+    this.showFirstPlacesIcons = false,
   });
 
   @override
@@ -57,10 +59,6 @@ class _HighscoreListState extends State<HighscoreList> {
               // build the normal row
               Widget row = Container(
                 margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
                 decoration: BoxDecoration(
                   color: _pressedIndex == index 
                       ? Colors.grey[100] 
@@ -68,92 +66,98 @@ class _HighscoreListState extends State<HighscoreList> {
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: const Color(0xFF992109), width: 1),
                 ),
-                child: Row(
-                  children: [
-                    if (index < 3) ...[
-                      Icon(
-                        Icons.emoji_events,
-                        color:
-                            index == 0
-                                ? Colors.amber
-                                : index == 1
-                                ? Colors.grey[400]
-                                : Colors.brown[300],
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            score['name'],
-                            style: const TextStyle(
-                              fontFamily: 'PixelFont',
-                              fontSize: 16,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      if (widget.showFirstPlacesIcons && index < 3) ...[
+                        Icon(
+                          Icons.emoji_events,
+                          color:
+                              index == 0
+                                  ? Colors.amber
+                                  : index == 1
+                                  ? Colors.grey[400]
+                                  : Colors.brown[300],
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              score['name'],
+                              style: const TextStyle(
+                                fontFamily: 'PixelFont',
+                                fontSize: 16,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            "ID: ${score['id']}",
+                            Text(
+                              "ID: ${score['id']}",
+                              style: const TextStyle(
+                                fontFamily: 'PixelFont',
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_hasDuplicateScore(score)) ...[
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            DateFormat(
+                              'dd/MM HH:mm:ss',
+                            ).format(DateTime.parse(score['latest_found'])),
+                            textAlign: TextAlign.right,
                             style: const TextStyle(
                               fontFamily: 'PixelFont',
                               fontSize: 10,
-                              color: Colors.grey,
+                              color: Color(0xFF992109),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    if (_hasDuplicateScore(score)) ...[
-                      Expanded(
-                        flex: 2,
+                        ),
+                      ] else ...[
+                        const Expanded(flex: 2, child: SizedBox()),
+                      ],
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE3350D),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: Text(
-                          DateFormat(
-                            'dd/MM HH:mm:ss',
-                          ).format(DateTime.parse(score['latest_found'])),
-                          textAlign: TextAlign.right,
+                          "${score['score']}",
                           style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                             fontFamily: 'PixelFont',
-                            fontSize: 10,
-                            color: Color(0xFF992109),
+                            fontSize: 14,
                           ),
                         ),
                       ),
-                    ] else ...[
-                      const Expanded(flex: 2, child: SizedBox()),
-                    ],
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE3350D),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        "${score['score']}",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'PixelFont',
-                          fontSize: 14,
+                      if (widget.clickable) ...[
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.chevron_right,
+                          color: Color(0xFF992109),
+                          size: 16,
                         ),
-                      ),
-                    ),
-                    if (widget.clickable) ...[
-                      const SizedBox(width: 8),
-                      const Icon(
-                        Icons.chevron_right,
-                        color: Color(0xFF992109),
-                        size: 16,
-                      ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               );
 
