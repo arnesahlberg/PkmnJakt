@@ -115,19 +115,25 @@ class _HighscorePageState extends State<HighscorePage> {
                     hintText: "Sök användarnamn eller ID...",
                     hintStyle: TextStyle(
                       fontFamily: 'PixelFont',
+                      fontSize: 14,
                       color: Colors.grey.shade600,
                     ),
                     prefixIcon: const Icon(
                       Icons.search,
+                      size: 20,
                       color: AppColors.primaryRed,
                     ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: 12,
+                      vertical: 8,
                     ),
                   ),
-                  style: const TextStyle(fontFamily: 'PixelFont', fontSize: 16),
+                  style: const TextStyle(
+                    fontFamily: 'PixelFont', 
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
             ),

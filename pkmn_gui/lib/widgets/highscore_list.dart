@@ -71,39 +71,41 @@ class _HighscoreListState extends State<HighscoreList> {
     Widget content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              widget.title,
-              style: const TextStyle(
-                fontFamily: 'PixelFontTitle',
-                fontSize: 20,
-                color: Color(0xFFE3350D),
-              ),
-            ),
-            if (widget.linkToHighscorePage)
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/highscore');
-                },
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        if (widget.title.isNotEmpty) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                widget.title,
+                style: const TextStyle(
+                  fontFamily: 'PixelFontTitle',
+                  fontSize: 20,
+                  color: Color(0xFFE3350D),
                 ),
-                child: const Text(
-                  "Visa alla →",
-                  style: TextStyle(
-                    fontFamily: 'PixelFont',
-                    fontSize: 14,
-                    color: Color(0xFF992109),
+              ),
+              if (widget.linkToHighscorePage)
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/highscore');
+                  },
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text(
+                    "Visa alla →",
+                    style: TextStyle(
+                      fontFamily: 'PixelFont',
+                      fontSize: 14,
+                      color: Color(0xFF992109),
+                    ),
                   ),
                 ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 16),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
         if (widget.highscores.isEmpty)
           const Text("Ingen highscore data än.")
         else
