@@ -2,6 +2,7 @@ use std::path;
 
 use actix_web::{web, HttpResponse, HttpRequest};
 use serde::{Deserialize, Serialize};
+use log::{info, warn, error, debug};
 use crate::misc::{self, validate_token};
 use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore};
 use crate::databaseconnection;
@@ -63,9 +64,25 @@ pub struct LoginResponse {
 }
 
 pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    info!("Login attempt for user: {}", info.id);
+    
+    let conn = match databaseconnection::get_conn(get_env_dbpath()) {
+        Ok(c) => c,
+        Err(e) => {
+            error!("Failed to get database connection: {}", e);
+            return HttpResponse::InternalServerError().json(LoginResponse {
+                id: info.id.clone(),
+                token: None,
+                name: None,
+                message: "Database connection failed".to_string(),
+                result_code: CallResultCode::Ok,
+            });
+        }
+    };
+    
     let user_exists = databaseconnection::user_id_exists(&info.id, &conn).unwrap();
     if !user_exists {
+        warn!("Login failed - user not found: {}", info.id);
         let response = LoginResponse {
             id: info.id.clone(),
             token: None,
@@ -75,9 +92,11 @@ pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
         };
         return HttpResponse::NotFound().json(response);
     }
+    
     let (user, token) = match databaseconnection::login_and_get_user_by_id_pwd(&info.id, &info.password, &conn).unwrap() {
         Some((user, token)) => (user, token),
         None => {
+            warn!("Login failed - invalid password for user: {}", info.id);
             let response = LoginResponse {
                 id: info.id.clone(),
                 token: None,
@@ -88,6 +107,8 @@ pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
             return HttpResponse::Unauthorized().json(response);
         }
     };
+    
+    info!("Login successful for user: {} ({})", user.user_id, user.name);
     let response = LoginResponse {
         id: user.user_id,
         token: Some(token),
@@ -106,9 +127,26 @@ pub struct CreateUserRequest {
 }
 
 pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    info!("User creation attempt - ID: {}, Name: {}, Name length: {}", 
+          info.id, info.name, info.name.len());
+    
+    let conn = match databaseconnection::get_conn(get_env_dbpath()) {
+        Ok(c) => c,
+        Err(e) => {
+            error!("Failed to get database connection: {}", e);
+            return HttpResponse::InternalServerError().json(LoginResponse {
+                id: info.id.clone(),
+                name: None,
+                token: None,
+                message: "Database connection failed".to_string(),
+                result_code: CallResultCode::Ok, // Should add a new error code for this
+            });
+        }
+    };
+    
     let user_exists = databaseconnection::user_id_exists(&info.id, &conn).unwrap();
     if user_exists {
+        warn!("User creation failed - user already exists: {}", info.id);
         let response = LoginResponse {
             id: info.id.clone(),
             name: None,
@@ -121,6 +159,7 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
 
     // check if name is too short or long
     if info.name.len() < USER_NAME_MIN_LENGTH {
+        warn!("User creation failed - name too short: {} (length: {})", info.name, info.name.len());
         let response = LoginResponse {
             id: info.id.clone(),
             name: None,
@@ -132,6 +171,7 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
     }
 
     if info.name.len() > USER_NAME_MAX_LENGTH {
+        warn!("User creation failed - name too long: {} (length: {})", info.name, info.name.len());
         let response = LoginResponse {
             id: info.id.clone(),
             name: None,
@@ -144,6 +184,7 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
 
     // password check
     if info.password.len() < PASSWORD_MIN_LENGTH {
+        warn!("User creation failed - password too short for user: {}", info.id);
         let response = LoginResponse {
             id: info.id.clone(),
             name: None,
@@ -155,15 +196,29 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
     }
 
     // if good then create user
-    let (user, token) = databaseconnection::create_user(&info.id, &info.name, &info.password, &conn).unwrap();
-    let response = LoginResponse {
-        id: user.user_id,
-        name: Some(user.name),
-        token: Some(token),
-        message: format!("Created new user {}", info.name),
-        result_code: CallResultCode::Ok,
-    };
-    HttpResponse::Ok().json(response)
+    match databaseconnection::create_user(&info.id, &info.name, &info.password, &conn) {
+        Ok((user, token)) => {
+            info!("User created successfully - ID: {}, Name: {}", user.user_id, user.name);
+            let response = LoginResponse {
+                id: user.user_id,
+                name: Some(user.name.clone()),
+                token: Some(token),
+                message: format!("Created new user {}", user.name),
+                result_code: CallResultCode::Ok,
+            };
+            HttpResponse::Ok().json(response)
+        },
+        Err(e) => {
+            error!("Failed to create user {}: {}", info.id, e);
+            HttpResponse::InternalServerError().json(LoginResponse {
+                id: info.id.clone(),
+                name: None,
+                token: None,
+                message: "Failed to create user".to_string(),
+                result_code: CallResultCode::Ok, // Should add a new error code for this
+            })
+        }
+    }
 }
 
 
@@ -451,12 +506,16 @@ pub struct FoundPokemonResponse {
 }
 
 pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokemonRequest>) -> HttpResponse {
+    debug!("Pokemon catch attempt with catch code");
+    
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
     let user_id = misc::get_user_id_from_token(token).unwrap();
+    
     if !validate_token(&user_id, token, &conn) {
+        warn!("Pokemon catch failed - invalid token for user: {}", user_id);
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
             pokemon_id: None,
@@ -466,8 +525,10 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
         };
         return HttpResponse::BadRequest().json(response);
     }
+    
     let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
     if !user_exists {
+        error!("Pokemon catch failed - user does not exist: {}", user_id);
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
             pokemon_id: None,
@@ -477,8 +538,10 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
         };
         return HttpResponse::BadRequest().json(response);
     }
+    
     let pokemon_exists = databaseconnection::check_if_pokemon_exists_by_catch_code(&info.catch_code, &conn).unwrap();
     if !pokemon_exists {
+        warn!("Pokemon catch failed - invalid catch code for user: {}", user_id);
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
             pokemon_id: None,
@@ -488,10 +551,12 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
         };
         return HttpResponse::BadRequest().json(response);
     }
+    
     let pokemon = databaseconnection::get_pokemon_by_catch_code(&info.catch_code, &conn).unwrap();
     let found_before =
         databaseconnection::check_if_you_found_pokemon_before(&user_id, &info.catch_code, &conn).unwrap();
     if found_before {
+        info!("Pokemon already caught - user: {}, pokemon: {} ({})", user_id, pokemon.name, pokemon.number);
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
             pokemon_id: Some(pokemon.number.clone()),
@@ -501,7 +566,9 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
         };
         return HttpResponse::Ok().json(response);
     }
+    
     databaseconnection::found_pokemon(&user_id, &info.catch_code, &conn).unwrap();
+    info!("Pokemon caught successfully - user: {}, pokemon: {} ({})", user_id, pokemon.name, pokemon.number);
     
     // Check for milestone achievement (only for Pokemon with ID <= 151)
     let mut milestone_reached = None;
