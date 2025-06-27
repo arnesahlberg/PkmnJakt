@@ -62,15 +62,7 @@ CREATE TABLE IF NOT EXISTS FoundPokemon (
     FOREIGN KEY (pokemon_id) REFERENCES Pokemon(pokemon_id)
 );
 
--- Table to track user milestones
-CREATE TABLE IF NOT EXISTS UserMilestones (
-    milestone_id    INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id         TEXT NOT NULL,
-    milestone_count INTEGER NOT NULL,
-    achieved_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id),
-    UNIQUE(user_id, milestone_count)
-);
+-- UserMilestones table removed - milestones are now calculated dynamically from FoundPokemon
 
 -- VIEW to get the FoundPokemon together whith CatchCode 
 -- same as FoundPokemon table but iwth a catch_code column
@@ -177,13 +169,4 @@ JOIN Users ON FoundPokemon.user_id = Users.user_id
 WHERE Users.admin = 0
 GROUP BY Users.name;
 
--- view to get user milestones
-CREATE VIEW IF NOT EXISTS ViewUserMilestones AS
-SELECT 
-    Users.user_id AS UserID,
-    Users.name AS User,
-    UserMilestones.milestone_count AS MilestoneCount,
-    UserMilestones.achieved_at AS AchievedAt
-FROM UserMilestones
-JOIN Users ON UserMilestones.user_id = Users.user_id
-ORDER BY UserMilestones.milestone_count;
+-- ViewUserMilestones removed - milestones are now calculated dynamically from FoundPokemon

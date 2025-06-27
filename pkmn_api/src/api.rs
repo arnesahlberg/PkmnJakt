@@ -511,16 +511,9 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
         // Check if this count is a milestone (every 10 up to 150, plus 151)
         let milestones = vec![10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 151];
         
-        for milestone in milestones {
-            if pokemon_count == milestone {
-                // Check if user already has this milestone
-                if !databaseconnection::user_has_milestone(&user_id, milestone, &conn).unwrap() {
-                    // Record the milestone
-                    databaseconnection::record_milestone(&user_id, milestone, &conn).unwrap();
-                    milestone_reached = Some(milestone);
-                }
-                break;
-            }
+        // Check if the current pokemon count matches any milestone exactly
+        if milestones.contains(&pokemon_count) {
+            milestone_reached = Some(pokemon_count);
         }
     }
     

@@ -501,36 +501,26 @@ pub fn user_pokemon_count_for_milestones(user_id: &str, conn: &Connection) -> Re
     Ok(count)
 }
 
-// check if user has achieved a milestone
+// check if user has achieved a milestone by counting their pokemon
 pub fn user_has_milestone(user_id: &str, milestone_count: u32, conn: &Connection) -> Result<bool> {
-    let mut stmt = conn.prepare(
-        "SELECT COUNT(*) FROM UserMilestones WHERE user_id = ?1 AND milestone_count = ?2"
-    )?;
-    let count: i32 = stmt.query_row(params![user_id, milestone_count], |row| row.get(0))?;
-    Ok(count > 0)
+    let pokemon_count = user_pokemon_count_for_milestones(user_id, conn)?;
+    Ok(pokemon_count >= milestone_count)
 }
 
-// record milestone achievement
-pub fn record_milestone(user_id: &str, milestone_count: u32, conn: &Connection) -> Result<()> {
-    conn.execute(
-        "INSERT INTO UserMilestones (user_id, milestone_count) VALUES (?1, ?2)",
-        params![user_id, milestone_count],
-    )?;
-    Ok(())
-}
+// record_milestone function removed - milestones are now calculated dynamically
 
-// get all milestones for a user
+// get all milestones for a user based on their pokemon count
 pub fn get_user_milestones(user_id: &str, conn: &Connection) -> Result<Vec<u32>> {
-    let mut stmt = conn.prepare(
-        "SELECT milestone_count FROM UserMilestones WHERE user_id = ?1 ORDER BY milestone_count"
-    )?;
-    let rows = stmt.query_map(params![user_id], |row| {
-        row.get(0)
-    })?;
+    let pokemon_count = user_pokemon_count_for_milestones(user_id, conn)?;
+    let milestones = vec![10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 151];
     
     let mut result = Vec::new();
-    for row in rows {
-        result.push(row?);
+    for milestone in milestones {
+        if pokemon_count >= milestone {
+            result.push(milestone);
+        } else {
+            break;
+        }
     }
     Ok(result)
 }
