@@ -272,7 +272,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                     ),
                                     if (highs.isNotEmpty) ...[
                                       const SizedBox(height: 24),
-                                      HighscoreList(highscores: highs),
+                                      HighscoreList(
+                                        highscores: highs,
+                                        clickable: false,
+                                        showFirstPlacesIcons: true,
+                                      ),
                                     ],
                                   ],
                                 );

@@ -211,6 +211,19 @@ class ApiService {
     final response = await http.get(Uri.parse('$baseUrl/get_user/$id'));
     return decodeUtf8Json(response);
   }
+
+  static Future<List<dynamic>> getUserPokedex(String userId) async {
+    final response = await http.get(Uri.parse('$baseUrl/user_pokedex/$userId'));
+    print('getUserPokedex response: ${response.body}');
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load user pokedex: ${response.statusCode}');
+    }
+    // decode the response body
+    // and return as List<dynamic>
+    // this is a json array with pokemon data
+    final decodedString = utf8.decode(response.bodyBytes);
+    return jsonDecode(decodedString) as List<dynamic>;
+  }
 }
 
 // admin stuff
