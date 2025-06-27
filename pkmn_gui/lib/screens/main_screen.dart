@@ -421,7 +421,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 const SizedBox(height: 16),
                                 Text(
                                   _ranking == 1
-                                      ? "Du är rankad: #$_ranking 🏆🥇🎉"
+                                      ? "Du är rankad: #$_ranking 🏆"
                                       : _ranking == 2
                                       ? "Du är rankad: #$_ranking 🥈"
                                       : _ranking == 3
@@ -433,7 +433,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 ),
                                 const SizedBox(height: UIConstants.spacing8),
                                 Text(
-                                  "Du har fångat $_pokemonCount Pokémon",
+                                  _pokemonCount < 151
+                                      ? "Du har fångat $_pokemonCount Pokémon"
+                                      : "Du har fångat alla $_pokemonCount Pokémon! 🎉",
                                   style: AppTextStyles.bodyLarge.copyWith(
                                     color: AppColors.secondaryRed,
                                   ),
