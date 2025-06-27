@@ -5,9 +5,7 @@ import '../constants.dart';
 import '../widgets/common_app_bar.dart';
 import '../widgets/pokedex_container.dart';
 import '../widgets/pokedex_button.dart';
-import '../widgets/milestone_badge.dart';
 import '../widgets/highscore_list.dart';
-import 'user_statistics_screen.dart';
 
 class HighscorePage extends StatefulWidget {
   const HighscorePage({super.key});
@@ -107,8 +105,16 @@ class _HighscorePageState extends State<HighscorePage> {
           children: [
             // Search bar
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: PokedexContainer(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFF992109),
+                    width: 2,
+                  ),
+                ),
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
@@ -130,7 +136,7 @@ class _HighscorePageState extends State<HighscorePage> {
                     ),
                   ),
                   style: const TextStyle(
-                    fontFamily: 'PixelFont', 
+                    fontFamily: 'PixelFont',
                     fontSize: 14,
                     color: Colors.black87,
                   ),
@@ -255,12 +261,11 @@ class _HighscorePageState extends State<HighscorePage> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: HighscoreList(
         highscores: _scores,
-        title: "", // Empty title since we have the title in the app bar
+        title: "",
         showContainer:
-            true, // Don't show container since we're already in a styled page
+            true, // show container otherwise it looks weird due to bug
         clickable: true,
-        showFirstPlacesIcons:
-            _currentPage == 1, // Only show medals on first page
+        showFirstPlacesIcons: true,
       ),
     );
   }
