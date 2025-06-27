@@ -1,2 +1,2 @@
 rm ../Database/base.db
-python create.py
+python create.py $1

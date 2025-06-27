@@ -11,6 +11,7 @@ import '../api_calls.dart';
 import '../utils/auth_utils.dart';
 import 'found_pokemon_scanner_screen.dart';
 import 'user_statistics_screen.dart';
+import 'milestone_screen.dart';
 import '../widgets/milestone_badge.dart';
 
 class UserHomeScreen extends StatefulWidget {
@@ -139,6 +140,21 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         builder:
             (context) =>
                 UserStatisticsScreen(userId: userId, userName: userName),
+      ),
+    );
+  }
+
+  void _navigateToMilestones() {
+    final session = Provider.of<UserSession>(context, listen: false);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => MilestoneScreen(
+              milestones: _userMilestones,
+              currentPokemonCount: _pokemonCount,
+              userName: session.userName ?? 'Unknown',
+            ),
       ),
     );
   }
@@ -425,14 +441,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                               ],
                               if (_userMilestones.isNotEmpty) ...[
                                 const SizedBox(height: UIConstants.spacing8),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    AllMilestoneBadges(
-                                      milestones: _userMilestones,
-                                      badgeSize: 24,
-                                    ),
-                                  ],
+                                MilestoneSummary(
+                                  milestones: _userMilestones,
+                                  currentPokemonCount: _pokemonCount,
+                                  onViewAll: _navigateToMilestones,
                                 ),
                               ],
                               const SizedBox(height: UIConstants.spacing24),
