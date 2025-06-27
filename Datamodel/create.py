@@ -58,11 +58,17 @@ def add_pokemon_caught(cursor, user_id, pokemon_id):
 
 # Add demo users too with found pokemon
 add_user(cursor, '00001', 'Ash', 'ash-pass')
-add_pokemon_caught(cursor, '00001', 30)
-add_pokemon_caught(cursor, '00001', 1)
-add_pokemon_caught(cursor, '00001', 43)
+# Add 150 different Pokémon to Ash (IDs 1–150)
+for pid in range(1, 151):
+    add_pokemon_caught(cursor, '00001', pid)
 
 add_user(cursor, '00002', 'Misty', 'misty-pass')
+
+# Add 29 different Pokémon to Misty (IDs 50–78)
+for pid in range(50, 79):
+    add_pokemon_caught(cursor, '00002', pid)
+
+
 add_user(cursor, '00003', 'Brock', 'brock-pass')
 add_user(cursor, '00004', 'Jessie', 'jessie-pass')
 add_user(cursor, '00005', 'James', 'james-pass')
@@ -81,6 +87,7 @@ add_user(cursor, '00017', 'Mallow', 'mallow-pass')
 add_user(cursor, '00018', 'Sophocles', 'sophocles-pass')
 add_user(cursor, '00019', 'Goh', 'goh-pass')
 add_user(cursor, '00020', 'Chloe', 'chloe-pass')
+
 
 
 
