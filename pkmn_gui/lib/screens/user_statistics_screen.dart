@@ -213,6 +213,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Container(
                                 width: UIConstants.iconSizeNormal,
@@ -233,56 +234,36 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                                 ),
                               ),
                               const SizedBox(width: UIConstants.spacing12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      widget.userName,
-                                      style: AppTextStyles.titleMedium,
-                                      overflow: TextOverflow.ellipsis,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    widget.userName,
+                                    style: AppTextStyles.titleMedium,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    "ID: ${widget.userId}",
+                                    style: TextStyle(
+                                      fontFamily: 'PixelFont',
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
                                     ),
-                                    Text(
-                                      "ID: ${widget.userId}",
-                                      style: TextStyle(
-                                        fontFamily: 'PixelFont',
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                           const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: UIConstants.iconSizeNormal,
-                                height: UIConstants.iconSizeNormal,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.primaryRed,
-                                  border: Border.all(
-                                    color: AppColors.secondaryRed,
-                                    width: UIConstants.borderWidth2,
-                                  ),
-                                  boxShadow: AppShadows.lightShadow,
-                                ),
-                                child: const Icon(
-                                  Icons.catching_pokemon,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ),
-                              const SizedBox(width: UIConstants.spacing12),
-                              Text(
-                                "Fångade Pokémon: $caughtCount",
-                                style: AppTextStyles.titleMedium,
-                              ),
-                            ],
+                          Text(
+                            "Fångade Pokémon: $caughtCount",
+                            style: TextStyle(
+                              fontFamily: 'PixelFont',
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
