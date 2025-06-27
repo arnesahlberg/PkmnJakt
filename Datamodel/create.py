@@ -102,18 +102,84 @@ if "--test-users" in os.sys.argv:
         add_pokemon_caught(cursor, '00008', pid)
         
     add_user(cursor, '00009', 'Iris', 'iris-pass')
-    add_user(cursor, '00010', 'Cilan', 'cilan-pass')
-    add_user(cursor, '00011', 'Serena', 'serena-pass')
-    add_user(cursor, '00012', 'Clemont', 'clemont-pass')
-    add_user(cursor, '00013', 'Bonnie', 'bonnie-pass')
-    add_user(cursor, '00014', 'Lana', 'lana-pass')
-    add_user(cursor, '00015', 'Kiawe', 'kiawe-pass')
-    add_user(cursor, '00016', 'Lillie', 'lillie-pass')
-    add_user(cursor, '00017', 'Mallow', 'mallow-pass')
-    add_user(cursor, '00018', 'Sophocles', 'sophocles-pass')
-    add_user(cursor, '00019', 'Goh', 'goh-pass')
-    add_user(cursor, '00020', 'Chloe', 'chloe-pass')
+    # add 19 different Pokémon to Iris (IDs 102–120)
+    for pid in range(102, 121):
+        add_pokemon_caught(cursor, '00009', pid)
 
+    add_user(cursor, '00010', 'Cilan', 'cilan-pass')
+    # add 19 different Pokémon to Cilan (IDs 1-19)
+    for pid in range(1, 20):
+        add_pokemon_caught(cursor, '00010', pid)
+
+    add_user(cursor, '00011', 'Serena', 'serena-pass')
+    # add 19 different Pokémon to Serena (IDs 1-19)
+    for pid in range(1, 20):
+        add_pokemon_caught(cursor, '00011', pid)
+
+    add_user(cursor, '00012', 'Clemont', 'clemont-pass')
+    # add 49 different Pokémon to Clemont (IDs 1-49)
+    for pid in range(1, 50):
+        add_pokemon_caught(cursor, '00012', pid)
+
+    add_user(cursor, '00013', 'Bonnie', 'bonnie-pass')
+    # add 19 different Pokémon to Bonnie (IDs 1-19)
+    for pid in range(1, 20):
+        add_pokemon_caught(cursor, '00013', pid)
+
+    add_user(cursor, '00014', 'Lana', 'lana-pass')
+    # add 89 different Pokémon to Lana (IDs 1-89)
+    for pid in range(1, 90):
+        add_pokemon_caught(cursor, '00014', pid)
+
+    add_user(cursor, '00015', 'Kiawe', 'kiawe-pass')
+    # add 119 different Pokémon to Kiawe (IDs 1-119)
+    for pid in range(1, 120):
+        add_pokemon_caught(cursor, '00015', pid)
+
+    add_user(cursor, '00016', 'Lillie', 'lillie-pass')
+    # add 119 different Pokémon to Lillie (IDs 1-119)
+    for pid in range(1, 120):
+        add_pokemon_caught(cursor, '00016', pid)
+
+    add_user(cursor, '00017', 'Mallow', 'mallow-pass')
+    # add 59 different Pokémon to Mallow (IDs 1-59)
+    for pid in range(1, 60):
+        add_pokemon_caught(cursor, '00017', pid)
+
+    add_user(cursor, '00018', 'Sophocles', 'sophocles-pass')
+    # add 59 different Pokémon to Sophocles (IDs 1-59)
+    for pid in range(1, 60):
+        add_pokemon_caught(cursor, '00018', pid)
+
+    add_user(cursor, '00019', 'Goh', 'goh-pass')
+    # add 149 different Pokémon to Goh (IDs 1-149)
+    for pid in range(1, 150):
+        add_pokemon_caught(cursor, '00019', pid)
+
+    add_user(cursor, '00020', 'Chloe', 'chloe-pass')
+    # add 19 different Pokémon to Chloe (IDs 1-19)
+    for pid in range(1, 20):
+        add_pokemon_caught(cursor, '00020', pid)
+
+    add_user(cursor, '00021', 'Rika', 'rika-pass')
+    # add 19 different Pokémon to Rika (IDs 1-19)
+    for pid in range(1, 20):
+        add_pokemon_caught(cursor, '00021', pid)
+
+    add_user(cursor, '00022', 'Penny', 'penny-pass')
+    # add 19 different Pokémon to Penny (IDs 1-19)
+    for pid in range(1, 20):
+        add_pokemon_caught(cursor, '00022', pid)
+
+    add_user(cursor, '00023', 'Nemona', 'nemona-pass')
+    # add 19 different Pokémon to Nemona (IDs 1-19)
+    for pid in range(1, 20):
+        add_pokemon_caught(cursor, '00023', pid)
+
+    add_user(cursor, '00024', 'Arven', 'arven-pass')
+    # add 139 different Pokémon to Arven (IDs 1-139)
+    for pid in range(1, 140):
+        add_pokemon_caught(cursor, '00024', pid)
 
 
 

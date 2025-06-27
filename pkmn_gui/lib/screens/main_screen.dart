@@ -776,19 +776,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                                                   .ellipsis,
                                                         ),
                                                       ),
-                                                      const SizedBox(width: 4),
-                                                      if (_recentPokemonUserMilestones[pokemon['found_by_user']['user_id']
-                                                                  .toString()] !=
-                                                              null &&
-                                                          _recentPokemonUserMilestones[pokemon['found_by_user']['user_id']
-                                                                  .toString()]!
-                                                              .isNotEmpty)
-                                                        MilestoneBadgeRow(
-                                                          milestones:
-                                                              _recentPokemonUserMilestones[pokemon['found_by_user']['user_id']
-                                                                  .toString()]!,
-                                                          badgeSize: 14,
-                                                        ),
                                                     ],
                                                   ),
                                                   Text(

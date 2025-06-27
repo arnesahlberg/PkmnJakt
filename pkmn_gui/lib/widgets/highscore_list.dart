@@ -4,7 +4,6 @@ import '../constants.dart';
 import 'pokedex_container.dart';
 import '../screens/user_statistics_screen.dart';
 import '../api_calls.dart';
-import 'milestone_badge.dart';
 
 class HighscoreList extends StatefulWidget {
   final List<dynamic> highscores;
@@ -13,6 +12,8 @@ class HighscoreList extends StatefulWidget {
   final bool clickable;
   final bool showFirstPlacesIcons;
   final bool linkToHighscorePage;
+  final int currentPage;
+  final bool hasActiveSearch;
 
   const HighscoreList({
     super.key,
@@ -22,6 +23,8 @@ class HighscoreList extends StatefulWidget {
     this.clickable = false,
     this.showFirstPlacesIcons = false,
     this.linkToHighscorePage = false,
+    this.currentPage = 1,
+    this.hasActiveSearch = false,
   });
 
   @override
@@ -30,36 +33,17 @@ class HighscoreList extends StatefulWidget {
 
 class _HighscoreListState extends State<HighscoreList> {
   int? _pressedIndex;
-  final Map<String, List<int>> _userMilestones = {};
 
   @override
   void initState() {
     super.initState();
-    _fetchMilestones();
   }
 
   @override
   void didUpdateWidget(HighscoreList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.highscores != widget.highscores) {
-      _fetchMilestones();
-    }
   }
 
-  Future<void> _fetchMilestones() async {
-    for (var score in widget.highscores) {
-      try {
-        final milestones = await ApiService.getUserMilestones(score['id'].toString());
-        if (mounted) {
-          setState(() {
-            _userMilestones[score['id'].toString()] = milestones;
-          });
-        }
-      } catch (e) {
-        // Silently fail - milestones are optional
-      }
-    }
-  }
 
   bool _hasDuplicateScore(dynamic currentScore) {
     return widget.highscores.where((s) => s['score'] == currentScore['score']).length >
@@ -133,7 +117,10 @@ class _HighscoreListState extends State<HighscoreList> {
                   ),
                   child: Row(
                     children: [
-                      if (widget.showFirstPlacesIcons && index < 3) ...[
+                      if (widget.showFirstPlacesIcons && 
+                          widget.currentPage == 1 && 
+                          !widget.hasActiveSearch && 
+                          index < 3) ...[
                         Icon(
                           Icons.emoji_events,
                           color:
@@ -163,13 +150,6 @@ class _HighscoreListState extends State<HighscoreList> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                const SizedBox(width: 4),
-                                if (_userMilestones[score['id'].toString()] != null &&
-                                    _userMilestones[score['id'].toString()]!.isNotEmpty)
-                                  MilestoneBadgeRow(
-                                    milestones: _userMilestones[score['id'].toString()]!,
-                                    badgeSize: 16,
-                                  ),
                               ],
                             ),
                             Text(

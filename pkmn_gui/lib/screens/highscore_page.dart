@@ -265,6 +265,8 @@ class _HighscorePageState extends State<HighscorePage> {
             true, // show container otherwise it looks weird due to bug
         clickable: true,
         showFirstPlacesIcons: true,
+        currentPage: _currentPage,
+        hasActiveSearch: _searchController.text.isNotEmpty,
       ),
     );
   }
