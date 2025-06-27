@@ -12,7 +12,7 @@ if not os.path.exists(db_dir):
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
-with open('def.sqlite', 'r') as sql_file:
+with open('def.sql', 'r') as sql_file:
     sql_script = sql_file.read()
 cursor.executescript(sql_script)
 
@@ -46,8 +46,22 @@ def add_user(cursor, user_id, name, password, is_admin=False):
 # Add admin user
 add_user(cursor, 'admin', 'admin', 'stensund', is_admin=True)
 
-# Add demo users too
+def add_pokemon_caught(cursor, user_id, pokemon_id):
+    cursor.execute('''
+    INSERT INTO FoundPokemon (user_id, pokemon_id)
+    VALUES (?, ?)
+    ''', (user_id, pokemon_id))
+
+
+
+
+
+# Add demo users too with found pokemon
 add_user(cursor, '00001', 'Ash', 'ash-pass')
+add_pokemon_caught(cursor, '00001', 30)
+add_pokemon_caught(cursor, '00001', 1)
+add_pokemon_caught(cursor, '00001', 43)
+
 add_user(cursor, '00002', 'Misty', 'misty-pass')
 add_user(cursor, '00003', 'Brock', 'brock-pass')
 add_user(cursor, '00004', 'Jessie', 'jessie-pass')

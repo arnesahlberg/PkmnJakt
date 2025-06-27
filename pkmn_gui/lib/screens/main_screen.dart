@@ -11,6 +11,7 @@ import '../api_calls.dart';
 import '../utils/auth_utils.dart';
 import 'found_pokemon_scanner_screen.dart';
 import 'user_statistics_screen.dart';
+import '../widgets/milestone_badge.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -25,15 +26,34 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   bool _isLoading = true;
   bool _isExtraLoading = true;
   int _ranking = 0;
+  int _pokemonCount = 0;
+  List<int> _userMilestones = [];
+  final Map<String, List<int>> _recentPokemonUserMilestones = {};
 
   Future<void> _loadData() async {
     final session = Provider.of<UserSession>(context, listen: false);
     try {
       final result = await ApiService.viewFoundPokemon(10, session.token!);
       final ranking = await ApiService.checkUserRanking(session.userId!);
+      final pokedexResult = await ApiService.getMyPokedex(session.token!);
+
+      // Count only Pokemon with ID <= 151
+      final pokemonList = pokedexResult['pokedex'] as List<dynamic>? ?? [];
+      final count = pokemonList.where((p) => p['number'] <= 151).length;
+
+      // Fetch user milestones
+      List<int> milestones = [];
+      try {
+        milestones = await ApiService.getUserMilestones(session.userId!);
+      } catch (e) {
+        // Silently fail - milestones are optional
+      }
+
       setState(() {
         _pokemonList = result['pokemon_found'] as List<dynamic>;
         _ranking = ranking;
+        _pokemonCount = count;
+        _userMilestones = milestones;
         _isLoading = false;
       });
     } catch (e) {
@@ -60,6 +80,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         _allPokemonList = latestResult['found_pokemon'] as List<dynamic>;
         _isExtraLoading = false;
       });
+      // Fetch milestones for users in recently caught list
+      _fetchRecentPokemonUserMilestones();
     } catch (e) {
       setState(() => _isExtraLoading = false);
       if (!mounted) return;
@@ -75,10 +97,30 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     }
   }
 
+  Future<void> _fetchRecentPokemonUserMilestones() async {
+    for (var pokemon in _allPokemonList) {
+      final userId = pokemon['found_by_user']['user_id'].toString();
+      if (!_recentPokemonUserMilestones.containsKey(userId)) {
+        try {
+          final milestones = await ApiService.getUserMilestones(userId);
+          if (mounted) {
+            setState(() {
+              _recentPokemonUserMilestones[userId] = milestones;
+            });
+          }
+        } catch (e) {
+          // Silently fail - milestones are optional
+        }
+      }
+    }
+  }
+
   Future<void> _refreshData() async {
     setState(() {
       _isLoading = true;
       _isExtraLoading = true;
+      _pokemonCount = 0;
+      _userMilestones = [];
     });
     await _loadData();
     await _loadExtraData();
@@ -359,19 +401,40 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 "Välkommen ${session.userName}!",
                                 style: AppTextStyles.titleLarge,
                               ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _ranking == 1
-                                    ? "Du är rankad: #$_ranking 🏆🥇🎉"
-                                    : _ranking == 2
-                                    ? "Du är rankad: #$_ranking 🥈"
-                                    : _ranking == 3
-                                    ? "Du är rankad: #$_ranking 🥉"
-                                    : "Du är rankad: #$_ranking",
-                                style: AppTextStyles.bodyLarge.copyWith(
-                                  color: AppColors.secondaryRed,
+                              if (_pokemonCount > 0) ...[
+                                const SizedBox(height: 16),
+                                Text(
+                                  _ranking == 1
+                                      ? "Du är rankad: #$_ranking 🏆🥇🎉"
+                                      : _ranking == 2
+                                      ? "Du är rankad: #$_ranking 🥈"
+                                      : _ranking == 3
+                                      ? "Du är rankad: #$_ranking 🥉"
+                                      : "Du är rankad: #$_ranking",
+                                  style: AppTextStyles.bodyLarge.copyWith(
+                                    color: AppColors.secondaryRed,
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(height: UIConstants.spacing8),
+                                Text(
+                                  "Du har fångat $_pokemonCount Pokémon",
+                                  style: AppTextStyles.bodyLarge.copyWith(
+                                    color: AppColors.secondaryRed,
+                                  ),
+                                ),
+                              ],
+                              if (_userMilestones.isNotEmpty) ...[
+                                const SizedBox(height: UIConstants.spacing8),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    AllMilestoneBadges(
+                                      milestones: _userMilestones,
+                                      badgeSize: 24,
+                                    ),
+                                  ],
+                                ),
+                              ],
                               const SizedBox(height: UIConstants.spacing24),
                               Row(
                                 children: [
@@ -577,6 +640,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           HighscoreList(
                             highscores: _highScores,
                             clickable: true,
+                            linkToHighscorePage: true,
                           ),
                           const SizedBox(height: 24),
                           PokedexContainer(
@@ -685,15 +749,34 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                                         ),
                                                       ),
                                                       const SizedBox(width: 4),
-                                                      Text(
-                                                        "${pokemon['found_by_user']['name']}",
-                                                        style: const TextStyle(
-                                                          fontSize: 12,
-                                                          color: Color(
-                                                            0xFF992109,
-                                                          ),
+                                                      Flexible(
+                                                        child: Text(
+                                                          "${pokemon['found_by_user']['name']}",
+                                                          style:
+                                                              const TextStyle(
+                                                                fontSize: 12,
+                                                                color: Color(
+                                                                  0xFF992109,
+                                                                ),
+                                                              ),
+                                                          overflow:
+                                                              TextOverflow
+                                                                  .ellipsis,
                                                         ),
                                                       ),
+                                                      const SizedBox(width: 4),
+                                                      if (_recentPokemonUserMilestones[pokemon['found_by_user']['user_id']
+                                                                  .toString()] !=
+                                                              null &&
+                                                          _recentPokemonUserMilestones[pokemon['found_by_user']['user_id']
+                                                                  .toString()]!
+                                                              .isNotEmpty)
+                                                        MilestoneBadgeRow(
+                                                          milestones:
+                                                              _recentPokemonUserMilestones[pokemon['found_by_user']['user_id']
+                                                                  .toString()]!,
+                                                          badgeSize: 14,
+                                                        ),
                                                     ],
                                                   ),
                                                   Text(

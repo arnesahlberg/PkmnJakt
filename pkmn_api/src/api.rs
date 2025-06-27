@@ -601,6 +601,76 @@ pub async fn get_statistics_highscore() -> HttpResponse  {
     HttpResponse::Ok().json(res)
 }
 
+// Paginated highscores endpoints (public, no auth required)
+#[derive(Debug, Deserialize)]
+pub struct GetHighscoresRequest {
+    pub page: u32,
+    pub per_page: Option<u32>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct GetHighscoresResponse {
+    pub scores: Vec<UserScore>,
+    pub total_count: u32,
+    pub page: u32,
+    pub per_page: u32,
+    pub total_pages: u32,
+    pub result_code: CallResultCode,
+}
+
+pub async fn get_highscores(query: web::Query<GetHighscoresRequest>) -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    
+    let per_page = query.per_page.unwrap_or(20).min(50); // Max 50 per page
+    let page = query.page.max(1); // Ensure page is at least 1
+    let offset = (page - 1) * per_page;
+    
+    let scores = databaseconnection::get_highscores_paginated(per_page, offset, &conn).unwrap();
+    let total_count = databaseconnection::get_highscores_total_count(&conn).unwrap();
+    let total_pages = (total_count + per_page - 1) / per_page; // Ceiling division
+    
+    let res = GetHighscoresResponse {
+        scores,
+        total_count,
+        page,
+        per_page,
+        total_pages,
+        result_code: CallResultCode::Ok,
+    };
+    
+    HttpResponse::Ok().json(res)
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SearchHighscoresRequest {
+    pub search: String,
+    pub page: u32,
+    pub per_page: Option<u32>,
+}
+
+pub async fn search_highscores(query: web::Query<SearchHighscoresRequest>) -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    
+    let per_page = query.per_page.unwrap_or(20).min(50); // Max 50 per page
+    let page = query.page.max(1); // Ensure page is at least 1
+    let offset = (page - 1) * per_page;
+    
+    let scores = databaseconnection::get_highscores_filtered(&query.search, per_page, offset, &conn).unwrap();
+    let total_count = databaseconnection::get_highscores_filtered_count(&query.search, &conn).unwrap();
+    let total_pages = (total_count + per_page - 1) / per_page; // Ceiling division
+    
+    let res = GetHighscoresResponse {
+        scores,
+        total_count,
+        page,
+        per_page,
+        total_pages,
+        result_code: CallResultCode::Ok,
+    };
+    
+    HttpResponse::Ok().json(res)
+}
+
 
 #[derive(Debug, Serialize)]
 pub struct GetLatestFoundPokemonResponse {
@@ -1057,6 +1127,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/view_found_pokemon", web::post().to(view_found_pokemon))
         .route("/statistics_highscore", web::get().to(get_statistics_highscore))
         .route("/statistics_latest_pokemon_found", web::get().to(get_statistics_latest_pokemon_found))
+        .route("/highscores", web::get().to(get_highscores))
+        .route("/highscores/search", web::get().to(search_highscores))
         .route("/get_user/{user_id}", web::get().to(get_user))
         .route("/num_users", web::get().to(num_users))
         .route("/get_pokemon/{number}", web::get().to(get_pokemon))

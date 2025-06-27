@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart'; // import shared_pr
 import 'screens/main_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/highscore_page.dart';
 import 'constants.dart';
 
 // ------------------------------
@@ -168,6 +169,7 @@ class MyApp extends StatelessWidget {
         '/home': (_) => const UserHomeScreen(),
         '/pokedex': (_) => const PokedexScreen(),
         '/admin': (_) => const AdminScreen(),
+        '/highscore': (_) => const HighscorePage(),
       },
     );
   }

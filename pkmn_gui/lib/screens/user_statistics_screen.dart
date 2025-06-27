@@ -153,7 +153,11 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
       body: Container(
         decoration: AppBoxDecorations.gradientBackground,
         child: FutureBuilder<List<dynamic>>(
-          future: Future.wait([_userDataFuture, _pokedexFuture, _milestonesFuture]),
+          future: Future.wait([
+            _userDataFuture,
+            _pokedexFuture,
+            _milestonesFuture,
+          ]),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -294,20 +298,32 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,
-                              children: milestones.map((milestone) {
-                                return MilestoneBadge(
-                                  milestone: milestone,
-                                  size: 40,
-                                );
-                              }).toList(),
+                              children:
+                                  milestones.map((milestone) {
+                                    return MilestoneBadge(
+                                      milestone: milestone,
+                                      size: 40,
+                                    );
+                                  }).toList(),
                             ),
                           ],
                         ),
                       ),
                     ),
                   ),
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 16),
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 8.0),
+                    child: Text(
+                      "${widget.userName}${widget.userName.endsWith('s') ? '' : 's'} Fångade Pokémon",
+                      style: const TextStyle(
+                        fontFamily: 'PixelFontTitle',
+                        fontSize: 20,
+                        color: AppColors.primaryRed,
+                      ),
+                    ),
+                  ),
                 ),
                 if (caughtPokemon.isEmpty)
                   SliverToBoxAdapter(

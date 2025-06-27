@@ -4,7 +4,6 @@
 PRAGMA foreign_keys = ON;
 PRAGMA encoding = "UTF-8";
 
-
 CREATE TABLE IF NOT EXISTS Users (
     user_id       TEXT PRIMARY KEY,
     name          TEXT NOT NULL UNIQUE,
@@ -88,8 +87,6 @@ SELECT
 FROM FoundPokemon
 JOIN CatchCodes ON FoundPokemon.pokemon_id = CatchCodes.pokemon_id
 WHERE FoundPokemon.user_id != 'admin'; -- exclude admin user
-
-
 
 -- view to show found pokemon with user name
 CREATE VIEW IF NOT EXISTS ViewFoundPokemon AS

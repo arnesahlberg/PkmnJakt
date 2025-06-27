@@ -234,6 +234,36 @@ class ApiService {
     final List<dynamic> jsonList = jsonDecode(decodedString) as List<dynamic>;
     return jsonList.map((e) => e as int).toList();
   }
+
+  // Paginated highscores
+  static Future<Map<String, dynamic>> getHighscores({
+    required int page,
+    int perPage = 20,
+  }) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/highscores?page=$page&per_page=$perPage'),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load highscores: ${response.statusCode}');
+    }
+    return decodeUtf8Json(response);
+  }
+
+  // Search highscores
+  static Future<Map<String, dynamic>> searchHighscores({
+    required String search,
+    required int page,
+    int perPage = 20,
+  }) async {
+    final encodedSearch = Uri.encodeQueryComponent(search);
+    final response = await http.get(
+      Uri.parse('$baseUrl/highscores/search?search=$encodedSearch&page=$page&per_page=$perPage'),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to search highscores: ${response.statusCode}');
+    }
+    return decodeUtf8Json(response);
+  }
 }
 
 // admin stuff

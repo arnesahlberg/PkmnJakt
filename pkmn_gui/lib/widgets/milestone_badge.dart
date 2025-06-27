@@ -12,10 +12,42 @@ class MilestoneBadge extends StatelessWidget {
   });
 
   Color get badgeColor {
-    if (milestone == 151) return Colors.purple;
-    if (milestone >= 100) return Colors.amber;
-    if (milestone >= 50) return Colors.orange;
-    return Colors.blue;
+    switch (milestone) {
+      case 10:
+        return Colors.blue.shade400;
+      case 20:
+        return Colors.green.shade600;
+      case 30:
+        return Colors.teal.shade600;
+      case 40:
+        return Colors.indigo.shade600;
+      case 50:
+        return Colors.orange.shade600;
+      case 60:
+        return Colors.deepOrange.shade600;
+      case 70:
+        return Colors.red.shade600;
+      case 80:
+        return Colors.pink.shade600;
+      case 90:
+        return Colors.purple.shade600;
+      case 100:
+        return Colors.amber.shade600;
+      case 110:
+        return Colors.amber.shade700;
+      case 120:
+        return Colors.amber.shade800;
+      case 130:
+        return Colors.amber.shade900;
+      case 140:
+        return const Color(0xFFFF8F00); // Deep amber
+      case 150:
+        return const Color(0xFFFF6F00); // Darker amber
+      case 151:
+        return Colors.deepPurple.shade600; // Special purple for completing all
+      default:
+        return Colors.grey.shade600;
+    }
   }
 
   @override
@@ -67,42 +99,40 @@ class MilestoneBadgeRow extends StatelessWidget {
   Widget build(BuildContext context) {
     if (milestones.isEmpty) return const SizedBox.shrink();
     
-    // Group milestones for display
-    final displayMilestones = <int>[];
+    // Only show the highest milestone
+    final highestMilestone = milestones.last;
     
-    // Show first few milestones
-    if (milestones.isNotEmpty) {
-      displayMilestones.addAll(milestones.take(3));
-    }
+    return MilestoneBadge(
+      milestone: highestMilestone,
+      size: badgeSize,
+    );
+  }
+}
+
+class AllMilestoneBadges extends StatelessWidget {
+  final List<int> milestones;
+  final double badgeSize;
+
+  const AllMilestoneBadges({
+    super.key,
+    required this.milestones,
+    this.badgeSize = 20,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (milestones.isEmpty) return const SizedBox.shrink();
     
-    // Always show highest milestone if more than 3
-    if (milestones.length > 3 && !displayMilestones.contains(milestones.last)) {
-      displayMilestones.add(milestones.last);
-    }
-    
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (int i = 0; i < displayMilestones.length; i++) ...[
-          if (i == 3 && milestones.length > 4)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2),
-              child: Text(
-                '...',
-                style: TextStyle(
-                  fontFamily: 'PixelFont',
-                  fontSize: badgeSize * 0.6,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-            ),
-          MilestoneBadge(
-            milestone: displayMilestones[i],
-            size: badgeSize,
-          ),
-          if (i < displayMilestones.length - 1) const SizedBox(width: 4),
-        ],
-      ],
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      alignment: WrapAlignment.center,
+      children: milestones.map((milestone) => 
+        MilestoneBadge(
+          milestone: milestone,
+          size: badgeSize,
+        )
+      ).toList(),
     );
   }
 }

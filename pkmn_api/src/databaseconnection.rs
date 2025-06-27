@@ -355,6 +355,57 @@ pub fn statistics_users_most_found(n : i32, conn : &Connection) -> Result<Vec<Us
     Ok(result)
 }
 
+// get paginated highscores
+pub fn get_highscores_paginated(limit: u32, offset: u32, conn: &Connection) -> Result<Vec<UserScore>> {
+    let mut stmt = conn.prepare("SELECT UserID, User, PokemonFound, LastFound FROM ViewTopFinders LIMIT ?1 OFFSET ?2")?;
+    let rows = stmt.query_map(params![limit, offset], |row| {
+        Ok(UserScore{id : row.get(0)?, name: row.get(1)?, score: row.get(2)?, latest_found: row.get(3)?})
+    })?;
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?)
+    }
+    Ok(result)
+}
+
+// get highscores filtered by name or id with pagination
+pub fn get_highscores_filtered(filter: &str, limit: u32, offset: u32, conn: &Connection) -> Result<Vec<UserScore>> {
+    let mut stmt = conn.prepare(
+        "SELECT vt.UserID, vt.User, vt.PokemonFound, vt.LastFound 
+         FROM ViewTopFinders vt
+         WHERE vt.UserID LIKE ?1 OR vt.User LIKE ?1
+         ORDER BY vt.PokemonFound DESC, vt.LastFound ASC
+         LIMIT ?2 OFFSET ?3"
+    )?;
+    let filter_pattern = format!("%{}%", filter);
+    let rows = stmt.query_map(params![filter_pattern, limit, offset], |row| {
+        Ok(UserScore{id : row.get(0)?, name: row.get(1)?, score: row.get(2)?, latest_found: row.get(3)?})
+    })?;
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?)
+    }
+    Ok(result)
+}
+
+// get total count of users in highscores (for pagination)
+pub fn get_highscores_total_count(conn: &Connection) -> Result<u32> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM ViewTopFinders")?;
+    let count: u32 = stmt.query_row([], |row| row.get(0))?;
+    Ok(count)
+}
+
+// get total count of filtered users in highscores
+pub fn get_highscores_filtered_count(filter: &str, conn: &Connection) -> Result<u32> {
+    let mut stmt = conn.prepare(
+        "SELECT COUNT(*) FROM ViewTopFinders 
+         WHERE UserID LIKE ?1 OR User LIKE ?1"
+    )?;
+    let filter_pattern = format!("%{}%", filter);
+    let count: u32 = stmt.query_row(params![filter_pattern], |row| row.get(0))?;
+    Ok(count)
+}
+
 
 pub fn statistics_latest_pokemon_found(n: i32, conn: &Connection) -> Result<Vec<FoundPkmn>> {
     let mut stmt = conn.prepare("Select UserID, User, Pokemon, PokemonNumber, TimeStamp, PhotoPath, Comment, Rating FROM ViewLatestFoundPokemon LIMIT ?1")?;
