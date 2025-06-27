@@ -136,6 +136,14 @@ class HighscoreList extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (clickable) ...[
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.chevron_right,
+                        color: Color(0xFF992109),
+                        size: 16,
+                      ),
+                    ],
                   ],
                 ),
               );
