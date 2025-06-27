@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import '../api_calls.dart';
 import '../utils/auth_utils.dart';
 import 'found_pokemon_scanner_screen.dart';
+import 'user_statistics_screen.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -87,6 +88,17 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     final dateTime = DateTime.parse(isoTime);
     final formatter = DateFormat('yyyy-MM-dd HH:mm');
     return formatter.format(dateTime);
+  }
+
+  void _navigateToUserStatistics(String userId, String userName) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) =>
+                UserStatisticsScreen(userId: userId, userName: userName),
+      ),
+    );
   }
 
   void _showInfoDialog() {
@@ -562,7 +574,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         ),
                         if (!_isExtraLoading) ...[
                           const SizedBox(height: 24),
-                          HighscoreList(highscores: _highScores),
+                          HighscoreList(
+                            highscores: _highScores,
+                            clickable: true,
+                          ),
                           const SizedBox(height: 24),
                           PokedexContainer(
                             child: Column(

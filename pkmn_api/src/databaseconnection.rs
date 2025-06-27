@@ -334,19 +334,6 @@ pub fn check_if_user_has_caught_pokemon(user_id: &str, pokemon_id: &str, conn: &
     Ok(count > 0)
 }
 
-// check if user has uploaded a picture of pokemon
-pub fn check_if_user_has_uploaded_photo_of_pokemon(user_id: &str, pokemon_id: &str, conn: &Connection) -> Result<bool> {
-    let mut stmt = conn.prepare("SELECT COUNT(*) FROM FoundPokemon WHERE user_id = ?1 AND pokemon_id = ?2 AND photo_path IS NOT NULL")?;
-    let count : i32 = stmt.query_row(params![user_id, pokemon_id], |row| row.get(0))?;
-    Ok(count > 0)
-}
-
-// upload photo of pokemon user has caught and add comment and rating
-pub fn upload_photo_of_pokemon(user_id: &str, pokemon_id: &str, photo_path: &str, comment: &str, rating: i32, conn: &Connection) -> Result<()> {
-    panic!("Not implemented yet.");
-    Ok(())
-}
-
 // get user ranking
 pub fn user_ranking(user_id : &str, conn : &Connection) -> Result<u32> {
     let mut stmt = conn.prepare("SELECT Ranking, LastFound FROM ViewUserRanking WHERE UserId = ?1")?;

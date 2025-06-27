@@ -839,6 +839,17 @@ pub async fn get_my_pokedex(req: HttpRequest) -> HttpResponse {
     HttpResponse::Ok().json(res)
 }
 
+pub async fn get_user_pokedex(path: web::Path<String>) -> HttpResponse {
+    let user_id = path.into_inner();
+    // first check if user exists
+    if !databaseconnection::user_id_exists(&user_id, &databaseconnection::get_conn(get_env_dbpath()).unwrap()).unwrap() {
+        return HttpResponse::NotFound().finish();
+    }
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let pokedex = databaseconnection::user_pokedex(&user_id, &conn).unwrap();
+    HttpResponse::Ok().json(pokedex)
+}
+
 pub async fn validate_token_request(req: HttpRequest) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
@@ -1013,6 +1024,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/user_exists/{user_id}", web::get().to(user_exists))
         .route("/user_ranking/{user_id}", web::get().to(get_user_ranking))
         .route("/my_pokedex", web::get().to(get_my_pokedex))
+        .route("/user_pokedex/{user_id}", web::get().to(get_user_pokedex))
         // admin endpoints
         .route("/am_i_admin", web::get().to(am_i_admin))
         .route("/is_user_admin/{user_id}", web::get().to(is_user_admin))

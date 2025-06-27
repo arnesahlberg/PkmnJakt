@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../constants.dart';
 import 'pokedex_container.dart';
+import '../screens/user_statistics_screen.dart';
 
 class HighscoreList extends StatelessWidget {
   final List<dynamic> highscores;
   final String title;
   final bool showContainer;
+  final bool clickable;
 
   const HighscoreList({
     super.key,
     required this.highscores,
     this.title = "Global Highscore",
     this.showContainer = true,
+    this.clickable = false,
   });
 
   bool _hasDuplicateScore(dynamic currentScore) {
@@ -43,7 +46,9 @@ class HighscoreList extends StatelessWidget {
             itemCount: highscores.length,
             itemBuilder: (context, index) {
               final score = highscores[index];
-              return Container(
+
+              // build the normal row
+              Widget row = Container(
                 margin: const EdgeInsets.only(bottom: 8),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -134,6 +139,27 @@ class HighscoreList extends StatelessWidget {
                   ],
                 ),
               );
+
+              // if clickable, wrap with tap navigation
+              if (clickable) {
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) => UserStatisticsScreen(
+                              userId: score['id'].toString(),
+                              userName: score['name'],
+                            ),
+                      ),
+                    );
+                  },
+                  child: row,
+                );
+              }
+
+              return row;
             },
           ),
       ],
