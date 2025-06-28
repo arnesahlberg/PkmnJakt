@@ -10,6 +10,7 @@ import '../utils/auth_utils.dart';
 import '../widgets/change_user_name_popup.dart';
 import '../widgets/change_password_popup.dart';
 import '../constants.dart';
+import '../widgets/type_badge.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,15 +20,29 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = true;
+  Map<String, dynamic>? _typeStats;
 
   @override
   void initState() {
     super.initState();
-    AuthUtils.validateTokenAndRedirect(context).then((isValid) {
+    AuthUtils.validateTokenAndRedirect(context).then((isValid) async {
       if (isValid && mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        final session = Provider.of<UserSession>(context, listen: false);
+        try {
+          final typeStats = await ApiService.getUserPokemonByType(session.userId!);
+          if (mounted) {
+            setState(() {
+              _typeStats = typeStats;
+              _isLoading = false;
+            });
+          }
+        } catch (e) {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
+        }
       }
     });
   }
@@ -174,6 +189,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ],
                         ),
                       ),
+                      if (_typeStats != null && _typeStats!.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16.0),
+                          child: PokedexContainer(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Center(
+                                  child: Text(
+                                    "Mina Pokémon-typer",
+                                    style: TextStyle(
+                                      fontFamily: 'PixelFontTitle',
+                                      fontSize: 18,
+                                      color: AppColors.primaryRed,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                ..._typeStats!.entries
+                                    .where((entry) => entry.value > 0)
+                                    .map((entry) => Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              TypeBadge(typeName: entry.key),
+                                              Text(
+                                                '${entry.value} st',
+                                                style: const TextStyle(
+                                                  fontFamily: 'PixelFont',
+                                                  fontSize: 14,
+                                                  color: Colors.black87,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ))
+                                    .toList(),
+                              ],
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),

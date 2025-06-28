@@ -4,7 +4,7 @@ use actix_web::{web, HttpResponse, HttpRequest};
 use serde::{Deserialize, Serialize};
 use log::{info, warn, error, debug};
 use crate::misc::{self, validate_token};
-use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore};
+use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats};
 use crate::databaseconnection;
 
 pub const USER_NAME_MIN_LENGTH: usize = 3;
@@ -1031,6 +1031,25 @@ pub async fn validate_token_request(req: HttpRequest) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
+// Get Pokemon count by type for a specific user
+pub async fn get_user_pokemon_by_type(path: web::Path<String>) -> HttpResponse {
+    let user_id = path.into_inner();
+    // first check if user exists
+    if !databaseconnection::user_id_exists(&user_id, &databaseconnection::get_conn(get_env_dbpath()).unwrap()).unwrap() {
+        return HttpResponse::NotFound().finish();
+    }
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let type_stats = databaseconnection::user_pokemon_by_type(&user_id, &conn).unwrap();
+    HttpResponse::Ok().json(type_stats)
+}
+
+// Get total Pokemon catches by type across all users
+pub async fn get_total_pokemon_by_type() -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let type_stats = databaseconnection::total_pokemon_by_type(&conn).unwrap();
+    HttpResponse::Ok().json(type_stats)
+}
+
 // admin endpoints
 
 pub async fn am_i_admin(req: HttpRequest) -> HttpResponse {
@@ -1197,6 +1216,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/my_pokedex", web::get().to(get_my_pokedex))
         .route("/user_pokedex/{user_id}", web::get().to(get_user_pokedex))
         .route("/user_milestones/{user_id}", web::get().to(get_user_milestones))
+        .route("/user_pokemon_by_type/{user_id}", web::get().to(get_user_pokemon_by_type))
+        .route("/total_pokemon_by_type", web::get().to(get_total_pokemon_by_type))
         // admin endpoints
         .route("/am_i_admin", web::get().to(am_i_admin))
         .route("/is_user_admin/{user_id}", web::get().to(is_user_admin))

@@ -264,6 +264,28 @@ class ApiService {
     }
     return decodeUtf8Json(response);
   }
+
+  // Get user Pokemon count by type
+  static Future<Map<String, dynamic>> getUserPokemonByType(String userId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/user_pokemon_by_type/$userId'),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load user Pokemon by type: ${response.statusCode}');
+    }
+    return decodeUtf8Json(response);
+  }
+
+  // Get total Pokemon count by type (global statistics)
+  static Future<Map<String, dynamic>> getTotalPokemonByType() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/total_pokemon_by_type'),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load total Pokemon by type: ${response.statusCode}');
+    }
+    return decodeUtf8Json(response);
+  }
 }
 
 // admin stuff

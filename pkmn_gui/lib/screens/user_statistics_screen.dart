@@ -4,6 +4,7 @@ import 'package:pkmn_gui/widgets/pokedex_container.dart';
 import '../api_calls.dart';
 import '../constants.dart';
 import '../widgets/milestone_badge.dart';
+import '../widgets/type_badge.dart';
 
 class UserStatisticsScreen extends StatefulWidget {
   final String userId;
@@ -23,6 +24,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
   late Future<Map<String, dynamic>> _userDataFuture;
   late Future<List<dynamic>> _pokedexFuture;
   late Future<List<int>> _milestonesFuture;
+  late Future<Map<String, dynamic>> _typeStatsFuture;
 
   @override
   void initState() {
@@ -30,6 +32,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
     _userDataFuture = ApiService.getUser(widget.userId);
     _pokedexFuture = ApiService.getUserPokedex(widget.userId);
     _milestonesFuture = ApiService.getUserMilestones(widget.userId);
+    _typeStatsFuture = ApiService.getUserPokemonByType(widget.userId);
   }
 
   void _showPokemonDetails(Map<String, dynamic> pokemon) {
@@ -119,6 +122,12 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                           ),
                         ),
                       ),
+                    const SizedBox(height: 16),
+                    if (pokemon['types'] != null)
+                      TypeBadgeList(
+                        types: pokemon['types'],
+                        fontSize: 14,
+                      ),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
@@ -157,6 +166,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
             _userDataFuture,
             _pokedexFuture,
             _milestonesFuture,
+            _typeStatsFuture,
           ]),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -204,6 +214,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
 
             final caughtPokemon = snapshot.data![1] as List<dynamic>;
             final milestones = snapshot.data![2] as List<int>;
+            final typeStats = snapshot.data![3] as Map<String, dynamic>;
             final caughtCount = caughtPokemon.length;
 
             // Sort Pokemon by number
@@ -306,6 +317,48 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                                     );
                                   }).toList(),
                             ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                if (typeStats.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: PokedexContainer(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Pokémon per Typ",
+                              style: TextStyle(
+                                fontFamily: 'PixelFontTitle',
+                                fontSize: 18,
+                                color: AppColors.primaryRed,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            ...typeStats.entries
+                                .where((entry) => entry.value > 0)
+                                .map((entry) => Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                      child: Row(
+                                        children: [
+                                          TypeBadge(typeName: entry.key),
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            '${entry.value} st',
+                                            style: const TextStyle(
+                                              fontFamily: 'PixelFont',
+                                              fontSize: 14,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ))
+                                .toList(),
                           ],
                         ),
                       ),

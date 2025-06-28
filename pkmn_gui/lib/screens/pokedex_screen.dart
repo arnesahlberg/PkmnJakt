@@ -6,6 +6,7 @@ import '../api_calls.dart';
 import '../main.dart';
 import '../utils/auth_utils.dart';
 import '../constants.dart';
+import '../widgets/type_badge.dart';
 
 class PokedexScreen extends StatefulWidget {
   const PokedexScreen({super.key});
@@ -181,6 +182,12 @@ class _PokedexScreenState extends State<PokedexScreen> {
                             color: Color(0xFF992109),
                           ),
                         ),
+                      ),
+                    const SizedBox(height: 16),
+                    if (pokemon['types'] != null)
+                      TypeBadgeList(
+                        types: pokemon['types'],
+                        fontSize: 14,
                       ),
                     const SizedBox(height: 24),
                     ElevatedButton(
@@ -465,6 +472,15 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                                 ),
                                                 textAlign: TextAlign.center,
                                               ),
+                                              if (isCaught && pokemon['types'] != null)
+                                                Padding(
+                                                  padding: const EdgeInsets.only(top: 2),
+                                                  child: TypeBadgeList(
+                                                    types: pokemon['types'],
+                                                    fontSize: 8,
+                                                    spacing: 2,
+                                                  ),
+                                                ),
                                             ],
                                           ),
                                         ),
