@@ -311,9 +311,20 @@ def run_tests():
     print(f"{Fore.YELLOW}\nTest 17: Getting number of users (expecting 200){Style.RESET_ALL}")
     make_request("GET", "num_users", None, tokens["admin"], expected_status=200)
 
+    # Re-login user 11111 since they were logged out in test 12b
+    print(f"{Fore.YELLOW}\nRe-logging in user 11111 for further tests...{Style.RESET_ALL}")
+    response = make_request("POST", "login", {
+        "id": "11111",
+        "password": "123456"  # Password was reset by admin in test 14b
+    }, expected_status=200)
+    if response and response.status_code == 200:
+        data = json.loads(response.text)
+        if "token" in data and "encoded_token" in data["token"]:
+            tokens["11111"] = data["token"]["encoded_token"]
+            print(f"Updated token for user 11111")
 
     # 18. Check if user is admin
-    print(f"{Fore.YELLOW}Test 18a: Check admin status for non-admin user 11111 (expecting 403){Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Test 18a: Non-admin user checking another user's admin status (expecting 403){Style.RESET_ALL}")
     response = make_request("GET", "is_user_admin/22222", None, tokens["11111"], expected_status=403)
     if response and response.status_code == 403:
         data = json.loads(response.text)

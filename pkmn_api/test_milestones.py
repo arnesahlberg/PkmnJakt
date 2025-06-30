@@ -238,20 +238,109 @@ def test_milestones():
     
     print(f"\n{Fore.CYAN}=== Milestone Testing Complete ==={Style.RESET_ALL}")
 
-def test_multiple_milestones_mew():
-    """Test specific scenario: catching Mew as 151st Pokemon."""
-    print(f"\n{Fore.CYAN}=== Testing Multiple Milestones (Mew as 151st) ==={Style.RESET_ALL}\n")
+def test_multiple_milestones_first_catch():
+    """Test multiple milestones triggered by catching a dual-type Pokemon."""
+    print(f"\n{Fore.CYAN}=== Testing Multiple Milestones (First Dual-Type Pokemon) ==={Style.RESET_ALL}\n")
     
-    # This test would require setting up a user with exactly 150 Pokemon
-    # and then catching Mew to trigger both milestones
-    print(f"{Fore.YELLOW}Note: This test requires specific setup with 150 Pokemon already caught{Style.RESET_ALL}")
-    print(f"{Fore.YELLOW}Skipping for now - would need to be run separately with proper data setup{Style.RESET_ALL}")
+    # 1. Login as admin user first (needed for cleanup)
+    print(f"{Fore.YELLOW}1. Logging in as admin user...{Style.RESET_ALL}")
+    admin_response = make_request("POST", "login", {
+        "id": "admin",
+        "password": "stensund"
+    })
+    if admin_response and admin_response.status_code == 200:
+        admin_data = admin_response.json()
+        if "token" in admin_data and "encoded_token" in admin_data["token"]:
+            admin_token = admin_data["token"]["encoded_token"]
+            print(f"{Fore.GREEN}✓ Admin login successful{Style.RESET_ALL}")
+    else:
+        print(f"{Fore.RED}✗ Failed to login as admin{Style.RESET_ALL}")
+        return
     
-    # In a real test scenario, you would:
-    # 1. Create a user
-    # 2. Register exactly 150 different Pokemon (not Mew)
-    # 3. Then register Mew as the 151st
-    # 4. Verify that both "151 Pokemon" and "Caught Mew" milestones are triggered
+    # 2. Create a fresh test user
+    test_user = {
+        "id": "multi_milestone_user",
+        "name": "Multi Milestone Tester",
+        "password": "TestPassword123!"
+    }
+    
+    print(f"\n{Fore.YELLOW}2. Creating test user...{Style.RESET_ALL}")
+    response = make_request("POST", "create_user", test_user)
+    if response and response.status_code == 200:
+        print(f"{Fore.GREEN}✓ User created successfully{Style.RESET_ALL}")
+        data = response.json()
+        if "token" in data and "encoded_token" in data["token"]:
+            token = data["token"]["encoded_token"]
+    else:
+        print(f"{Fore.RED}✗ Failed to create user{Style.RESET_ALL}")
+        return
+    
+    # 3. Catch Bulbasaur (#1) - which is Grass/Poison type
+    # This should trigger multiple milestones:
+    # - First Pokemon caught (if that's a milestone)
+    # - First Grass type
+    # - First Poison type
+    # - Possibly a specific Pokemon milestone for Bulbasaur
+    print(f"\n{Fore.YELLOW}3. Catching Bulbasaur (Grass/Poison dual-type)...{Style.RESET_ALL}")
+    
+    bulbasaur_catch_code = "ac3cf629-e151-45a6-a328-5af466cb471d"  # Bulbasaur's catch code
+    
+    response = make_request("POST", "found_pokemon", {
+        "catch_code": bulbasaur_catch_code
+    }, token)
+    
+    if response and response.status_code == 200:
+        data = response.json()
+        print(f"Caught: {data.get('message', 'Pokemon registered')}")
+        
+        milestones = data.get('milestones_achieved', [])
+        if len(milestones) > 1:
+            print(f"\n{Fore.GREEN}✓ Multiple milestones achieved simultaneously!{Style.RESET_ALL}")
+            print(f"Total milestones triggered: {len(milestones)}")
+            
+            for milestone in milestones:
+                print(milestone)
+                m_type = milestone.get('milestone_type', 'Unknown')
+                name = milestone.get('requirement', 'Unknown')
+                desc = milestone.get('display_text', 'Unknown')
+                print(f"  - [{m_type}] {name}: {desc}")
+                
+            # Check if we got type-based milestones
+            type_milestones = [m for m in milestones if m.get('milestone_type') == 'TypeBased']
+            if len(type_milestones) >= 2:
+                print(f"\n{Fore.GREEN}✓ Confirmed: Multiple type-based milestones from dual-type Pokemon!{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.YELLOW}Only {len(milestones)} milestone(s) triggered{Style.RESET_ALL}")
+    else:
+        print(f"{Fore.RED}✗ Failed to catch Pokemon{Style.RESET_ALL}")
+    
+    # 4. Check comprehensive milestones
+    print(f"\n{Fore.YELLOW}4. Verifying comprehensive milestones...{Style.RESET_ALL}")
+    response = make_request("GET", f"user_milestone_definitions/{test_user['id']}")
+    if response and response.status_code == 200:
+        milestone_defs = response.json()
+        print(f"Total milestones achieved: {len(milestone_defs)}")
+        
+        # Group by type
+        by_type = {}
+        for m in milestone_defs:
+            m_type = m.get('milestone_type', 'Unknown')
+            if m_type not in by_type:
+                by_type[m_type] = []
+            by_type[m_type].append(m.get('requirement', 'Unknown'))
+        
+        for m_type, names in by_type.items():
+            print(f"  {m_type}: {', '.join(names)}")
+    
+    # 5. Clean up
+    print(f"\n{Fore.YELLOW}5. Cleaning up test user...{Style.RESET_ALL}")
+    response = make_request("POST", "admin_delete_user", {
+        "id": test_user["id"]
+    }, admin_token)
+    if response and response.status_code == 200:
+        print(f"{Fore.GREEN}✓ Test user deleted{Style.RESET_ALL}")
+    
+    print(f"\n{Fore.CYAN}=== Multiple Milestone Testing Complete ==={Style.RESET_ALL}")
     
 if __name__ == "__main__":
     # Note: Make sure the API server is running before executing this test
@@ -259,7 +348,7 @@ if __name__ == "__main__":
     
     try:
         test_milestones()
-        test_multiple_milestones_mew()
+        test_multiple_milestones_first_catch()
     except KeyboardInterrupt:
         print(f"\n{Fore.YELLOW}Test interrupted by user{Style.RESET_ALL}")
     except Exception as e:
