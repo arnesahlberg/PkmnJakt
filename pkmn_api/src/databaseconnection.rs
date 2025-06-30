@@ -403,11 +403,11 @@ pub fn check_if_user_has_caught_pokemon(user_id: &str, pokemon_id: &str, conn: &
 pub fn user_has_first_pokemon_of_type(user_id: &str, type_name: &str, conn: &Connection) -> Result<bool> {
     let mut stmt = conn.prepare(
         "SELECT COUNT(DISTINCT fp.pokemon_id) FROM FoundPokemon fp 
-         JOIN ViewPokemonWithTypes p ON fp.pokemon_id = p.pokemon_id 
-         WHERE fp.user_id = ?1 AND p.types LIKE ?2"
+         JOIN PokemonTypeLinks ptl ON fp.pokemon_id = ptl.pokemon_id
+         JOIN PokemonTypes pt ON ptl.type_id = pt.type_id
+         WHERE fp.user_id = ?1 AND pt.type_name = ?2"
     )?;
-    let type_pattern = format!("%{}%", type_name);
-    let count: i32 = stmt.query_row(params![user_id, type_pattern], |row| row.get(0))?;
+    let count: i32 = stmt.query_row(params![user_id, type_name], |row| row.get(0))?;
     Ok(count > 0)
 }
 
