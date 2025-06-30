@@ -21,7 +21,8 @@ class TypeBadge extends StatelessWidget {
     'Is': Color(0xFF98D8D8),
     'Kamp': Color(0xFFC03028),
     'Mark': Color(0xFFE0C068),
-    'Flygande': Color(0xFFA890F0),
+    'Flyg': Color(0xFFA890F0),
+    'Flygande': Color(0xFFA890F0), // Keep for backwards compatibility
     'Psykisk': Color(0xFFF85888),
     'Insekt': Color(0xFFA8B820),
     'Sten': Color(0xFFB8A038),
@@ -74,7 +75,7 @@ class TypeBadge extends StatelessWidget {
 }
 
 class TypeBadgeList extends StatelessWidget {
-  final String? types;
+  final List<String>? types;
   final double fontSize;
   final double spacing;
 
@@ -91,12 +92,10 @@ class TypeBadgeList extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final typeList = types!.split(',').map((t) => t.trim()).toList();
-
     return Wrap(
       spacing: spacing,
       runSpacing: spacing,
-      children: typeList.map((type) => TypeBadge(
+      children: types!.map((type) => TypeBadge(
         typeName: type,
         fontSize: fontSize,
       )).toList(),

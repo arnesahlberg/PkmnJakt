@@ -384,7 +384,7 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
                           const SizedBox(height: 16),
                           if (pokemonTypes != null)
                             TypeBadgeList(
-                              types: pokemonTypes,
+                              types: List<String>.from(pokemonTypes),
                               fontSize: 14,
                             ),
                           const SizedBox(height: 16),

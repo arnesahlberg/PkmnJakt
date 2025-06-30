@@ -124,7 +124,10 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                       ),
                     const SizedBox(height: 16),
                     if (pokemon['types'] != null)
-                      TypeBadgeList(types: pokemon['types'], fontSize: 14),
+                      TypeBadgeList(
+                        types: List<String>.from(pokemon['types']),
+                        fontSize: 14,
+                      ),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),

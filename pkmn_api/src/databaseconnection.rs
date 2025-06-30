@@ -7,6 +7,14 @@ use rusqlite::{params, Connection, Result};
 use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats};
 use crate::misc::{self, create_token};
 
+// Helper function to parse types string into vector
+fn parse_types(types_str: Option<String>) -> Vec<String> {
+    match types_str {
+        Some(types) => types.split('/').map(|s| s.trim().to_string()).collect(),
+        None => vec![],
+    }
+}
+
 
 pub fn get_conn (path : String) -> Result<Connection> {
     Connection::open(path)
@@ -290,6 +298,7 @@ pub fn view_found_pokemon(user_id: &str, n: i32, conn: &Connection) -> Result<Ve
     let mut stmt = conn.prepare("SELECT Pokemon, PokemonNumber, Types, TimeStamp, PhotoPath, Comment, Rating FROM ViewFoundPokemon WHERE UserId = ?1 ORDER BY TimeStamp DESC LIMIT ?2")?;
     let rows = stmt.query_map(params![user_id, n], |row| {
         let user = get_user_by_id_str(user_id, conn)?.unwrap();
+        let types_str: Option<String> = row.get(2)?;
         Ok(FoundPkmn {
             found_by_user: User {
                 user_id: user_id.to_string(),
@@ -300,7 +309,7 @@ pub fn view_found_pokemon(user_id: &str, n: i32, conn: &Connection) -> Result<Ve
             },
             name: row.get(0)?,
             number: row.get(1)?,
-            types: row.get(2)?,
+            types: parse_types(types_str),
             time_found: row.get(3)?,
             photo_path: row.get(4)?,
             comment: row.get(5)?,
@@ -418,6 +427,7 @@ pub fn get_highscores_filtered_count(filter: &str, conn: &Connection) -> Result<
 pub fn statistics_latest_pokemon_found(n: i32, conn: &Connection) -> Result<Vec<FoundPkmn>> {
     let mut stmt = conn.prepare("Select UserID, User, Pokemon, PokemonNumber, Types, TimeStamp, PhotoPath, Comment, Rating FROM ViewLatestFoundPokemon LIMIT ?1")?;
     let rows = stmt.query_map(params![n], |row| {
+        let types_str: Option<String> = row.get(4)?;
         Ok(FoundPkmn { 
             found_by_user : User {
                 user_id: row.get(0)?,
@@ -428,7 +438,7 @@ pub fn statistics_latest_pokemon_found(n: i32, conn: &Connection) -> Result<Vec<
             },
             name: row.get(2)?,
             number: row.get(3)?,
-            types: row.get(4)?,
+            types: parse_types(types_str),
             time_found: row.get(5)?,
             photo_path: row.get(6)?,
             comment: row.get(7)?,
@@ -449,13 +459,14 @@ pub fn statistics_latest_pokemon_found(n: i32, conn: &Connection) -> Result<Vec<
 pub fn get_pokemon(number: u32, conn: &Connection) -> Result<Option<Pkmn>> {
     let mut stmt = conn.prepare("SELECT name, pokemon_id, description, height, types FROM ViewPokemonWithTypes WHERE pokemon_id = ?1")?;
     let rows = stmt.query_map(params![number], |row| {
+        let types_str: Option<String> = row.get(4)?;
         Ok(Pkmn {
             name: row.get(0)?,
             number: row.get(1)?,
             photo_path: None,
             description: row.get(2)?,
             height: row.get(3)?,
-            types: row.get(4)?,
+            types: parse_types(types_str),
         })
     })?;
 
@@ -468,13 +479,14 @@ pub fn get_pokemon(number: u32, conn: &Connection) -> Result<Option<Pkmn>> {
 pub fn get_pokemon_by_catch_code(catch_code: &str, conn: &Connection) -> Result<Pkmn> {
     let mut stmt = conn.prepare("SELECT pokemon_id, name, description, height, active, types FROM ViewPokemonWithCatchCode WHERE catch_code = ?1")?;
     let row = stmt.query_row(params![catch_code], |row| {
+        let types_str: Option<String> = row.get(5)?;
         Ok(Pkmn {
             name: row.get(1)?,
             number: row.get(0)?,
             photo_path: None,
             description: row.get(2)?,
             height: row.get(3)?,
-            types: row.get(5)?,
+            types: parse_types(types_str),
         })
     })?;
     Ok(row)
@@ -486,13 +498,14 @@ pub fn user_pokedex(user_id: &str, conn: &Connection) -> Result<Vec<Pkmn>> {
         "SELECT name, description, height, pokemon_id, types FROM ViewPokemonWithTypes WHERE pokemon_id IN (SELECT pokemon_id FROM FoundPokemon WHERE User_Id = ?1)"
     )?;
     let rows = stmt.query_map(params![user_id], |row| {
+        let types_str: Option<String> = row.get(4)?;
         Ok(Pkmn {
             name: row.get(0)?,
             number: row.get(3)?,
             photo_path: None,
             description: row.get(1)?,
             height: row.get(2)?,
-            types: row.get(4)?,
+            types: parse_types(types_str),
         })
     })?;
 

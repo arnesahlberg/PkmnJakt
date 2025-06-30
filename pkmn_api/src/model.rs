@@ -30,7 +30,7 @@ pub struct FoundPkmn {
     pub photo_path: Option<String>,
     pub comment: Option<String>,
     pub rating: Option<i32>,
-    pub types: Option<String>,  // Concatenated types like "Fire/Flying"
+    pub types: Vec<String>,  // Array of types like ["Fire", "Flying"]
 }
 
 
@@ -49,7 +49,7 @@ pub struct Pkmn {
     pub photo_path: Option<String>,
     pub description: Option<String>,
     pub height: f32,
-    pub types: Option<String>,  // Concatenated types like "Fire/Flying"
+    pub types: Vec<String>,  // Array of types like ["Fire", "Flying"]
 }
 
 

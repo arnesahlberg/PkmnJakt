@@ -186,7 +186,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
                     const SizedBox(height: 16),
                     if (pokemon['types'] != null)
                       TypeBadgeList(
-                        types: pokemon['types'],
+                        types: List<String>.from(pokemon['types']),
                         fontSize: 14,
                       ),
                     const SizedBox(height: 24),
@@ -476,7 +476,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                                 Padding(
                                                   padding: const EdgeInsets.only(top: 2),
                                                   child: TypeBadgeList(
-                                                    types: pokemon['types'],
+                                                    types: List<String>.from(pokemon['types']),
                                                     fontSize: 8,
                                                     spacing: 2,
                                                   ),
