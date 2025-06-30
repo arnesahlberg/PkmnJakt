@@ -655,6 +655,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                             highscores: _highScores,
                             clickable: true,
                             linkToHighscorePage: true,
+                            showFirstPlacesIcons: true,
                           ),
                           const SizedBox(height: 24),
                           PokedexContainer(
