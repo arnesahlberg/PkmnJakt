@@ -365,14 +365,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
-  // helper to check if score has duplicates
-  bool _hasDuplicateScore(dynamic currentScore) {
-    return _highScores
-            .where((s) => s['score'] == currentScore['score'])
-            .length >
-        1;
-  }
-
   @override
   void initState() {
     super.initState();

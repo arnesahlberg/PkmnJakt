@@ -124,10 +124,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                       ),
                     const SizedBox(height: 16),
                     if (pokemon['types'] != null)
-                      TypeBadgeList(
-                        types: pokemon['types'],
-                        fontSize: 14,
-                      ),
+                      TypeBadgeList(types: pokemon['types'], fontSize: 14),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
@@ -161,7 +158,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
       appBar: CommonAppBar(title: widget.userName),
       body: Container(
         decoration: AppBoxDecorations.gradientBackground,
-        child: FutureBuilder<List<dynamic>>(
+        child: FutureBuilder<List<Object>>(
           future: Future.wait([
             _userDataFuture,
             _pokedexFuture,
@@ -325,7 +322,10 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                 if (typeStats.isNotEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
                       child: PokedexContainer(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,23 +341,27 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                             const SizedBox(height: 12),
                             ...typeStats.entries
                                 .where((entry) => entry.value > 0)
-                                .map((entry) => Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                      child: Row(
-                                        children: [
-                                          TypeBadge(typeName: entry.key),
-                                          const SizedBox(width: 12),
-                                          Text(
-                                            '${entry.value} st',
-                                            style: const TextStyle(
-                                              fontFamily: 'PixelFont',
-                                              fontSize: 14,
-                                              color: Colors.black87,
-                                            ),
+                                .map(
+                                  (entry) => Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        TypeBadge(typeName: entry.key),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          '${entry.value} st',
+                                          style: const TextStyle(
+                                            fontFamily: 'PixelFont',
+                                            fontSize: 14,
+                                            color: Colors.black87,
                                           ),
-                                        ],
-                                      ),
-                                    ))
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
                                 .toList(),
                           ],
                         ),
