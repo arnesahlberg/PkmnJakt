@@ -645,12 +645,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                         final pokemon = _allPokemonList[index];
                                         final userId = pokemon['found_by_user']['user_id'].toString();
                                         
-                                        return GestureDetector(
-                                          onTap: () => _navigateToUserStatistics(
-                                            userId,
-                                            pokemon['found_by_user']['name'],
-                                          ),
-                                          child: Container(
+                                        return Container(
                                             margin: const EdgeInsets.only(right: 16),
                                             padding: const EdgeInsets.all(8),
                                             decoration: BoxDecoration(
@@ -726,8 +721,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                        );
+                                          );
                                       },
                                     ),
                                   ),
