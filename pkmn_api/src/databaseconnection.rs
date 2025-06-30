@@ -6,6 +6,7 @@ use chrono_tz::Europe::Stockholm;
 use rusqlite::{params, Connection, Result};
 use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats};
 use crate::misc::{self, create_token};
+use crate::milestones::{MilestoneDefinition, get_count_milestone_for_count, get_type_milestone_for_type, get_pokemon_milestone};
 
 // Helper function to parse types string into vector
 fn parse_types(types_str: Option<String>) -> Vec<String> {
@@ -272,7 +273,7 @@ pub fn get_pokemon_id_by_catch_code(catch_code: &str, conn: &Connection) -> Resu
 
 
 // to call if oyu've found a pokemon
-pub fn found_pokemon(user_id: &str, catch_code: &str, conn: &Connection) -> Result<()> {
+pub fn found_pokemon(user_id: &str, catch_code: &str, conn: &Connection) -> Result<Vec<MilestoneDefinition>> {
     let pokemon_id = get_pokemon_id_by_catch_code(catch_code, conn)?;
     
     // Generate timestamp in Stockholm timezone (CET/CEST)
@@ -280,11 +281,58 @@ pub fn found_pokemon(user_id: &str, catch_code: &str, conn: &Connection) -> Resu
     let now_stockholm = now_utc.with_timezone(&Stockholm);
     let timestamp_str = now_stockholm.format("%Y-%m-%d %H:%M:%S").to_string();
     
+    // Get the pokemon's types before inserting
+    let pokemon = get_pokemon(pokemon_id, conn)?.unwrap();
+    
+    // Check milestones BEFORE inserting (for type-based milestones)
+    let mut achieved_milestones = Vec::new();
+    
+    // Check type-based milestones (only if this is their first pokemon of this type)
+    for type_name in &pokemon.types {
+        if !user_has_first_pokemon_of_type(user_id, type_name, conn)? {
+            if let Some(milestone) = get_type_milestone_for_type(type_name) {
+                achieved_milestones.push(milestone);
+            }
+        }
+    }
+    
+    // Check if they're about to catch a legendary bird and don't have all three yet
+    let has_birds_before = user_has_legendary_birds(user_id, conn)?;
+    
+    // Insert the pokemon
     conn.execute(
         "INSERT INTO FoundPokemon (user_id, pokemon_id, found_timestamp) VALUES (?1, ?2, ?3)",
         params![user_id, pokemon_id, timestamp_str],
     )?;
-    Ok(())
+    
+    // Check count-based milestones AFTER inserting
+    let pokemon_count = user_pokemon_count_for_milestones(user_id, conn)?;
+    // Get all possible count milestones
+    let count_milestones = vec![10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 151];
+    
+    // Check if current count matches any milestone exactly
+    if count_milestones.contains(&pokemon_count) {
+        if let Some(milestone) = get_count_milestone_for_count(pokemon_count) {
+            achieved_milestones.push(milestone);
+        }
+    }
+    
+    // Check specific pokemon milestones
+    if let Some(milestone) = get_pokemon_milestone(pokemon_id) {
+        achieved_milestones.push(milestone);
+    }
+    
+    // Check legendary birds milestone (if they now have all three)
+    if !has_birds_before && user_has_legendary_birds(user_id, conn)? {
+        if let Some(milestone) = crate::milestones::get_milestone_definition("legendary_birds") {
+            achieved_milestones.push(milestone);
+        }
+    }
+    
+    // Sort milestones by order
+    achieved_milestones.sort_by_key(|m| m.order);
+    
+    Ok(achieved_milestones)
 }
 
 pub fn num_pokemon_found(user_id: &str, conn: &Connection) -> Result<i32> {
@@ -349,6 +397,28 @@ pub fn check_if_user_has_caught_pokemon(user_id: &str, pokemon_id: &str, conn: &
     let mut stmt = conn.prepare("SELECT COUNT(*) FROM FoundPokemon WHERE user_id = ?1 AND pokemon_id = ?2")?;
     let count : i32 = stmt.query_row(params![user_id, pokemon_id], |row| row.get(0))?;
     Ok(count > 0)
+}
+
+// check if user has caught their first pokemon of a specific type
+pub fn user_has_first_pokemon_of_type(user_id: &str, type_name: &str, conn: &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare(
+        "SELECT COUNT(DISTINCT fp.pokemon_id) FROM FoundPokemon fp 
+         JOIN ViewPokemonWithTypes p ON fp.pokemon_id = p.pokemon_id 
+         WHERE fp.user_id = ?1 AND p.types LIKE ?2"
+    )?;
+    let type_pattern = format!("%{}%", type_name);
+    let count: i32 = stmt.query_row(params![user_id, type_pattern], |row| row.get(0))?;
+    Ok(count > 0)
+}
+
+// check if user has caught all three legendary birds
+pub fn user_has_legendary_birds(user_id: &str, conn: &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare(
+        "SELECT COUNT(DISTINCT pokemon_id) FROM FoundPokemon 
+         WHERE user_id = ?1 AND pokemon_id IN (144, 145, 146)"
+    )?;
+    let count: i32 = stmt.query_row(params![user_id], |row| row.get(0))?;
+    Ok(count == 3)
 }
 
 // get user ranking
@@ -588,4 +658,58 @@ pub fn total_pokemon_by_type(conn: &Connection) -> Result<Vec<TypeStats>> {
         result.push(row?);
     }
     Ok(result)
+}
+
+// Get all achieved milestone definitions for a user
+pub fn get_user_milestone_definitions(user_id: &str, conn: &Connection) -> Result<Vec<MilestoneDefinition>> {
+    let mut achieved_milestones = Vec::new();
+    
+    // Get count-based milestones
+    let pokemon_count = user_pokemon_count_for_milestones(user_id, conn)?;
+    let milestones = vec![10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 151];
+    
+    for milestone in milestones {
+        if pokemon_count >= milestone {
+            if let Some(definition) = get_count_milestone_for_count(milestone) {
+                achieved_milestones.push(definition);
+            }
+        }
+    }
+    
+    // Get type-based milestones
+    let types = vec!["Normal", "Eld", "Vatten", "Gräs", "Elektro", "Is", "Kamp", "Gift", "Mark", "Flyg", "Psykisk", "Insekt", "Sten", "Spöke", "Drake", "Mörk", "Stål", "Fé"];
+    
+    for type_name in types {
+        if user_has_first_pokemon_of_type(user_id, type_name, conn)? {
+            if let Some(definition) = get_type_milestone_for_type(type_name) {
+                achieved_milestones.push(definition);
+            }
+        }
+    }
+    
+    // Get special Pokemon milestones
+    let special_pokemon = vec![144, 145, 146, 150, 151, 312798312]; // Articuno, Zapdos, Moltres, Mewtwo, Mew, MissingNo
+    
+    for pokemon_id in special_pokemon {
+        let mut stmt = conn.prepare("SELECT COUNT(*) FROM FoundPokemon WHERE user_id = ?1 AND pokemon_id = ?2")?;
+        let count: i32 = stmt.query_row(params![user_id, pokemon_id], |row| row.get(0))?;
+        
+        if count > 0 {
+            if let Some(definition) = get_pokemon_milestone(pokemon_id) {
+                achieved_milestones.push(definition);
+            }
+        }
+    }
+    
+    // Check legendary birds milestone
+    if user_has_legendary_birds(user_id, conn)? {
+        if let Some(definition) = crate::milestones::get_milestone_definition("legendary_birds") {
+            achieved_milestones.push(definition);
+        }
+    }
+    
+    // Sort by order
+    achieved_milestones.sort_by_key(|m| m.order);
+    
+    Ok(achieved_milestones)
 }

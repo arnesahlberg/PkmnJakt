@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants.dart';
+import '../models/milestone.dart';
 
 class MilestoneBadge extends StatelessWidget {
   final int milestone;
@@ -72,6 +73,61 @@ class MilestoneBadge extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class ComprehensiveMilestoneBadge extends StatelessWidget {
+  final MilestoneDefinition milestone;
+  final double size;
+
+  const ComprehensiveMilestoneBadge({
+    super.key,
+    required this.milestone,
+    this.size = 32,
+  });
+
+  Color _parseColor(String colorString) {
+    try {
+      String hexColor = colorString.replaceAll('#', '');
+      if (hexColor.length == 6) {
+        hexColor = 'FF' + hexColor;
+      }
+      return Color(int.parse(hexColor, radix: 16));
+    } catch (e) {
+      return Colors.grey;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _parseColor(milestone.color);
+    
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: Border.all(color: color.withOpacity(0.7), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.4),
+            blurRadius: 4,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          milestone.icon.length > 3 ? milestone.icon.substring(0, 2) : milestone.icon,
+          style: TextStyle(
+            fontSize: size * 0.5,
+            color: Colors.white,
+          ),
+          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -390,25 +446,93 @@ class ResponsiveMilestoneDisplay extends StatelessWidget {
 
 class MilestoneSummary extends StatelessWidget {
   final List<int> milestones;
+  final List<MilestoneDefinition>? comprehensiveMilestones;
   final int currentPokemonCount;
   final VoidCallback onViewAll;
 
   const MilestoneSummary({
     super.key,
     required this.milestones,
+    this.comprehensiveMilestones,
     required this.onViewAll,
     this.currentPokemonCount = 0,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (milestones.isEmpty) return const SizedBox.shrink();
+    // Calculate total achievements
+    final totalAchievements = comprehensiveMilestones?.length ?? milestones.length;
+    
+    if (totalAchievements == 0) return const SizedBox.shrink();
 
-    // Show latest 3 milestones
-    final displayMilestones =
-        milestones.length > 3
-            ? milestones.sublist(milestones.length - 3)
-            : milestones;
+    // Get a mix of different milestone types to display
+    List<Widget> displayBadges = [];
+    
+    if (comprehensiveMilestones != null && comprehensiveMilestones!.isNotEmpty) {
+      // Sort by order to get most recent
+      final sortedMilestones = List<MilestoneDefinition>.from(comprehensiveMilestones!)
+        ..sort((a, b) => b.order.compareTo(a.order));
+      
+      // Get a mix: highest count milestone, a type milestone, and a special milestone
+      MilestoneDefinition? highestCount;
+      MilestoneDefinition? typeExample;
+      MilestoneDefinition? specialExample;
+      
+      for (var m in sortedMilestones) {
+        if (m.milestoneType == MilestoneType.countBased && highestCount == null) {
+          highestCount = m;
+        } else if (m.milestoneType == MilestoneType.typeBased && typeExample == null) {
+          typeExample = m;
+        } else if (m.milestoneType == MilestoneType.specificPokemon && specialExample == null) {
+          specialExample = m;
+        }
+      }
+      
+      // Add them to display in priority order
+      if (highestCount != null) {
+        displayBadges.add(Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: ComprehensiveMilestoneBadge(milestone: highestCount, size: 32),
+        ));
+      }
+      if (specialExample != null && displayBadges.length < 3) {
+        displayBadges.add(Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: ComprehensiveMilestoneBadge(milestone: specialExample, size: 32),
+        ));
+      }
+      if (typeExample != null && displayBadges.length < 3) {
+        displayBadges.add(Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: ComprehensiveMilestoneBadge(milestone: typeExample, size: 32),
+        ));
+      }
+      
+      // Fill remaining slots with other recent milestones
+      int added = displayBadges.length;
+      for (var m in sortedMilestones) {
+        if (displayBadges.length >= 3) break;
+        if (m != highestCount && m != typeExample && m != specialExample) {
+          displayBadges.add(Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ComprehensiveMilestoneBadge(milestone: m, size: 32),
+          ));
+        }
+      }
+    } else {
+      // Fallback to old milestones display
+      final displayMilestones =
+          milestones.length > 3
+              ? milestones.sublist(milestones.length - 3)
+              : milestones;
+      
+      displayBadges = displayMilestones.map(
+        (milestone) => Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: MilestoneBadge(milestone: milestone, size: 32),
+        ),
+      ).toList();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,9 +542,9 @@ class MilestoneSummary extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                milestones.length == 1
+                totalAchievements == 1
                     ? 'Du har uppnått 1 prestation!'
-                    : 'Du har uppnått ${milestones.length} prestationer!',
+                    : 'Du har uppnått $totalAchievements prestationer!',
                 style: AppTextStyles.bodyLarge.copyWith(
                   color: AppColors.secondaryRed,
                 ),
@@ -437,8 +561,8 @@ class MilestoneSummary extends StatelessWidget {
                       color: AppColors.secondaryRed,
                     ),
                   ),
-                  SizedBox(width: 4),
-                  Icon(
+                  const SizedBox(width: 4),
+                  const Icon(
                     Icons.arrow_forward,
                     color: AppColors.secondaryRed,
                     size: 16,
@@ -451,13 +575,8 @@ class MilestoneSummary extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            ...displayMilestones.map(
-              (milestone) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: MilestoneBadge(milestone: milestone, size: 32),
-              ),
-            ),
-            if (milestones.length > 3)
+            ...displayBadges,
+            if (totalAchievements > 3)
               Container(
                 width: 32,
                 height: 32,
@@ -468,12 +587,12 @@ class MilestoneSummary extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    '+${milestones.length - 3}',
-                    style: TextStyle(
+                    '+${totalAchievements - 3}',
+                    style: const TextStyle(
                       fontFamily: 'PixelFont',
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade600,
+                      color: Colors.grey,
                     ),
                   ),
                 ),

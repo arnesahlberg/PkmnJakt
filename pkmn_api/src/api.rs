@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use log::{info, warn, error, debug};
 use crate::misc::{self, validate_token};
 use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats};
+use crate::milestones::MilestoneDefinition;
 use crate::databaseconnection;
 
 pub const USER_NAME_MIN_LENGTH: usize = 3;
@@ -502,7 +503,8 @@ pub struct FoundPokemonResponse {
     pub pokemon_id: Option<u32>,
     pub message: String,
     pub result_code: CallResultCode,
-    pub milestone_reached: Option<u32>,
+    pub milestone_reached: Option<u32>, // Keep for backward compatibility
+    pub milestones_achieved: Vec<MilestoneDefinition>,
 }
 
 pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokemonRequest>) -> HttpResponse {
@@ -522,6 +524,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
             message: "Invalid token".to_string(),
             result_code: CallResultCode::InvalidToken,
             milestone_reached: None,
+            milestones_achieved: Vec::new(),
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -535,6 +538,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
             message: format!("User does not exist {}", user_id),
             result_code: CallResultCode::UserNotFound,
             milestone_reached: None,
+            milestones_achieved: Vec::new(),
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -548,6 +552,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
             message: "Cannot find pokemon".to_string(),
             result_code: CallResultCode::PokemonNotFound,
             milestone_reached: None,
+            milestones_achieved: Vec::new(),
         };
         return HttpResponse::BadRequest().json(response);
     }
@@ -563,26 +568,18 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
             message: format!("Already found pokemon"),
             result_code: CallResultCode::PokemonAlreadyFound,
             milestone_reached: None,
+            milestones_achieved: Vec::new(),
         };
         return HttpResponse::Ok().json(response);
     }
     
-    databaseconnection::found_pokemon(&user_id, &info.catch_code, &conn).unwrap();
+    let milestones_achieved = databaseconnection::found_pokemon(&user_id, &info.catch_code, &conn).unwrap();
     info!("Pokemon caught successfully - user: {}, pokemon: {} ({})", user_id, pokemon.name, pokemon.number);
     
-    // Check for milestone achievement (only for Pokemon with ID <= 151)
-    let mut milestone_reached = None;
-    if pokemon.number <= 151 {
-        let pokemon_count = databaseconnection::user_pokemon_count_for_milestones(&user_id, &conn).unwrap();
-        
-        // Check if this count is a milestone (every 10 up to 150, plus 151)
-        let milestones = vec![10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 151];
-        
-        // Check if the current pokemon count matches any milestone exactly
-        if milestones.contains(&pokemon_count) {
-            milestone_reached = Some(pokemon_count);
-        }
-    }
+    // Keep backward compatibility with milestone_reached
+    let milestone_reached = milestones_achieved.iter()
+        .find(|m| m.milestone_type == crate::milestones::MilestoneType::CountBased)
+        .and_then(|m| m.requirement.parse::<u32>().ok());
     
     let response = FoundPokemonResponse {
         user_id: user_id.clone(),
@@ -590,6 +587,7 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
         message: format!("Caught {} (#{})", pokemon.name, pokemon.number),
         result_code: CallResultCode::Ok,
         milestone_reached,
+        milestones_achieved,
     };
     HttpResponse::Ok().json(response)
 }
@@ -1019,6 +1017,17 @@ pub async fn get_user_milestones(path: web::Path<String>) -> HttpResponse {
     HttpResponse::Ok().json(milestones)
 }
 
+pub async fn get_user_milestone_definitions(path: web::Path<String>) -> HttpResponse {
+    let user_id = path.into_inner();
+    // first check if user exists
+    if !databaseconnection::user_id_exists(&user_id, &databaseconnection::get_conn(get_env_dbpath()).unwrap()).unwrap() {
+        return HttpResponse::NotFound().finish();
+    }
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let milestone_definitions = databaseconnection::get_user_milestone_definitions(&user_id, &conn).unwrap();
+    HttpResponse::Ok().json(milestone_definitions)
+}
+
 pub async fn validate_token_request(req: HttpRequest) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
@@ -1216,6 +1225,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/my_pokedex", web::get().to(get_my_pokedex))
         .route("/user_pokedex/{user_id}", web::get().to(get_user_pokedex))
         .route("/user_milestones/{user_id}", web::get().to(get_user_milestones))
+        .route("/user_milestone_definitions/{user_id}", web::get().to(get_user_milestone_definitions))
         .route("/user_pokemon_by_type/{user_id}", web::get().to(get_user_pokemon_by_type))
         .route("/total_pokemon_by_type", web::get().to(get_total_pokemon_by_type))
         // admin endpoints
