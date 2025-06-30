@@ -457,7 +457,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                                   child: Container(
                                     margin: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
+                                      color: Colors.white,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
                                         color: AppColors.secondaryRed,
@@ -466,15 +466,21 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(7),
-                                      child: Image.asset(
-                                        'assets/images/pkmn/${pokemon['number']}.jpg',
-                                        fit: BoxFit.contain,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                const Icon(
-                                                  Icons.image_outlined,
-                                                  size: 48,
-                                                ),
+                                      child: Container(
+                                        color: Colors.white,
+                                        child: Image.asset(
+                                          'assets/images/pkmn/${pokemon['number']}.jpg',
+                                          fit: BoxFit.contain,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Container(
+                                                    color: Colors.white,
+                                                    child: const Icon(
+                                                      Icons.image_outlined,
+                                                      size: 48,
+                                                    ),
+                                                  ),
+                                        ),
                                       ),
                                     ),
                                   ),

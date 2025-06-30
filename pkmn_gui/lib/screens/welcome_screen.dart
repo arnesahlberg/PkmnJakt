@@ -185,7 +185,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                           ),
                                           const SizedBox(height: 16),
                                           SizedBox(
-                                            height: 200,
+                                            height: 160,
                                             child: ListView.builder(
                                               scrollDirection: Axis.horizontal,
                                               itemCount: recent.length,

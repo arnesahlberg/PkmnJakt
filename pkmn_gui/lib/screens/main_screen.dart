@@ -29,7 +29,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   int _ranking = 0;
   int _pokemonCount = 0;
   List<int> _userMilestones = [];
-  final Map<String, List<int>> _recentPokemonUserMilestones = {};
 
   Future<void> _loadData() async {
     final session = Provider.of<UserSession>(context, listen: false);
@@ -81,8 +80,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         _allPokemonList = latestResult['found_pokemon'] as List<dynamic>;
         _isExtraLoading = false;
       });
-      // Fetch milestones for users in recently caught list
-      _fetchRecentPokemonUserMilestones();
     } catch (e) {
       setState(() => _isExtraLoading = false);
       if (!mounted) return;
@@ -95,24 +92,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           backgroundColor: Colors.red,
         ),
       );
-    }
-  }
-
-  Future<void> _fetchRecentPokemonUserMilestones() async {
-    for (var pokemon in _allPokemonList) {
-      final userId = pokemon['found_by_user']['user_id'].toString();
-      if (!_recentPokemonUserMilestones.containsKey(userId)) {
-        try {
-          final milestones = await ApiService.getUserMilestones(userId);
-          if (mounted) {
-            setState(() {
-              _recentPokemonUserMilestones[userId] = milestones;
-            });
-          }
-        } catch (e) {
-          // Silently fail - milestones are optional
-        }
-      }
     }
   }
 
@@ -550,93 +529,85 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                   ),
                                 )
                               else
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: _pokemonList.length,
-                                  itemBuilder: (context, index) {
-                                    final pokemon = _pokemonList[index];
-                                    return Container(
-                                      margin: const EdgeInsets.only(bottom: 12),
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: const Color(0xFF992109),
-                                          width: 2,
+                                SizedBox(
+                                  height: 160,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: _pokemonList.length,
+                                    itemBuilder: (context, index) {
+                                      final pokemon = _pokemonList[index];
+                                      return Container(
+                                        margin: const EdgeInsets.only(right: 16),
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: const Color(0xFF992109),
+                                            width: 2,
+                                          ),
                                         ),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 60,
-                                            height: 60,
-                                            decoration: BoxDecoration(
-                                              color: Colors.grey.shade100,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              border: Border.all(
-                                                color: const Color(0xFF992109),
-                                                width: 1,
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              width: 80,
+                                              height: 80,
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: const Color(0xFF992109),
+                                                  width: 1,
+                                                ),
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(7),
+                                                child: Container(
+                                                  color: Colors.white,
+                                                  child: Image.asset(
+                                                    'assets/images/pkmn/${pokemon['number']}.jpg',
+                                                    fit: BoxFit.contain,
+                                                    errorBuilder:
+                                                        (context, error, stackTrace) =>
+                                                            Container(
+                                                              color: Colors.white,
+                                                              child: const Icon(
+                                                                Icons.image_outlined,
+                                                                size: 48,
+                                                              ),
+                                                            ),
+                                                  ),
+                                                ),
                                               ),
                                             ),
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(7),
-                                              child: Image.asset(
-                                                'assets/images/pkmn/${pokemon['number']}.jpg',
-                                                fit: BoxFit.contain,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => const Icon(
-                                                      Icons.image_outlined,
-                                                      size: 32,
-                                                    ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              "${pokemon['name']}",
+                                              style: const TextStyle(
+                                                fontFamily: 'PixelFont',
+                                                fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 16),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  "${pokemon['name']}",
-                                                  style: const TextStyle(
-                                                    fontFamily:
-                                                        'PixelFontTitle',
-                                                    fontSize: 16,
-                                                    color: Color(0xFFE3350D),
-                                                  ),
-                                                ),
-                                                Text(
-                                                  "Nr. ${pokemon['number']}",
-                                                  style: TextStyle(
-                                                    fontFamily: 'PixelFont',
-                                                    fontSize: 14,
-                                                    color: Colors.grey.shade700,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  _formatTime(
-                                                    pokemon['time_found'],
-                                                  ),
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ],
+                                            Text(
+                                              "Nr. ${pokemon['number']}",
+                                              style: const TextStyle(
+                                                fontFamily: 'PixelFont',
+                                                fontSize: 12,
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
+                                            Text(
+                                              _formatTime(pokemon['time_found']),
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
                             ],
                           ),
@@ -665,128 +636,100 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 if (_allPokemonList.isEmpty)
                                   const Text("Inga globala fångster än.")
                                 else
-                                  ListView.builder(
-                                    shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    itemCount: _allPokemonList.length,
-                                    itemBuilder: (context, index) {
-                                      final pokemon = _allPokemonList[index];
-                                      return Container(
-                                        margin: const EdgeInsets.only(
-                                          bottom: 12,
-                                        ),
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
+                                  SizedBox(
+                                    height: 160,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: _allPokemonList.length,
+                                      itemBuilder: (context, index) {
+                                        final pokemon = _allPokemonList[index];
+                                        final userId = pokemon['found_by_user']['user_id'].toString();
+                                        
+                                        return GestureDetector(
+                                          onTap: () => _navigateToUserStatistics(
+                                            userId,
+                                            pokemon['found_by_user']['name'],
                                           ),
-                                          border: Border.all(
-                                            color: const Color(0xFF992109),
-                                            width: 2,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 60,
-                                              height: 60,
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey.shade100,
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                border: Border.all(
-                                                  color: const Color(
-                                                    0xFF992109,
-                                                  ),
-                                                  width: 1,
-                                                ),
-                                              ),
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(7),
-                                                child: Image.asset(
-                                                  'assets/images/pkmn/${pokemon['number']}.jpg',
-                                                  fit: BoxFit.contain,
-                                                  errorBuilder:
-                                                      (
-                                                        context,
-                                                        error,
-                                                        stackTrace,
-                                                      ) => const Icon(
-                                                        Icons.image_outlined,
-                                                        size: 32,
-                                                      ),
-                                                ),
+                                          child: Container(
+                                            margin: const EdgeInsets.only(right: 16),
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: const Color(0xFF992109),
+                                                width: 2,
                                               ),
                                             ),
-                                            const SizedBox(width: 16),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    "${pokemon['name']}",
-                                                    style: const TextStyle(
-                                                      fontFamily:
-                                                          'PixelFontTitle',
-                                                      fontSize: 16,
-                                                      color: Color(0xFFE3350D),
+                                            child: Column(
+                                              children: [
+                                                Container(
+                                                  width: 80,
+                                                  height: 80,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.circular(8),
+                                                    border: Border.all(
+                                                      color: const Color(0xFF992109),
+                                                      width: 1,
                                                     ),
                                                   ),
-                                                  Text(
-                                                    "Nr. ${pokemon['number']}",
-                                                    style: TextStyle(
-                                                      fontFamily: 'PixelFont',
-                                                      fontSize: 14,
-                                                      color:
-                                                          Colors.grey.shade700,
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      const Icon(
-                                                        Icons.person,
-                                                        size: 12,
-                                                        color: Color(
-                                                          0xFF992109,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Flexible(
-                                                        child: Text(
-                                                          "${pokemon['found_by_user']['name']}",
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 12,
-                                                                color: Color(
-                                                                  0xFF992109,
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(7),
+                                                    child: Container(
+                                                      color: Colors.white,
+                                                      child: Image.asset(
+                                                        'assets/images/pkmn/${pokemon['number']}.jpg',
+                                                        fit: BoxFit.contain,
+                                                        errorBuilder:
+                                                            (context, error, stackTrace) =>
+                                                                Container(
+                                                                  color: Colors.white,
+                                                                  child: const Icon(
+                                                                    Icons.image_outlined,
+                                                                    size: 48,
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                          overflow:
-                                                              TextOverflow
-                                                                  .ellipsis,
-                                                        ),
                                                       ),
-                                                    ],
-                                                  ),
-                                                  Text(
-                                                    _formatTime(
-                                                      pokemon['time_found'],
-                                                    ),
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
                                                     ),
                                                   ),
-                                                ],
-                                              ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  "${pokemon['name']}",
+                                                  style: const TextStyle(
+                                                    fontFamily: 'PixelFont',
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  "Nr. ${pokemon['number']}",
+                                                  style: const TextStyle(
+                                                    fontFamily: 'PixelFont',
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  "${pokemon['found_by_user']['name']}",
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                  ),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                                Text(
+                                                  _formatTime(pokemon['time_found']),
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                          ],
-                                        ),
-                                      );
-                                    },
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
                               ],
                             ),

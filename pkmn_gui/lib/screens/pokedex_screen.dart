@@ -395,7 +395,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                           child: Container(
                                             margin: const EdgeInsets.all(6),
                                             decoration: BoxDecoration(
-                                              color: Colors.grey.shade100,
+                                              color: Colors.white,
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               border: Border.all(
@@ -406,31 +406,40 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                             child: ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(7),
-                                              child:
-                                                  isCaught
-                                                      ? Image.asset(
-                                                        'assets/images/pkmn/${pokemon['number']}.jpg',
-                                                        fit: BoxFit.contain,
-                                                        errorBuilder:
-                                                            (
-                                                              context,
-                                                              error,
-                                                              stackTrace,
-                                                            ) => const Icon(
-                                                              Icons
-                                                                  .image_outlined,
+                                              child: Container(
+                                                color: Colors.white,
+                                                child:
+                                                    isCaught
+                                                        ? Image.asset(
+                                                          'assets/images/pkmn/${pokemon['number']}.jpg',
+                                                          fit: BoxFit.contain,
+                                                          errorBuilder:
+                                                              (
+                                                                context,
+                                                                error,
+                                                                stackTrace,
+                                                              ) => Container(
+                                                                color: Colors.white,
+                                                                child: const Icon(
+                                                                  Icons
+                                                                      .image_outlined,
+                                                                  size: 48,
+                                                                ),
+                                                              ),
+                                                        )
+                                                        : Container(
+                                                          color: Colors.white,
+                                                          child: const Center(
+                                                            child: Icon(
+                                                              Icons.question_mark,
                                                               size: 48,
+                                                              color:
+                                                                  AppColors
+                                                                      .secondaryRed,
                                                             ),
-                                                      )
-                                                      : const Center(
-                                                        child: Icon(
-                                                          Icons.question_mark,
-                                                          size: 48,
-                                                          color:
-                                                              AppColors
-                                                                  .secondaryRed,
+                                                          ),
                                                         ),
-                                                      ),
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -472,15 +481,6 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                                 ),
                                                 textAlign: TextAlign.center,
                                               ),
-                                              if (isCaught && pokemon['types'] != null)
-                                                Padding(
-                                                  padding: const EdgeInsets.only(top: 2),
-                                                  child: TypeBadgeList(
-                                                    types: List<String>.from(pokemon['types']),
-                                                    fontSize: 8,
-                                                    spacing: 2,
-                                                  ),
-                                                ),
                                             ],
                                           ),
                                         ),
