@@ -93,7 +93,7 @@ class ComprehensiveMilestoneBadge extends StatelessWidget {
     try {
       String hexColor = colorString.replaceAll('#', '');
       if (hexColor.length == 6) {
-        hexColor = 'FF' + hexColor;
+        hexColor = 'FF$hexColor';
       }
       return Color(int.parse(hexColor, radix: 16));
     } catch (e) {
@@ -104,7 +104,7 @@ class ComprehensiveMilestoneBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _parseColor(milestone.color);
-    
+
     return Container(
       width: size,
       height: size,
@@ -122,11 +122,10 @@ class ComprehensiveMilestoneBadge extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          milestone.icon.length > 3 ? milestone.icon.substring(0, 2) : milestone.icon,
-          style: TextStyle(
-            fontSize: size * 0.5,
-            color: Colors.white,
-          ),
+          milestone.icon.length > 3
+              ? milestone.icon.substring(0, 2)
+              : milestone.icon,
+          style: TextStyle(fontSize: size * 0.5, color: Colors.white),
           textAlign: TextAlign.center,
         ),
       ),
@@ -461,62 +460,85 @@ class MilestoneSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Calculate total achievements
-    final totalAchievements = comprehensiveMilestones?.length ?? milestones.length;
-    
+    final totalAchievements =
+        comprehensiveMilestones?.length ?? milestones.length;
+
     if (totalAchievements == 0) return const SizedBox.shrink();
 
     // Get a mix of different milestone types to display
     List<Widget> displayBadges = [];
-    
-    if (comprehensiveMilestones != null && comprehensiveMilestones!.isNotEmpty) {
+
+    if (comprehensiveMilestones != null &&
+        comprehensiveMilestones!.isNotEmpty) {
       // Sort by order to get most recent
-      final sortedMilestones = List<MilestoneDefinition>.from(comprehensiveMilestones!)
-        ..sort((a, b) => b.order.compareTo(a.order));
-      
+      final sortedMilestones = List<MilestoneDefinition>.from(
+        comprehensiveMilestones!,
+      )..sort((a, b) => b.order.compareTo(a.order));
+
       // Get a mix: highest count milestone, a type milestone, and a special milestone
       MilestoneDefinition? highestCount;
       MilestoneDefinition? typeExample;
       MilestoneDefinition? specialExample;
-      
+
       for (var m in sortedMilestones) {
-        if (m.milestoneType == MilestoneType.countBased && highestCount == null) {
+        if (m.milestoneType == MilestoneType.countBased &&
+            highestCount == null) {
           highestCount = m;
-        } else if (m.milestoneType == MilestoneType.typeBased && typeExample == null) {
+        } else if (m.milestoneType == MilestoneType.typeBased &&
+            typeExample == null) {
           typeExample = m;
-        } else if (m.milestoneType == MilestoneType.specificPokemon && specialExample == null) {
+        } else if (m.milestoneType == MilestoneType.specificPokemon &&
+            specialExample == null) {
           specialExample = m;
         }
       }
-      
+
       // Add them to display in priority order
       if (highestCount != null) {
-        displayBadges.add(Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: ComprehensiveMilestoneBadge(milestone: highestCount, size: 32),
-        ));
+        displayBadges.add(
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ComprehensiveMilestoneBadge(
+              milestone: highestCount,
+              size: 32,
+            ),
+          ),
+        );
       }
       if (specialExample != null && displayBadges.length < 3) {
-        displayBadges.add(Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: ComprehensiveMilestoneBadge(milestone: specialExample, size: 32),
-        ));
+        displayBadges.add(
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ComprehensiveMilestoneBadge(
+              milestone: specialExample,
+              size: 32,
+            ),
+          ),
+        );
       }
       if (typeExample != null && displayBadges.length < 3) {
-        displayBadges.add(Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: ComprehensiveMilestoneBadge(milestone: typeExample, size: 32),
-        ));
+        displayBadges.add(
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ComprehensiveMilestoneBadge(
+              milestone: typeExample,
+              size: 32,
+            ),
+          ),
+        );
       }
-      
+
       // Fill remaining slots with other recent milestones
       int added = displayBadges.length;
       for (var m in sortedMilestones) {
         if (displayBadges.length >= 3) break;
         if (m != highestCount && m != typeExample && m != specialExample) {
-          displayBadges.add(Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: ComprehensiveMilestoneBadge(milestone: m, size: 32),
-          ));
+          displayBadges.add(
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ComprehensiveMilestoneBadge(milestone: m, size: 32),
+            ),
+          );
         }
       }
     } else {
@@ -525,13 +547,16 @@ class MilestoneSummary extends StatelessWidget {
           milestones.length > 3
               ? milestones.sublist(milestones.length - 3)
               : milestones;
-      
-      displayBadges = displayMilestones.map(
-        (milestone) => Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: MilestoneBadge(milestone: milestone, size: 32),
-        ),
-      ).toList();
+
+      displayBadges =
+          displayMilestones
+              .map(
+                (milestone) => Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: MilestoneBadge(milestone: milestone, size: 32),
+                ),
+              )
+              .toList();
     }
 
     return Column(

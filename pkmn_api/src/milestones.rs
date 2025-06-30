@@ -41,7 +41,7 @@ lazy_static! {
             (130, "130 Pokémon!", "#E65100"),
             (140, "140 Pokémon - nästan alla!", "#FF6F00"),
             (150, "150 Pokémon - otroligt!", "#FF5722"),
-            (151, "ALLA 151 - Pokémon-mästare!", "#673AB7"),
+            (151, "ALLA 151 - Helt fantastiskt! Vi trodde faktiskt inte att någon skulle göra det! Du får en våffelbiljett om du pratar Arne eller Josefin!", "#673AB7"),
         ];
         
         for (i, (count, text, color)) in count_milestones.iter().enumerate() {

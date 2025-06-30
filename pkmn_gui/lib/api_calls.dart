@@ -340,7 +340,11 @@ class AdminApiService {
       Uri.parse('$baseUrl/am_i_admin'),
       headers: ApiService._headers(token),
     );
-    return response.statusCode == 200;
+    if (response.statusCode != 200 && response.statusCode != 401) {
+      throw Exception('Failed to check admin status: ${response.statusCode}');
+    }
+    final json = decodeUtf8Json(response);
+    return json['is_admin'] ?? false;
   }
 
   // get users in interval (post)

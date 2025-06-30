@@ -19,10 +19,7 @@ class ComprehensiveMilestoneScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CommonAppBar(
-        title: "Mina Prestationer",
-        showBackButton: true,
-      ),
+      appBar: const CommonAppBar(title: "Prestationer", showBackButton: true),
       body: Container(
         decoration: AppBoxDecorations.gradientBackground,
         child: SingleChildScrollView(
@@ -43,21 +40,12 @@ class ComprehensiveMilestoneScreen extends StatelessWidget {
                       milestones.isEmpty
                           ? "Inga prestationer uppnådda än!"
                           : milestones.length == 1
-                              ? "Du har uppnått 1 prestation!"
-                              : "Du har uppnått ${milestones.length} prestationer!",
+                          ? "Du har uppnått 1 prestation!"
+                          : "Du har uppnått ${milestones.length} prestationer!",
                       style: AppTextStyles.bodyLarge.copyWith(
                         color: AppColors.secondaryRed,
                       ),
                     ),
-                    if (currentPokemonCount > 0) ...[
-                      const SizedBox(height: UIConstants.spacing8),
-                      Text(
-                        "Du har fångat $currentPokemonCount Pokémon",
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.secondaryRed,
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -80,6 +68,18 @@ class ComprehensiveMilestoneDisplay extends StatelessWidget {
   final List<MilestoneDefinition> milestones;
   final int currentPokemonCount;
 
+  // Define category constants
+  static const String _categoryCountBased = 'count_based';
+  static const String _categoryTypeBased = 'type_based';
+  static const String _categorySpecialPokemon = 'special_pokemon';
+
+  // Define display names for categories
+  static const Map<String, String> _categoryDisplayNames = {
+    _categoryCountBased: 'Fångat många',
+    _categoryTypeBased: 'Fångat Pokémon av typ',
+    _categorySpecialPokemon: 'Fångat speciella Pokémon',
+  };
+
   const ComprehensiveMilestoneDisplay({
     super.key,
     required this.milestones,
@@ -88,21 +88,21 @@ class ComprehensiveMilestoneDisplay extends StatelessWidget {
 
   Map<String, List<MilestoneDefinition>> getMilestonesByType() {
     final Map<String, List<MilestoneDefinition>> categories = {
-      'Framsteg': [],
-      'Första av varje typ': [],
-      'Speciella Pokémon': [],
+      _categoryCountBased: [],
+      _categoryTypeBased: [],
+      _categorySpecialPokemon: [],
     };
 
     for (MilestoneDefinition milestone in milestones) {
       switch (milestone.milestoneType) {
         case MilestoneType.countBased:
-          categories['Framsteg']!.add(milestone);
+          categories[_categoryCountBased]!.add(milestone);
           break;
         case MilestoneType.typeBased:
-          categories['Första av varje typ']!.add(milestone);
+          categories[_categoryTypeBased]!.add(milestone);
           break;
         case MilestoneType.specificPokemon:
-          categories['Speciella Pokémon']!.add(milestone);
+          categories[_categorySpecialPokemon]!.add(milestone);
           break;
       }
     }
@@ -131,26 +131,26 @@ class ComprehensiveMilestoneDisplay extends StatelessWidget {
     }
   }
 
-  Color getCategoryColor(String category) {
-    switch (category) {
-      case 'Framsteg':
+  Color getCategoryColor(String categoryKey) {
+    switch (categoryKey) {
+      case _categoryCountBased:
         return Colors.blue.shade100;
-      case 'Första av varje typ':
+      case _categoryTypeBased:
         return Colors.green.shade100;
-      case 'Speciella Pokémon':
+      case _categorySpecialPokemon:
         return Colors.purple.shade100;
       default:
         return Colors.grey.shade100;
     }
   }
 
-  Color getCategoryTextColor(String category) {
-    switch (category) {
-      case 'Framsteg':
+  Color getCategoryTextColor(String categoryKey) {
+    switch (categoryKey) {
+      case _categoryCountBased:
         return Colors.blue.shade800;
-      case 'Första av varje typ':
+      case _categoryTypeBased:
         return Colors.green.shade800;
-      case 'Speciella Pokémon':
+      case _categorySpecialPokemon:
         return Colors.purple.shade800;
       default:
         return Colors.grey.shade800;
@@ -202,16 +202,26 @@ class ComprehensiveMilestoneDisplay extends StatelessWidget {
   }
 
   Widget _buildCategorySection(
-    String categoryName,
+    String categoryKey,
     List<MilestoneDefinition> milestones,
     double badgeSize,
     double screenWidth,
   ) {
     if (milestones.isEmpty) return const SizedBox.shrink();
 
-    final crossAxisCount = categoryName == 'Framsteg'
-        ? (screenWidth < 400 ? 4 : screenWidth < 600 ? 6 : 8)
-        : (screenWidth < 400 ? 3 : screenWidth < 600 ? 4 : 6);
+    final displayName = _categoryDisplayNames[categoryKey] ?? categoryKey;
+    final crossAxisCount =
+        categoryKey == _categoryCountBased
+            ? (screenWidth < 400
+                ? 4
+                : screenWidth < 600
+                ? 6
+                : 8)
+            : (screenWidth < 400
+                ? 3
+                : screenWidth < 600
+                ? 4
+                : 6);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
@@ -221,16 +231,16 @@ class ComprehensiveMilestoneDisplay extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: getCategoryColor(categoryName),
+              color: getCategoryColor(categoryKey),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              categoryName,
+              displayName,
               style: TextStyle(
                 fontFamily: 'PixelFont',
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: getCategoryTextColor(categoryName),
+                color: getCategoryTextColor(categoryKey),
               ),
             ),
           ),
@@ -256,11 +266,11 @@ class ComprehensiveMilestoneDisplay extends StatelessWidget {
 
   Widget _buildMilestoneBadge(MilestoneDefinition milestone, double size) {
     final color = _parseColor(milestone.color);
-    
+
     // Handle different icon formats
     String displayText;
     double fontSize;
-    
+
     if (milestone.isCountBased) {
       // For count-based milestones, just show the number
       displayText = milestone.requirement;
@@ -277,7 +287,7 @@ class ComprehensiveMilestoneDisplay extends StatelessWidget {
         fontSize = size * 0.4; // Larger for short icons
       }
     }
-    
+
     return GestureDetector(
       onTap: () {
         // Could show milestone details here

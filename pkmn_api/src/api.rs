@@ -1061,6 +1061,13 @@ pub async fn get_total_pokemon_by_type() -> HttpResponse {
 
 // admin endpoints
 
+#[derive(Debug, Serialize)]
+pub struct AmIAdminResponse {
+    pub is_admin: bool,
+    pub user_id: String,
+    pub result_code: CallResultCode,
+}
+
 pub async fn am_i_admin(req: HttpRequest) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
@@ -1068,13 +1075,27 @@ pub async fn am_i_admin(req: HttpRequest) -> HttpResponse {
     let user_id = misc::get_user_id_from_token(token).unwrap();
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     if !validate_token(&user_id, token, &conn) {
-        return HttpResponse::Unauthorized().finish();
+        let response = AmIAdminResponse {
+            is_admin: false,
+            user_id: user_id.clone(),
+            result_code: CallResultCode::InvalidToken,
+        };
+        return HttpResponse::Unauthorized().json(response);
     }
     let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
-    if !is_admin {
-        return HttpResponse::Forbidden().finish();
-    }
-    HttpResponse::Ok().finish()
+    let response = AmIAdminResponse {
+        is_admin,
+        user_id: user_id.clone(),
+        result_code: CallResultCode::Ok,
+    };
+    HttpResponse::Ok().json(response)
+}
+
+#[derive(Debug, Serialize)]
+pub struct IsUserAdminResponse {
+    pub is_admin: bool,
+    pub user_id: String,
+    pub result_code: CallResultCode,
 }
 
 pub async fn is_user_admin(req: HttpRequest, path: web::Path<String>) -> HttpResponse {
@@ -1085,14 +1106,29 @@ pub async fn is_user_admin(req: HttpRequest, path: web::Path<String>) -> HttpRes
     let user_id = misc::get_user_id_from_token(token).unwrap();
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     if !validate_token(&user_id, token, &conn) {
-        return HttpResponse::Unauthorized().finish();
+        let response = IsUserAdminResponse {
+            is_admin: false,
+            user_id: target_user_id.clone(),
+            result_code: CallResultCode::InvalidToken,
+        };
+        return HttpResponse::Unauthorized().json(response);
     }
-    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
-    if !is_admin {
-        return HttpResponse::Forbidden().finish();
+    let requesting_user_is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !requesting_user_is_admin {
+        let response = IsUserAdminResponse {
+            is_admin: false,
+            user_id: target_user_id.clone(),
+            result_code: CallResultCode::UserNotAdmin,
+        };
+        return HttpResponse::Forbidden().json(response);
     }
-    let is_admin = databaseconnection::user_is_admin(&target_user_id, &conn).unwrap();
-    HttpResponse::Ok().body(is_admin.to_string())
+    let target_is_admin = databaseconnection::user_is_admin(&target_user_id, &conn).unwrap();
+    let response = IsUserAdminResponse {
+        is_admin: target_is_admin,
+        user_id: target_user_id.clone(),
+        result_code: CallResultCode::Ok,
+    };
+    HttpResponse::Ok().json(response)
 }
 
 // make user admin

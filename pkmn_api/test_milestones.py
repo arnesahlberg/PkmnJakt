@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Test script to verify milestone functionality works after refactoring."""
+"""Test script to verify comprehensive milestone functionality."""
 
 import requests
 import json
 import sys
 from colorama import Fore, Style, init
+import time
 
 init()
 
@@ -34,8 +35,8 @@ def make_request(method, endpoint, data=None, token=None):
         return None
 
 def test_milestones():
-    """Test milestone functionality."""
-    print(f"{Fore.CYAN}=== Testing Milestone Functionality ==={Style.RESET_ALL}\n")
+    """Test comprehensive milestone functionality."""
+    print(f"{Fore.CYAN}=== Testing Comprehensive Milestone Functionality ==={Style.RESET_ALL}\n")
     
     # 1. Login as admin user first (needed for cleanup)
     print(f"{Fore.YELLOW}1. Logging in as admin user...{Style.RESET_ALL}")
@@ -84,6 +85,16 @@ def test_milestones():
         else:
             print(f"{Fore.RED}✗ Unexpected milestones found{Style.RESET_ALL}")
     
+    # Also check comprehensive milestone definitions
+    response = make_request("GET", f"user_milestone_definitions/{test_user['id']}")
+    if response and response.status_code == 200:
+        milestone_defs = response.json()
+        print(f"Initial milestone definitions count: {len(milestone_defs)}")
+        if len(milestone_defs) == 0:
+            print(f"{Fore.GREEN}✓ No milestone definitions initially (expected){Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}✗ Found {len(milestone_defs)} milestone definitions initially{Style.RESET_ALL}")
+    
     # 4. Register pokemon to test milestones
     # These are some valid catch codes from the test data
     catch_codes = [
@@ -101,6 +112,7 @@ def test_milestones():
     
     print(f"\n{Fore.YELLOW}4. Registering 10 pokemon to trigger first milestone...{Style.RESET_ALL}")
     milestone_triggered = False
+    milestones_achieved = []
     
     for i, catch_code in enumerate(catch_codes, 1):
         response = make_request("POST", "found_pokemon", {
@@ -110,14 +122,23 @@ def test_milestones():
         if response and response.status_code == 200:
             data = response.json()
             print(f"  Pokemon {i}: {data.get('message', 'Registered')}")
+            
+            # Check both old and new milestone fields
             if data.get('milestone_reached'):
-                print(f"{Fore.GREEN}  ✓ MILESTONE REACHED: {data['milestone_reached']} pokemon!{Style.RESET_ALL}")
+                print(f"{Fore.GREEN}  ✓ MILESTONE REACHED (legacy): {data['milestone_reached']} pokemon!{Style.RESET_ALL}")
                 milestone_triggered = True
+            
+            if data.get('milestones_achieved'):
+                for milestone in data['milestones_achieved']:
+                    print(f"{Fore.GREEN}  ✓ MILESTONE ACHIEVED: {milestone.get('name', 'Unknown')} - {milestone.get('description', '')}!{Style.RESET_ALL}")
+                    milestones_achieved.extend(data['milestones_achieved'])
+                    milestone_triggered = True
         else:
             print(f"{Fore.RED}  ✗ Failed to register pokemon {i}{Style.RESET_ALL}")
     
     if milestone_triggered:
         print(f"\n{Fore.GREEN}✓ Milestone system is working correctly!{Style.RESET_ALL}")
+        print(f"Total milestones achieved so far: {len(milestones_achieved)}")
     else:
         print(f"\n{Fore.RED}✗ No milestone was triggered (expected at 10 pokemon){Style.RESET_ALL}")
     
@@ -126,14 +147,87 @@ def test_milestones():
     response = make_request("GET", f"user_milestones/{test_user['id']}")
     if response and response.status_code == 200:
         milestones = response.json()
-        print(f"Current milestones: {milestones}")
+        print(f"Current milestones (legacy): {milestones}")
         if 10 in milestones:
             print(f"{Fore.GREEN}✓ 10-pokemon milestone correctly recorded{Style.RESET_ALL}")
         else:
             print(f"{Fore.RED}✗ 10-pokemon milestone not found{Style.RESET_ALL}")
     
-    # 6. Clean up - delete test user
-    print(f"\n{Fore.YELLOW}6. Cleaning up test user...{Style.RESET_ALL}")
+    # Check comprehensive milestone definitions
+    response = make_request("GET", f"user_milestone_definitions/{test_user['id']}")
+    if response and response.status_code == 200:
+        milestone_defs = response.json()
+        print(f"\nComprehensive milestones achieved: {len(milestone_defs)}")
+        
+        # Categorize milestones by type
+        count_based = []
+        type_based = []
+        specific_pokemon = []
+        
+        for m in milestone_defs:
+            milestone_type = m.get('milestone_type', '')
+            name = m.get('name', 'Unknown')
+            
+            if milestone_type == 'CountBased':
+                count_based.append(name)
+            elif milestone_type == 'TypeBased':
+                type_based.append(name)
+            elif milestone_type == 'SpecificPokemon':
+                specific_pokemon.append(name)
+        
+        if count_based:
+            print(f"  Count-based milestones: {', '.join(count_based)}")
+        if type_based:
+            print(f"  Type-based milestones: {', '.join(type_based)}")
+        if specific_pokemon:
+            print(f"  Specific Pokemon milestones: {', '.join(specific_pokemon)}")
+    
+    # 6. Test multiple milestones at once (e.g., Mew as 151st Pokemon)
+    print(f"\n{Fore.YELLOW}6. Testing multiple milestones trigger (catching more Pokemon)...{Style.RESET_ALL}")
+    
+    # Additional catch codes to test type-based and special milestones
+    more_catch_codes = [
+        "025e2e1e-e05e-492f-b9a4-02ba9ce58c6f",  # 11 - might be a starter or specific type
+        "3b3e87ba-fb48-4b5e-9b7f-c7c3cd956797",  # 12
+        # Add more as needed to test different milestone types
+    ]
+    
+    for i, catch_code in enumerate(more_catch_codes, 11):
+        response = make_request("POST", "found_pokemon", {
+            "catch_code": catch_code
+        }, token)
+        
+        if response and response.status_code == 200:
+            data = response.json()
+            print(f"  Pokemon {i}: {data.get('message', 'Registered')}")
+            
+            if data.get('milestones_achieved'):
+                print(f"  Multiple milestones achieved in one catch:")
+                for milestone in data['milestones_achieved']:
+                    print(f"    - {milestone.get('milestone_type', '')}: {milestone.get('name', '')} - {milestone.get('description', '')}")
+        else:
+            print(f"  ✗ Failed to register pokemon {i}")
+    
+    # 7. Final milestone check
+    print(f"\n{Fore.YELLOW}7. Final comprehensive milestone check...{Style.RESET_ALL}")
+    response = make_request("GET", f"user_milestone_definitions/{test_user['id']}")
+    if response and response.status_code == 200:
+        milestone_defs = response.json()
+        print(f"Total milestones achieved: {len(milestone_defs)}")
+        
+        # Group by type and show summary
+        by_type = {}
+        for m in milestone_defs:
+            m_type = m.get('milestone_type', 'Unknown')
+            if m_type not in by_type:
+                by_type[m_type] = 0
+            by_type[m_type] += 1
+        
+        for m_type, count in by_type.items():
+            print(f"  {m_type}: {count} milestones")
+    
+    # 8. Clean up - delete test user
+    print(f"\n{Fore.YELLOW}8. Cleaning up test user...{Style.RESET_ALL}")
     response = make_request("POST", "admin_delete_user", {
         "id": test_user["id"]
     }, admin_token)
@@ -144,12 +238,28 @@ def test_milestones():
     
     print(f"\n{Fore.CYAN}=== Milestone Testing Complete ==={Style.RESET_ALL}")
 
+def test_multiple_milestones_mew():
+    """Test specific scenario: catching Mew as 151st Pokemon."""
+    print(f"\n{Fore.CYAN}=== Testing Multiple Milestones (Mew as 151st) ==={Style.RESET_ALL}\n")
+    
+    # This test would require setting up a user with exactly 150 Pokemon
+    # and then catching Mew to trigger both milestones
+    print(f"{Fore.YELLOW}Note: This test requires specific setup with 150 Pokemon already caught{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Skipping for now - would need to be run separately with proper data setup{Style.RESET_ALL}")
+    
+    # In a real test scenario, you would:
+    # 1. Create a user
+    # 2. Register exactly 150 different Pokemon (not Mew)
+    # 3. Then register Mew as the 151st
+    # 4. Verify that both "151 Pokemon" and "Caught Mew" milestones are triggered
+    
 if __name__ == "__main__":
     # Note: Make sure the API server is running before executing this test
     print(f"{Fore.YELLOW}Note: This test requires the API server to be running at {BASE_URL}{Style.RESET_ALL}\n")
     
     try:
         test_milestones()
+        test_multiple_milestones_mew()
     except KeyboardInterrupt:
         print(f"\n{Fore.YELLOW}Test interrupted by user{Style.RESET_ALL}")
     except Exception as e:
