@@ -65,7 +65,7 @@ INSERT INTO PokemonTypes (type_name) VALUES
     ('Gift'),       -- Poison
     ('Mark'),       -- Ground
     ('Flyg'),       -- Flying
-    ('Psyko'),      -- Psychic
+    ('Psykisk'),      -- Psychic
     ('Insekt'),     -- Bug
     ('Sten'),       -- Rock
     ('Spöke'),      -- Ghost

@@ -70,9 +70,9 @@ pokemon_types = {
     60: ["Vatten"],              # Poliwag
     61: ["Vatten"],              # Poliwhirl
     62: ["Vatten", "Kamp"],      # Poliwrath
-    63: ["Psyko"],               # Abra
-    64: ["Psyko"],               # Kadabra
-    65: ["Psyko"],               # Alakazam
+    63: ["Psykisk"],               # Abra
+    64: ["Psykisk"],               # Kadabra
+    65: ["Psykisk"],               # Alakazam
     66: ["Kamp"],                # Machop
     67: ["Kamp"],                # Machoke
     68: ["Kamp"],                # Machamp
@@ -86,8 +86,8 @@ pokemon_types = {
     76: ["Sten", "Mark"],        # Golem
     77: ["Eld"],                 # Ponyta
     78: ["Eld"],                 # Rapidash
-    79: ["Vatten", "Psyko"],     # Slowpoke
-    80: ["Vatten", "Psyko"],     # Slowbro
+    79: ["Vatten", "Psykisk"],     # Slowpoke
+    80: ["Vatten", "Psykisk"],     # Slowbro
     81: ["Elektro"],             # Magnemite
     82: ["Elektro"],             # Magneton
     83: ["Normal", "Flyg"],      # Farfetch'd
@@ -103,14 +103,14 @@ pokemon_types = {
     93: ["Spöke", "Gift"],       # Haunter
     94: ["Spöke", "Gift"],       # Gengar
     95: ["Sten", "Mark"],        # Onix
-    96: ["Psyko"],               # Drowzee
-    97: ["Psyko"],               # Hypno
+    96: ["Psykisk"],               # Drowzee
+    97: ["Psykisk"],               # Hypno
     98: ["Vatten"],              # Krabby
     99: ["Vatten"],              # Kingler
     100: ["Elektro"],            # Voltorb
     101: ["Elektro"],            # Electrode
-    102: ["Gräs", "Psyko"],      # Exeggcute
-    103: ["Gräs", "Psyko"],      # Exeggutor
+    102: ["Gräs", "Psykisk"],      # Exeggcute
+    103: ["Gräs", "Psykisk"],      # Exeggutor
     104: ["Mark"],               # Cubone
     105: ["Mark"],               # Marowak
     106: ["Kamp"],               # Hitmonlee
@@ -128,10 +128,10 @@ pokemon_types = {
     118: ["Vatten"],             # Goldeen
     119: ["Vatten"],             # Seaking
     120: ["Vatten"],             # Staryu
-    121: ["Vatten", "Psyko"],    # Starmie
-    122: ["Psyko"],              # Mr. Mime
+    121: ["Vatten", "Psykisk"],    # Starmie
+    122: ["Psykisk"],              # Mr. Mime
     123: ["Insekt", "Flyg"],     # Scyther
-    124: ["Is", "Psyko"],        # Jynx
+    124: ["Is", "Psykisk"],        # Jynx
     125: ["Elektro"],            # Electabuzz
     126: ["Eld"],                # Magmar
     127: ["Insekt"],             # Pinsir
@@ -157,9 +157,9 @@ pokemon_types = {
     147: ["Drake"],              # Dratini
     148: ["Drake"],              # Dragonair
     149: ["Drake", "Flyg"],      # Dragonite
-    150: ["Psyko"],              # Mewtwo
-    151: ["Psyko"],              # Mew
-    312798312: ["Flyg", "Normal"] # MissingNo (Fixed: Flying instead of Bird)
+    150: ["Psykisk"],              # Mewtwo
+    151: ["Psykisk"],              # Mew
+    312798312: ["Flyg", "Normal"] # MissingNo
 }
 
 def populate_types(db_path):
