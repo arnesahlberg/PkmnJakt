@@ -224,7 +224,14 @@ def run_tests():
     
     # 13. Check if user is admin
     print(f"{Fore.YELLOW}Test 13a: Check admin status for non-admin user 11111 (expecting 401){Style.RESET_ALL}")
-    make_request("GET", "am_i_admin", None, tokens["11111"], expected_status=401)
+    response = make_request("GET", "am_i_admin", None, tokens["11111"], expected_status=401)
+    if response and response.status_code == 401:
+        data = json.loads(response.text)
+        if data.get("is_admin") == False:
+            print(f"{Fore.GREEN}  ✓ Correctly returned is_admin: false for non-admin user{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}  ✗ Expected is_admin: false but got: {data.get('is_admin')}{Style.RESET_ALL}")
+    
     print(f"{Fore.YELLOW}Test 13b: Login as admin user (expecting 200){Style.RESET_ALL}")
     res = make_request("POST", "login", {
         "id": "admin",
@@ -238,8 +245,15 @@ def run_tests():
     else:
         print("Failed to login as admin user.")
         sys.exit(1)
+    
     print(f"{Fore.YELLOW}Test 13c: Check admin status for admin user (expecting 200){Style.RESET_ALL}")
-    make_request("GET", "am_i_admin", None, tokens["admin"], expected_status=200)
+    response = make_request("GET", "am_i_admin", None, tokens["admin"], expected_status=200)
+    if response and response.status_code == 200:
+        data = json.loads(response.text)
+        if data.get("is_admin") == True:
+            print(f"{Fore.GREEN}  ✓ Correctly returned is_admin: true for admin user{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}  ✗ Expected is_admin: true but got: {data.get('is_admin')}{Style.RESET_ALL}")
     
     # 14. Reset password for user as admin/non-admin
     print(f"{Fore.YELLOW}Test 14a: Non-admin attempting to reset password for user 11111 (expecting 403){Style.RESET_ALL}")
@@ -297,32 +311,79 @@ def run_tests():
     print(f"{Fore.YELLOW}\nTest 17: Getting number of users (expecting 200){Style.RESET_ALL}")
     make_request("GET", "num_users", None, tokens["admin"], expected_status=200)
 
+    # Re-login user 11111 since they were logged out in test 12b
+    print(f"{Fore.YELLOW}\nRe-logging in user 11111 for further tests...{Style.RESET_ALL}")
+    response = make_request("POST", "login", {
+        "id": "11111",
+        "password": "123456"  # Password was reset by admin in test 14b
+    }, expected_status=200)
+    if response and response.status_code == 200:
+        data = json.loads(response.text)
+        if "token" in data and "encoded_token" in data["token"]:
+            tokens["11111"] = data["token"]["encoded_token"]
+            print(f"Updated token for user 11111")
 
     # 18. Check if user is admin
-    print(f"{Fore.YELLOW}Test 18a: Check admin status for non-admin user 11111 (expecting 401){Style.RESET_ALL}")
-    make_request("GET", "is_user_admin/22222", None, tokens["11111"], expected_status=401)
+    print(f"{Fore.YELLOW}Test 18a: Non-admin user checking another user's admin status (expecting 403){Style.RESET_ALL}")
+    response = make_request("GET", "is_user_admin/22222", None, tokens["11111"], expected_status=403)
+    if response and response.status_code == 403:
+        data = json.loads(response.text)
+        print(f"{Fore.GREEN}  ✓ Non-admin correctly denied access{Style.RESET_ALL}")
+    
     print(f"{Fore.YELLOW}Test 18b: As admin, check admin status for user 22222 (expecting 200){Style.RESET_ALL}")
-    make_request("GET", "is_user_admin/22222", None, tokens["admin"], expected_status=200)
-    print(f"{Fore.YELLOW}Test 18c: As admin, check admin status for user admin (expecting 401){Style.RESET_ALL}")
-    make_request("GET", "is_user_admin/admin", None, tokens["admin"], expected_status=200)
+    response = make_request("GET", "is_user_admin/22222", None, tokens["admin"], expected_status=200)
+    if response and response.status_code == 200:
+        data = json.loads(response.text)
+        if data.get("is_admin") == False:
+            print(f"{Fore.GREEN}  ✓ Correctly returned is_admin: false for user 22222{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}  ✗ Expected is_admin: false but got: {data.get('is_admin')}{Style.RESET_ALL}")
+    
+    print(f"{Fore.YELLOW}Test 18c: As admin, check admin status for user admin (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "is_user_admin/admin", None, tokens["admin"], expected_status=200)
+    if response and response.status_code == 200:
+        data = json.loads(response.text)
+        if data.get("is_admin") == True:
+            print(f"{Fore.GREEN}  ✓ Correctly returned is_admin: true for admin user{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}  ✗ Expected is_admin: true but got: {data.get('is_admin')}{Style.RESET_ALL}")
 
     # 19. Make user into an admin
     print(f"{Fore.YELLOW}Test 19: Make user 22222 into an admin (expecting 200){Style.RESET_ALL}")
     make_request("POST", "make_user_admin", {"id": "22222"}, tokens["admin"], expected_status=200)
 
     # 20. Check if user is admin
-    print(f"{Fore.YELLOW}Test 20a: Check admin status for user 22222 (expecting 200){Style.RESET_ALL}")
-    make_request("GET", "is_user_admin/22222", None, tokens["admin"], expected_status=200)
-    print(f"{Fore.YELLOW}Test 20b: Check admin status for user 22222 (expecting 200){Style.RESET_ALL}")
-    make_request("GET", "is_user_admin/22222", None, tokens["22222"], expected_status=200)
+    print(f"{Fore.YELLOW}Test 20a: Check admin status for user 22222 after making admin (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "is_user_admin/22222", None, tokens["admin"], expected_status=200)
+    if response and response.status_code == 200:
+        data = json.loads(response.text)
+        if data.get("is_admin") == True:
+            print(f"{Fore.GREEN}  ✓ Correctly returned is_admin: true for user 22222 after promotion{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}  ✗ Expected is_admin: true but got: {data.get('is_admin')}{Style.RESET_ALL}")
+    
+    print(f"{Fore.YELLOW}Test 20b: User 22222 checking own admin status via am_i_admin (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "am_i_admin", None, tokens["22222"], expected_status=200)
+    if response and response.status_code == 200:
+        data = json.loads(response.text)
+        if data.get("is_admin") == True:
+            print(f"{Fore.GREEN}  ✓ User 22222 correctly sees themselves as admin{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}  ✗ Expected is_admin: true but got: {data.get('is_admin')}{Style.RESET_ALL}")
 
     # 21. Remove user from admin
     print(f"{Fore.YELLOW}Test 21: Remove user 22222 from admin (expecting 200){Style.RESET_ALL}")
     make_request("POST", "make_user_not_admin", {"id": "22222"}, tokens["admin"], expected_status=200)
 
     # 22. Check if user is admin
-    print(f"{Fore.YELLOW}Test 22a: Check admin status for user 22222 (expecting 401){Style.RESET_ALL}")
-    make_request("GET", "is_user_admin/22222", None, tokens["admin"], expected_status=200)
+    print(f"{Fore.YELLOW}Test 22a: Check admin status for user 22222 after removal (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "is_user_admin/22222", None, tokens["admin"], expected_status=200)
+    if response and response.status_code == 200:
+        data = json.loads(response.text)
+        if data.get("is_admin") == False:
+            print(f"{Fore.GREEN}  ✓ Correctly returned is_admin: false for user 22222 after demotion{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}  ✗ Expected is_admin: false but got: {data.get('is_admin')}{Style.RESET_ALL}")
 
     # 23. Test Pokemon type statistics endpoints (with Swedish type names)
     print(f"{Fore.YELLOW}\nTest 23a: Get Pokemon count by type for user 11111 (expecting 200 with Swedish types){Style.RESET_ALL}")

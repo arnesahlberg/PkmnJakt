@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pkmn_gui/widgets/common_app_bar.dart';
 import 'package:pkmn_gui/widgets/pokedex_container.dart';
+import 'package:provider/provider.dart';
 import '../api_calls.dart';
 import '../constants.dart';
 import '../widgets/milestone_badge.dart';
 import '../widgets/type_badge.dart';
+import '../main.dart'; // for UserSession
+import '../models/milestone.dart';
 
 class UserStatisticsScreen extends StatefulWidget {
   final String userId;
@@ -23,137 +26,27 @@ class UserStatisticsScreen extends StatefulWidget {
 class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
   late Future<Map<String, dynamic>> _userDataFuture;
   late Future<List<dynamic>> _pokedexFuture;
-  late Future<List<int>> _milestonesFuture;
+  late Future<List<dynamic>> _comprehensiveMilestonesFuture;
   late Future<Map<String, dynamic>> _typeStatsFuture;
+  late Future<Map<String, dynamic>> _currentUserPokedexFuture;
 
   @override
   void initState() {
     super.initState();
     _userDataFuture = ApiService.getUser(widget.userId);
     _pokedexFuture = ApiService.getUserPokedex(widget.userId);
-    _milestonesFuture = ApiService.getUserMilestones(widget.userId);
+    _comprehensiveMilestonesFuture = ApiService.getUserMilestoneDefinitions(widget.userId);
     _typeStatsFuture = ApiService.getUserPokemonByType(widget.userId);
+    
+    // Get current user's pokedex
+    final session = Provider.of<UserSession>(context, listen: false);
+    if (session.token != null) {
+      _currentUserPokedexFuture = ApiService.getMyPokedex(session.token!);
+    } else {
+      _currentUserPokedexFuture = Future.value({'pokedex': []});
+    }
   }
 
-  void _showPokemonDetails(Map<String, dynamic> pokemon) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(UIConstants.borderRadius16),
-            ),
-            child: PokedexContainer(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      pokemon['name'],
-                      style: const TextStyle(
-                        fontFamily: 'PixelFontTitle',
-                        fontSize: 22,
-                        color: AppColors.primaryRed,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      "Nr. ${pokemon['number']}",
-                      style: TextStyle(
-                        fontFamily: 'PixelFont',
-                        fontSize: 16,
-                        color: Colors.grey.shade700,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Container(
-                      width: 180,
-                      height: 180,
-                      padding: const EdgeInsets.all(UIConstants.padding16),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(
-                          UIConstants.borderRadius16,
-                        ),
-                        border: Border.all(
-                          color: AppColors.secondaryRed,
-                          width: UIConstants.borderWidth2,
-                        ),
-                      ),
-                      child: Image.asset(
-                        'assets/images/pkmn/${pokemon['number']}.jpg',
-                        fit: BoxFit.contain,
-                        errorBuilder:
-                            (context, error, stackTrace) =>
-                                const Icon(Icons.image_outlined, size: 80),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    if (pokemon['description'] != null)
-                      Text(
-                        pokemon['description'],
-                        style: TextStyle(
-                          fontFamily: 'PixelFont',
-                          fontSize: 16,
-                          color: Colors.grey.shade800,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    const SizedBox(height: 16),
-                    if (pokemon['height'] != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryRed.withAlpha(
-                            (0.1 * 255).toInt(),
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          "Höjd: ${pokemon['height']} m",
-                          style: const TextStyle(
-                            fontFamily: 'PixelFont',
-                            fontSize: 14,
-                            color: Color(0xFF992109),
-                          ),
-                        ),
-                      ),
-                    const SizedBox(height: 16),
-                    if (pokemon['types'] != null)
-                      TypeBadgeList(
-                        types: List<String>.from(pokemon['types']),
-                        fontSize: 14,
-                      ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryRed,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            UIConstants.borderRadius8,
-                          ),
-                        ),
-                      ),
-                      child: const Text(
-                        "Stäng",
-                        style: TextStyle(
-                          fontFamily: 'PixelFont',
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,8 +58,9 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
           future: Future.wait([
             _userDataFuture,
             _pokedexFuture,
-            _milestonesFuture,
+            _comprehensiveMilestonesFuture,
             _typeStatsFuture,
+            _currentUserPokedexFuture,
           ]),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -213,9 +107,21 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
             }
 
             final caughtPokemon = snapshot.data![1] as List<dynamic>;
-            final milestones = snapshot.data![2] as List<int>;
+            final comprehensiveMilestonesData = snapshot.data![2] as List<dynamic>;
             final typeStats = snapshot.data![3] as Map<String, dynamic>;
+            final currentUserPokedexData = snapshot.data![4] as Map<String, dynamic>;
             final caughtCount = caughtPokemon.length;
+            
+            // Parse comprehensive milestones
+            final comprehensiveMilestones = comprehensiveMilestonesData
+                .map((data) => MilestoneDefinition.fromJson(data as Map<String, dynamic>))
+                .toList();
+            
+            // Create a Set of current user's caught Pokemon numbers for fast lookup
+            final currentUserPokedex = currentUserPokedexData['pokedex'] as List<dynamic>? ?? [];
+            final currentUserCaughtNumbers = currentUserPokedex
+                .map((pokemon) => pokemon['number'] as int)
+                .toSet();
 
             // Sort Pokemon by number
             caughtPokemon.sort(
@@ -289,7 +195,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                     ),
                   ),
                 ),
-                if (milestones.isNotEmpty)
+                if (comprehensiveMilestones.isNotEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -310,8 +216,8 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                               spacing: 8,
                               runSpacing: 8,
                               children:
-                                  milestones.map((milestone) {
-                                    return MilestoneBadge(
+                                  comprehensiveMilestones.map((milestone) {
+                                    return ComprehensiveMilestoneBadge(
                                       milestone: milestone,
                                       size: 40,
                                     );
@@ -428,90 +334,108 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                       itemCount: caughtPokemon.length,
                       itemBuilder: (context, index) {
                         final pokemon = caughtPokemon[index];
-                        return GestureDetector(
-                          onTap: () => _showPokemonDetails(pokemon),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(
-                                UIConstants.borderRadius12,
-                              ),
-                              border: Border.all(
-                                color: AppColors.secondaryRed,
-                                width: UIConstants.borderWidth2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.shadowColor.withOpacity(
-                                    0.15,
-                                  ),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: const Offset(1, 2),
-                                ),
-                              ],
+                        final pokemonNumber = pokemon['number'] as int;
+                        final isCaughtByViewer = currentUserCaughtNumbers.contains(pokemonNumber);
+                        
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(
+                              UIConstants.borderRadius12,
                             ),
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    margin: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: AppColors.secondaryRed,
-                                        width: 1,
-                                      ),
+                            border: Border.all(
+                              color: AppColors.secondaryRed,
+                              width: UIConstants.borderWidth2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.shadowColor.withOpacity(
+                                  0.15,
+                                ),
+                                spreadRadius: 1,
+                                blurRadius: 3,
+                                offset: const Offset(1, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  margin: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppColors.secondaryRed,
+                                      width: 1,
                                     ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(7),
-                                      child: Container(
-                                        color: Colors.white,
-                                        child: Image.asset(
-                                          'assets/images/pkmn/${pokemon['number']}.jpg',
-                                          fit: BoxFit.contain,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  Container(
-                                                    color: Colors.white,
-                                                    child: const Icon(
-                                                      Icons.image_outlined,
-                                                      size: 48,
-                                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(7),
+                                    child: Container(
+                                      color: Colors.white,
+                                      child: isCaughtByViewer
+                                          ? Image.asset(
+                                              'assets/images/pkmn/${pokemon['number']}.jpg',
+                                              fit: BoxFit.contain,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) =>
+                                                      Container(
+                                                        color: Colors.white,
+                                                        child: const Icon(
+                                                          Icons.image_outlined,
+                                                          size: 48,
+                                                        ),
+                                                      ),
+                                            )
+                                          : Container(
+                                              color: Colors.grey.shade100,
+                                              child: Center(
+                                                child: Text(
+                                                  '?',
+                                                  style: TextStyle(
+                                                    fontSize: 48,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.grey.shade400,
                                                   ),
-                                        ),
-                                      ),
+                                                ),
+                                              ),
+                                            ),
                                     ),
                                   ),
                                 ),
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 6,
-                                    horizontal: 4,
+                              ),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                  horizontal: 4,
+                                ),
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primaryRed,
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(10),
+                                    bottomRight: Radius.circular(10),
                                   ),
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.primaryRed,
-                                    borderRadius: BorderRadius.only(
-                                      bottomLeft: Radius.circular(10),
-                                      bottomRight: Radius.circular(10),
-                                    ),
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        pokemon['name'],
-                                        style: const TextStyle(
-                                          fontFamily: 'PixelFont',
-                                          fontSize: 12,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      isCaughtByViewer 
+                                          ? pokemon['name'] 
+                                          : "#${pokemon['number']}",
+                                      style: const TextStyle(
+                                        fontFamily: 'PixelFont',
+                                        fontSize: 12,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
                                       ),
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    if (isCaughtByViewer)
                                       Text(
                                         "#${pokemon['number']}",
                                         style: const TextStyle(
@@ -521,11 +445,10 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
-                                    ],
-                                  ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         );
                       },

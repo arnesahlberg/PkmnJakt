@@ -7,6 +7,7 @@ import '../widgets/pokedex_container.dart';
 import '../widgets/pokedex_button.dart';
 import '../constants.dart';
 import '../widgets/type_badge.dart';
+import '../models/milestone.dart';
 
 class FoundPokemonScannerScreen extends StatefulWidget {
   const FoundPokemonScannerScreen({super.key});
@@ -34,6 +35,111 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
   void dispose() {
     _rotationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _showMilestoneDialog(BuildContext context, MilestoneDefinition milestone) async {
+    final color = _parseColor(milestone.color);
+    
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: PokedexContainer(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.stars,
+                    size: UIConstants.iconSizeHuge * 1.5,
+                    color: Colors.amber,
+                  ),
+                  const SizedBox(height: UIConstants.spacing16),
+                  const Text(
+                    "MILSTOLPE!",
+                    style: TextStyle(
+                      fontFamily: 'PixelFontTitle',
+                      fontSize: 28,
+                      color: AppColors.primaryRed,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    milestone.displayText,
+                    style: const TextStyle(
+                      fontFamily: 'PixelFont',
+                      fontSize: 20,
+                      color: AppColors.secondaryRed,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  // Milestone badge icon
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: color,
+                        width: 4,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withOpacity(0.5),
+                          blurRadius: 20,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        milestone.icon,
+                        style: TextStyle(
+                          fontFamily: 'PixelFontTitle',
+                          fontSize: milestone.icon.length > 2 ? 24 : 40,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  PokedexButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text("Fortsätt"),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _parseColor(String colorString) {
+    try {
+      // Remove the # if present
+      String hexColor = colorString.replaceAll('#', '');
+      // Add alpha if not present
+      if (hexColor.length == 6) {
+        hexColor = 'FF' + hexColor;
+      }
+      return Color(int.parse(hexColor, radix: 16));
+    } catch (e) {
+      // Fallback to amber if parsing fails
+      return Colors.amber;
+    }
   }
 
   void _onGetResult(String result) async {
@@ -199,113 +305,41 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
       final pokemonDescription = pokemonDetails['description'];
       final pokemonTypes = pokemonDetails['types'];
       
-      // Check if a milestone was reached
-      final milestoneReached = foundResponse['milestone_reached'];
+      // Parse achieved milestones
+      final milestonesData = foundResponse['milestones_achieved'] as List<dynamic>? ?? [];
+      final achievedMilestones = milestonesData
+          .map((data) => MilestoneDefinition.fromJson(data as Map<String, dynamic>))
+          .toList();
+      
+      // Debug: Print how many milestones were achieved
+      if (achievedMilestones.isNotEmpty) {
+        debugPrint("Achieved ${achievedMilestones.length} milestone(s):");
+        for (final milestone in achievedMilestones) {
+          debugPrint("  - ${milestone.displayText} (order: ${milestone.order})");
+        }
+      }
+      
+      // Keep backward compatibility (not used but maintained for API compatibility)
+      // final milestoneReached = foundResponse['milestone_reached'];
 
       if (!mounted) return;
 
       // Set processing to false *before* showing the dialog
       setState(() => _isProcessing = false);
       
-      // If milestone was reached, show milestone dialog first
-      if (milestoneReached != null) {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (dialogContext) => Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: PokedexContainer(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.stars,
-                        size: UIConstants.iconSizeHuge * 1.5,
-                        color: Colors.amber,
-                      ),
-                      const SizedBox(height: UIConstants.spacing16),
-                      const Text(
-                        "MILSTOLPE!",
-                        style: TextStyle(
-                          fontFamily: 'PixelFontTitle',
-                          fontSize: 28,
-                          color: AppColors.primaryRed,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        "Du har fångat $milestoneReached Pokémon!",
-                        style: const TextStyle(
-                          fontFamily: 'PixelFont',
-                          fontSize: 20,
-                          color: AppColors.secondaryRed,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        milestoneReached == 151 
-                          ? "Grattis! Du har fångat alla 151 original Pokémon!"
-                          : "Grattis! Här får du en $milestoneReached-medalj!",
-                        style: TextStyle(
-                          fontFamily: 'PixelFont',
-                          fontSize: 16,
-                          color: Colors.grey.shade800,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 32),
-                      // Milestone badge icon
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.amber.shade100,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.amber,
-                            width: 4,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.amber.withOpacity(0.5),
-                              blurRadius: 20,
-                              spreadRadius: 5,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            "$milestoneReached",
-                            style: const TextStyle(
-                              fontFamily: 'PixelFontTitle',
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryRed,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      PokedexButton(
-                        onPressed: () {
-                          Navigator.pop(dialogContext);
-                        },
-                        child: const Text("Fortsätt"),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-        
+      // Show milestone dialogs if any were achieved
+      // Sort milestones by order to ensure consistent display
+      final sortedMilestones = List<MilestoneDefinition>.from(achievedMilestones)
+        ..sort((a, b) => a.order.compareTo(b.order));
+      
+      for (int i = 0; i < sortedMilestones.length; i++) {
+        final milestone = sortedMilestones[i];
+        // Add a small delay between milestones (except for the first one)
+        if (i > 0) {
+          await Future.delayed(const Duration(milliseconds: 300));
+        }
+        if (!mounted) return;
+        await _showMilestoneDialog(context, milestone);
         if (!mounted) return;
       }
 

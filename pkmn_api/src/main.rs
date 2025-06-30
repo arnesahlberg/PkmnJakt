@@ -9,7 +9,8 @@ use std::io::Write;
 mod misc;
 mod model;
 mod databaseconnection;
-mod api; 
+mod api;
+mod milestones; 
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
