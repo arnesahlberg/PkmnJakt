@@ -105,11 +105,12 @@ class _PokedexScreenState extends State<PokedexScreen> {
               borderRadius: BorderRadius.circular(UIConstants.borderRadius16),
             ),
             child: PokedexContainer(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                     Text(
                       pokemon['name'],
                       style: const TextStyle(
@@ -213,6 +214,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
               ),
             ),
           ),
+        ),
     );
   }
 
