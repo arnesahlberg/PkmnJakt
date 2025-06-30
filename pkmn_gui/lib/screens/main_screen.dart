@@ -11,7 +11,6 @@ import '../api_calls.dart';
 import '../utils/auth_utils.dart';
 import 'found_pokemon_scanner_screen.dart';
 import 'user_statistics_screen.dart';
-import 'milestone_screen.dart';
 import '../widgets/milestone_badge.dart';
 import '../models/milestone.dart';
 import '../screens/comprehensive_milestone_screen.dart';
@@ -30,7 +29,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   bool _isExtraLoading = true;
   int _ranking = 0;
   int _pokemonCount = 0;
-  List<int> _userMilestones = [];
   List<MilestoneDefinition> _comprehensiveMilestones = [];
 
   Future<void> _loadData() async {
@@ -44,13 +42,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       final pokemonList = pokedexResult['pokedex'] as List<dynamic>? ?? [];
       final count = pokemonList.where((p) => p['number'] <= 151).length;
 
-      // Fetch user milestones (both old and new format)
-      List<int> milestones = [];
+      // Fetch comprehensive milestones
       List<MilestoneDefinition> comprehensiveMilestones = [];
       try {
-        milestones = await ApiService.getUserMilestones(session.userId!);
-        
-        // Fetch comprehensive milestones
         final milestoneData = await ApiService.getUserMilestoneDefinitions(session.userId!);
         comprehensiveMilestones = milestoneData
             .map((data) => MilestoneDefinition.fromJson(data as Map<String, dynamic>))
@@ -63,7 +57,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         _pokemonList = result['pokemon_found'] as List<dynamic>;
         _ranking = ranking;
         _pokemonCount = count;
-        _userMilestones = milestones;
         _comprehensiveMilestones = comprehensiveMilestones;
         _isLoading = false;
       });
@@ -111,7 +104,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       _isLoading = true;
       _isExtraLoading = true;
       _pokemonCount = 0;
-      _userMilestones = [];
       _comprehensiveMilestones = [];
     });
     await _loadData();
@@ -138,30 +130,16 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   void _navigateToMilestones() {
     final session = Provider.of<UserSession>(context, listen: false);
     
-    // Use comprehensive milestone screen if we have comprehensive data, otherwise fall back to old screen
-    if (_comprehensiveMilestones.isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ComprehensiveMilestoneScreen(
-            milestones: _comprehensiveMilestones,
-            currentPokemonCount: _pokemonCount,
-            userName: session.userName ?? 'Unknown',
-          ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ComprehensiveMilestoneScreen(
+          milestones: _comprehensiveMilestones,
+          currentPokemonCount: _pokemonCount,
+          userName: session.userName ?? 'Unknown',
         ),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MilestoneScreen(
-            milestones: _userMilestones,
-            currentPokemonCount: _pokemonCount,
-            userName: session.userName ?? 'Unknown',
-          ),
-        ),
-      );
-    }
+      ),
+    );
   }
 
   void _showInfoDialog() {
@@ -438,10 +416,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                   ),
                                 ),
                               ],
-                              if (_userMilestones.isNotEmpty || _comprehensiveMilestones.isNotEmpty) ...[
+                              if (_comprehensiveMilestones.isNotEmpty) ...[
                                 const SizedBox(height: UIConstants.spacing8),
                                 MilestoneSummary(
-                                  milestones: _userMilestones,
+                                  milestones: const [],
                                   comprehensiveMilestones: _comprehensiveMilestones,
                                   currentPokemonCount: _pokemonCount,
                                   onViewAll: _navigateToMilestones,
