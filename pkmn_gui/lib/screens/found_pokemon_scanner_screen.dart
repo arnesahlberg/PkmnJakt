@@ -6,6 +6,7 @@ import '../widgets/data_matrix_scanner.dart';
 import '../widgets/pokedex_container.dart';
 import '../widgets/pokedex_button.dart';
 import '../constants.dart';
+import '../widgets/type_badge.dart';
 
 class FoundPokemonScannerScreen extends StatefulWidget {
   const FoundPokemonScannerScreen({super.key});
@@ -196,6 +197,7 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
       final pokemonDetails = await ApiService.getPokemon(pokemonId);
       final pokemonName = pokemonDetails['name'];
       final pokemonDescription = pokemonDetails['description'];
+      final pokemonTypes = pokemonDetails['types'];
       
       // Check if a milestone was reached
       final milestoneReached = foundResponse['milestone_reached'];
@@ -379,7 +381,13 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
                                   ),
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
+                          if (pokemonTypes != null)
+                            TypeBadgeList(
+                              types: List<String>.from(pokemonTypes),
+                              fontSize: 14,
+                            ),
+                          const SizedBox(height: 16),
                           if (pokemonDescription != null &&
                               pokemonDescription.isNotEmpty)
                             Text(

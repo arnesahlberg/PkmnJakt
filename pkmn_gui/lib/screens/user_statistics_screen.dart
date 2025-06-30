@@ -4,6 +4,7 @@ import 'package:pkmn_gui/widgets/pokedex_container.dart';
 import '../api_calls.dart';
 import '../constants.dart';
 import '../widgets/milestone_badge.dart';
+import '../widgets/type_badge.dart';
 
 class UserStatisticsScreen extends StatefulWidget {
   final String userId;
@@ -23,6 +24,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
   late Future<Map<String, dynamic>> _userDataFuture;
   late Future<List<dynamic>> _pokedexFuture;
   late Future<List<int>> _milestonesFuture;
+  late Future<Map<String, dynamic>> _typeStatsFuture;
 
   @override
   void initState() {
@@ -30,6 +32,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
     _userDataFuture = ApiService.getUser(widget.userId);
     _pokedexFuture = ApiService.getUserPokedex(widget.userId);
     _milestonesFuture = ApiService.getUserMilestones(widget.userId);
+    _typeStatsFuture = ApiService.getUserPokemonByType(widget.userId);
   }
 
   void _showPokemonDetails(Map<String, dynamic> pokemon) {
@@ -119,6 +122,12 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                           ),
                         ),
                       ),
+                    const SizedBox(height: 16),
+                    if (pokemon['types'] != null)
+                      TypeBadgeList(
+                        types: List<String>.from(pokemon['types']),
+                        fontSize: 14,
+                      ),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
@@ -152,11 +161,12 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
       appBar: CommonAppBar(title: widget.userName),
       body: Container(
         decoration: AppBoxDecorations.gradientBackground,
-        child: FutureBuilder<List<dynamic>>(
+        child: FutureBuilder<List<Object>>(
           future: Future.wait([
             _userDataFuture,
             _pokedexFuture,
             _milestonesFuture,
+            _typeStatsFuture,
           ]),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -204,6 +214,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
 
             final caughtPokemon = snapshot.data![1] as List<dynamic>;
             final milestones = snapshot.data![2] as List<int>;
+            final typeStats = snapshot.data![3] as Map<String, dynamic>;
             final caughtCount = caughtPokemon.length;
 
             // Sort Pokemon by number
@@ -311,6 +322,55 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                       ),
                     ),
                   ),
+                if (typeStats.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
+                      child: PokedexContainer(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Pokémon per Typ",
+                              style: TextStyle(
+                                fontFamily: 'PixelFontTitle',
+                                fontSize: 18,
+                                color: AppColors.primaryRed,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            ...typeStats.entries
+                                .where((entry) => entry.value > 0)
+                                .map(
+                                  (entry) => Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        TypeBadge(typeName: entry.key),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          '${entry.value} st',
+                                          style: const TextStyle(
+                                            fontFamily: 'PixelFont',
+                                            fontSize: 14,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
                 SliverToBoxAdapter(
                   child: Padding(
@@ -397,7 +457,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                                   child: Container(
                                     margin: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
+                                      color: Colors.white,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
                                         color: AppColors.secondaryRed,
@@ -406,15 +466,21 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(7),
-                                      child: Image.asset(
-                                        'assets/images/pkmn/${pokemon['number']}.jpg',
-                                        fit: BoxFit.contain,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                const Icon(
-                                                  Icons.image_outlined,
-                                                  size: 48,
-                                                ),
+                                      child: Container(
+                                        color: Colors.white,
+                                        child: Image.asset(
+                                          'assets/images/pkmn/${pokemon['number']}.jpg',
+                                          fit: BoxFit.contain,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Container(
+                                                    color: Colors.white,
+                                                    child: const Icon(
+                                                      Icons.image_outlined,
+                                                      size: 48,
+                                                    ),
+                                                  ),
+                                        ),
                                       ),
                                     ),
                                   ),

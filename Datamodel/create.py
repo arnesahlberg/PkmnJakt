@@ -5,6 +5,7 @@ import os
 import random   # added for salt generation
 import string   # added for salt generation
 import datetime
+from populate_pokemon_types import populate_types
 
 db_path = '../Database/base.db'
 db_dir = os.path.dirname(db_path)
@@ -185,3 +186,8 @@ if "--test-users" in os.sys.argv:
 
 conn.commit()
 conn.close()
+
+# Populate Pokemon types
+print("Populating Pokemon types...")
+populate_types(db_path)
+print("Database creation completed successfully!")

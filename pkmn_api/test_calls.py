@@ -324,6 +324,23 @@ def run_tests():
     print(f"{Fore.YELLOW}Test 22a: Check admin status for user 22222 (expecting 401){Style.RESET_ALL}")
     make_request("GET", "is_user_admin/22222", None, tokens["admin"], expected_status=200)
 
+    # 23. Test Pokemon type statistics endpoints (with Swedish type names)
+    print(f"{Fore.YELLOW}\nTest 23a: Get Pokemon count by type for user 11111 (expecting 200 with Swedish types){Style.RESET_ALL}")
+    response = make_request("GET", "user_pokemon_by_type/11111", None, tokens["admin"], expected_status=200)
+    if response and "Gräs" in str(response) or "Eld" in str(response):
+        print(f"{Fore.GREEN}  ✓ Swedish type names detected{Style.RESET_ALL}")
+    
+    print(f"{Fore.YELLOW}Test 23b: Get Pokemon count by type for non-existent user (expecting 404){Style.RESET_ALL}")
+    make_request("GET", "user_pokemon_by_type/nonexistent", None, tokens["admin"], expected_status=404)
+    
+    print(f"{Fore.YELLOW}Test 23c: Get total Pokemon catches by type across all users (expecting 200 with Swedish types){Style.RESET_ALL}")
+    response = make_request("GET", "total_pokemon_by_type", None, tokens["admin"], expected_status=200)
+    if response and ("Vatten" in str(response) or "Elektro" in str(response)):
+        print(f"{Fore.GREEN}  ✓ Swedish type names detected in global stats{Style.RESET_ALL}")
+    
+    print(f"{Fore.YELLOW}Test 23d: Get total Pokemon catches by type without authentication (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "total_pokemon_by_type", None, expected_status=200)
+
 
     # Final: DELETE ALL USERS
     print(f"{Fore.YELLOW}\nTest 18: Deleting all users by looping{Style.RESET_ALL}")

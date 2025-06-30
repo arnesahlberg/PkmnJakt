@@ -1,153 +1,153 @@
 Nr,Name,Info,Height (m)
-1,Bulbasaur,"Gräs/Gift, en av Kantos start-Pokémon med en blomma på ryggen.",0.7
-2,Ivysaur,"Gräs/Gift, utvecklas från Bulbasaur.",1.0
-3,Venusaur,"Gräs/Gift, utvecklas från Ivysaur – ikonisk för sin blomma.",2.0
-4,Charmander,"Eld, en av Kantos start-Pokémon med en eld på svansen.",0.6
-5,Charmeleon,"Eld, utvecklas från Charmander och är stridslysten.",1.1
-6,Charizard,"Eld/Flyg, utvecklas från Charmeleon och är känd för sin stora eld.",1.7
-7,Squirtle,"Vatten, en av Kantos start-Pokémon med ett hårt skal.",0.5
-8,Wartortle,"Vatten, utvecklas från Squirtle med ett robustare skal.",1.0
-9,Blastoise,"Vatten, utvecklas från Wartortle och har vattenkanoner på sitt skal.",1.6
-10,Caterpie,"Insekt, en liten larv-Pokémon.",0.3
-11,Metapod,"Insekt, utvecklas från Caterpie och skyddas av sitt hårda skal.",0.7
-12,Butterfree,"Insekt/Flyg, utvecklas från Metapod och har vackra fjärilsvingar.",1.1
-13,Weedle,"Insekt/Gift, en liten larv med giftiga taggar.",0.3
-14,Kakuna,"Insekt/Gift, utvecklas från Weedle och är lugn innan utveckling.",0.6
-15,Beedrill,"Insekt/Gift, utvecklas från Kakuna – snabb med tre giftiga sting.",1.0
-16,Pidgey,"Normal/Flyg, en liten fågel-Pokémon som är vanlig i Kanto.",0.3
-17,Pidgeotto,"Normal/Flyg, utvecklas från Pidgey med skarpare sinnen.",1.1
-18,Pidgeot,"Normal/Flyg, utvecklas från Pidgeotto och är en majestätisk flygare.",1.5
-19,Rattata,"Normal, en vanlig gnagare som är snabb och anpassningsbar.",0.3
-20,Raticate,"Normal, utvecklas från Rattata och är starkare och mer aggressiv.",0.7
-21,Spearow,"Normal/Flyg, en liten fågel med en vass näbb.",0.3
-22,Fearow,"Normal/Flyg, utvecklas från Spearow med lång hals och näbb.",1.2
-23,Ekans,"Gift, en orm-Pokémon som är smidig och giftig.",2.0
-24,Arbok,"Gift, utvecklas från Ekans med ett mönster som liknar ett ansikte.",3.5
-25,Pikachu,"Elektrisk, en ikonisk maskot som är söt och elektrifierande.",0.4
-26,Raichu,"Elektrisk, utvecklas från Pikachu och besitter stor elektrisk kraft.",0.8
-27,Sandshrew,"Mark, en liten Pokémon med ett skyddande pansar.",0.6
-28,Sandslash,"Mark, utvecklas från Sandshrew och har vassa taggar.",1.0
-29,Nidoran♀,"Gift, en liten Pokémon med horn.",0.4
-30,Nidorina,"Gift, utvecklas från Nidoran♀ och är något större.",0.8
-31,Nidoqueen,"Gift/Mark, utvecklas från Nidorina och är mäktig och skyddande.",1.3
-32,Nidoran♂,"Gift, en liten Pokémon med spetsiga öron.",0.5
-33,Nidorino,"Gift, utvecklas från Nidoran♂ och är större och starkare.",0.9
-34,Nidoking,"Gift/Mark, utvecklas från Nidorino – kraftfull och aggressiv.",1.4
-35,Clefairy,"fe, söt och mystisk, förknippad med månen.",0.6
-36,Clefable,"fe, utvecklas från Clefairy och är elegant och magisk.",1.3
-37,Vulpix,"Eld, en vacker räv-Pokémon med flera svansar.",0.6
-38,Ninetales,"Eld, utvecklas från Vulpix med långa, eleganta svansar.",1.1
-39,Jigglypuff,"Normal/fe, känd för sin sång som får folk att somna.",0.5
-40,Wigglytuff,"Normal/fe, utvecklas från Jigglypuff och är större och mjukare.",1.0
-41,Zubat,"Gift/Flyg, en fladdermusliknande Pokémon som undviker ljus.",0.8
-42,Golbat,"Gift/Flyg, utvecklas från Zubat och har förbättrad flygförmåga.",1.6
-43,Oddish,"Gräs/Gift, en liten växt-Pokémon som trivs i mörker.",0.5
-44,Gloom,"Gräs/Gift, utvecklas från Oddish och avger en stark lukt.",0.8
-45,Vileplume,"Gräs/Gift, utvecklas från Gloom och är känd för sin stora blomma.",1.2
-46,Paras,"Insekt/Gräs, en liten Pokémon med svampar på ryggen.",0.3
-47,Parasect,"Insekt/Gräs, utvecklas från Paras där svampen tar över kroppen.",1.0
-48,Venonat,"Insekt/Gift, en nattaktiv Pokémon med stora ögon.",1.0
-49,Venomoth,"Insekt/Gift, utvecklas från Venonat och har vackra vingar.",1.5
-50,Diglett,"Mark, en liten grävande Pokémon som knappt syns.",0.2
-51,Dugtrio,"Mark, utvecklas från Diglett med tre sammankopplade huvuden.",0.7
-52,Meowth,"Normal, en kattliknande Pokémon känd från Team Rocket.",0.4
-53,Persian,"Normal, utvecklas från Meowth och är elegant och snabb.",1.0
-54,Psyduck,"Vatten, en andliknande Pokémon med konstant huvudvärk.",0.8
-55,Golduck,"Vatten, utvecklas från Psyduck och är en stark simmare.",1.7
-56,Mankey,"Slagsmål, en aggressiv apa-Pokémon.",0.5
-57,Primeape,"Slagsmål, utvecklas från Mankey – rasande och envis.",1.0
-58,Growlithe,"Eld, lojal och modig – ofta en vakthund.",0.7
-59,Arcanine,"Eld, utvecklas från Growlithe och är storslagen samt snabb.",1.9
-60,Poliwag,"Vatten, en groddliknande Pokémon med en spiral på magen.",0.6
-61,Poliwhirl,"Vatten, utvecklas från Poliwag med ett virvelmönster.",1.0
-62,Poliwrath,"Vatten/Slagsmål, utvecklas från Poliwhirl och är stark samt vältränad.",1.3
-63,Abra,"Psyk, en mystisk Pokémon som teleporterar sig vid fara.",0.9
-64,Kadabra,"Psyk, utvecklas från Abra och har starka psykiska krafter.",1.3
-65,Alakazam,"Psyk, utvecklas från Kadabra – känd för sin intelligens.",1.5
-66,Machop,"Slagsmål, en muskulös Pokémon tränad i strid.",0.8
-67,Machoke,"Slagsmål, utvecklas från Machop och är stark samt vältränad.",1.5
-68,Machamp,"Slagsmål, utvecklas från Machoke och har fyra armar.",1.6
-69,Bellsprout,"Gräs/Gift, en växt-Pokémon med en lång, smal hals.",0.7
-70,Weepinbell,"Gräs/Gift, utvecklas från Bellsprout med en stor mun likt en klocka.",1.0
-71,Victreebel,"Gräs/Gift, utvecklas från Weepinbell och liknar en fälla.",1.7
-72,Tentacool,"Vatten/Gift, en manetliknande Pokémon med många tentakler.",0.9
-73,Tentacruel,"Vatten/Gift, utvecklas från Tentacool med långa tentakler.",1.6
-74,Geodude,"Sten/Mark, en liten klippa med armar som ofta ses i bergen.",0.4
-75,Graveler,"Sten/Mark, utvecklas från Geodude och är kraftigare.",1.0
-76,Golem,"Sten/Mark, utvecklas från Graveler – massiv och stark.",1.4
-77,Ponyta,"Eld, en hästliknande Pokémon med flammande man.",1.0
-78,Rapidash,"Eld, utvecklas från Ponyta och är snabb samt elegant.",1.7
-79,Slowpoke,"Vatten/Psyk, en lugn och något förvirrad Pokémon.",1.2
-80,Slowbro,"Vatten/Psyk, utvecklas från Slowpoke med hjälp av Shellder.",1.6
-81,Magnemite,"Elektrisk/Stål, en liten magnet-Pokémon som svävar.",0.3
-82,Magneton,"Elektrisk/Stål, fusions-Pokémon utvecklad från Magnemite.",1.0
-83,Farfetch'd,"Normal/Flyg, en fågel-Pokémon med en grön lök som vapen.",0.8
-84,Doduo,"Normal/Flyg, en tvåhövdad Pokémon som har svårt att flyga.",1.4
-85,Dodrio,"Normal/Flyg, utvecklas från Doduo och har tre huvuden.",1.8
-86,Seel,"Vatten, en säl-liknande Pokémon med tjock päls.",1.1
-87,Dewgong,"Vatten/Is, utvecklas från Seel – stor och elegant.",1.7
-88,Grimer,"Gift, en smutsig Pokémon som lever av avfall.",0.9
-89,Muk,"Gift, utvecklas från Grimer och är ännu smutsigare.",1.2
-90,Shellder,"Vatten, en mussel-liknande Pokémon med ett hårt skal.",0.3
-91,Cloyster,"Vatten/Is, utvecklas från Shellder med ett massivt skal.",1.5
-92,Gastly,"Spöke/Gift, en eterisk Pokémon som består av gas.",1.3
-93,Haunter,"Spöke/Gift, utvecklas från Gastly och är kusligt flytande.",1.6
-94,Gengar,"Spöke/Gift, utvecklas från Haunter – känd för att förfölja människor.",1.5
-95,Onix,"Sten/Mark, en gigantisk slingrande stenorm.",8.8
-96,Drowzee,"Psyk, en drömliknande Pokémon som äter drömmar.",1.0
-97,Hypno,"Psyk, utvecklas från Drowzee och har hypnotiska krafter.",1.6
-98,Krabby,"Vatten, en krabba-Pokémon med kraftiga klor.",0.4
-99,Kingler,"Vatten, utvecklas från Krabby med en enorm klo.",1.3
-100,Voltorb,"Elektrisk, en rund Pokémon som liknar en Pokéball.",0.5
-101,Electrode,"Elektrisk, utvecklas från Voltorb – explosiv och rund.",1.2
-102,Exeggcute,"Gräs/Psyk, en klunga ägg som kommunicerar telepatiskt.",0.4
-103,Exeggutor,"Gräs/Psyk, utvecklas från Exeggcute med en lång, palm-liknande hals.",2.0
-104,Cubone,"Mark, en ensam Pokémon som bär sin döda moders skalle.",0.4
-105,Marowak,"Mark, utvecklas från Cubone och använder ett ben som vapen.",1.0
-106,Hitmonlee,"Slagsmål, känd för sina kraftfulla sparkar.",1.5
-107,Hitmonchan,"Slagsmål, känd för snabba och kraftfulla slag.",1.4
-108,Lickitung,"Normal, en Pokémon med en lång, förlängningsbar tunga.",1.2
-109,Koffing,"Gift, en liten, flytande Pokémon som kan explodera.",0.6
-110,Weezing,"Gift, utvecklas från Koffing och består av två gasbubblor.",1.2
-111,Rhyhorn,"Mark/Sten, en Pokémon med tjocka ben och horn.",1.0
-112,Rhydon,"Mark/Sten, utvecklas från Rhyhorn – enorm och stark.",1.9
-113,Chansey,"Normal, en vänlig Pokémon känd för sina helande egenskaper.",1.1
-114,Tangela,"Gräs, en Pokémon helt täckt av lianer.",1.0
-115,Kangaskhan,"Normal, en moderlig Pokémon med en mage för sin unge.",2.2
-116,Horsea,"Vatten, en liten sjöhästliknande Pokémon.",0.4
-117,Seadra,"Vatten, utvecklas från Horsea – mer aggressiv och snabb.",1.2
-118,Goldeen,"Vatten, en fiskliknande Pokémon med vackra fenor.",0.6
-119,Seaking,"Vatten, utvecklas från Goldeen och har ett horn på huvudet.",1.3
-120,Staryu,"Vatten, en stjärnformad Pokémon med en central kärna.",0.8
-121,Starmie,"Vatten/Psyk, utvecklas från Staryu med flera strålande armar.",1.1
-122,Mr. Mime,"Psyk/fe, en mimande Pokémon som skapar osynliga barriärer.",1.3
-123,Scyther,"Insekt/Flyg, en ninja-liknande Pokémon med stora klor.",1.5
-124,Jynx,"Is/Psyk, en humanoid Pokémon känd för sin kyss.",1.4
-125,Electabuzz,"Elektrisk, en strömliknande Pokémon med kraftfulla stötar.",1.1
-126,Magmar,"Eld, en flammande Pokémon med het andedräkt.",1.3
-127,Pinsir,"insekt, en kraftfull Pokémon med stora klor.",1.5
-128,Tauros,"Normal, en tjur-liknande Pokémon känd för sina horn.",1.4
-129,Magikarp,"Vatten, en svag men envis Pokémon som utvecklas till något stort.",0.9
-130,Gyarados,"Vatten/Flyg, utvecklas från Magikarp – enorm och rasande.",6.5
-131,Lapras,"Vatten/Is, en vänlig Pokémon som transporterar människor.",2.5
-132,Ditto,"Normal, en formskiftande Pokémon som kopierar andra.",0.3
-133,Eevee,"Normal, en genetiskt instabil Pokémon med många utvecklingsalternativ.",0.3
-134,Vaporeon,"Vatten, utvecklas från Eevee med en vattensten – elegant simmare.",1.0
-135,Jolteon,"Elektrisk, utvecklas från Eevee med en elektrisk sten – snabb och spetsig.",0.8
-136,Flareon,"Eld, utvecklas från Eevee med en eldstens – brinnande passion.",0.9
-137,Porygon,"Normal, en digital Pokémon skapad av datorer.",0.8
-138,Omanyte,"Sten/Vatten, en uråldrig Pokémon återupplivad från fossil.",0.4
-139,Omastar,"Sten/Vatten, utvecklas från Omanyte med tentakler för att fånga byten.",1.0
-140,Kabuto,"Sten/Vatten, en uråldrig skalbärande Pokémon från fossil.",0.5
-141,Kabutops,"Sten/Vatten, utvecklas från Kabuto – snabb och farlig jägare.",1.3
-142,Aerodactyl,"Sten/Flyg, en förhistorisk Pokémon med en vass näbb.",1.8
-143,Snorlax,"Normal, en enorm och lat Pokémon som sover mycket.",2.1
-144,Articuno,"Is/Flyg, en legendarisk fågel-Pokémon som kontrollerar is.",1.7
-145,Zapdos,"Elektrisk/Flyg, en legendarisk fågel-Pokémon med blixtar.",1.6
-146,Moltres,"Eld/Flyg, en legendarisk fågel-Pokémon som kontrollerar eld.",2.0
-147,Dratini,"Drake, en sällsynt drak-Pokémon – graciös och svårfångad.",1.8
-148,Dragonair,"Drake, utvecklas från Dratini med en lång, elegant kropp.",4.0
-149,Dragonite,"Drake/Flyg, utvecklas från Dragonair – kraftfull och vänlig.",2.2
-150,Mewtwo,"Psyk, en skapad legendarisk Pokémon med enorm kraft.",2.0
-151,Mew,"Psyk, en mytisk och sällsynt Pokémon som kan bemästra alla förmågor.",0.4
+1,Bulbasaur,"En av Kantos start-Pokémon med en blomma på ryggen.",0.7
+2,Ivysaur,"Utvecklas från Bulbasaur.",1.0
+3,Venusaur,"Utvecklas från Ivysaur – ikonisk för sin blomma.",2.0
+4,Charmander,"En av Kantos start-Pokémon med en eld på svansen.",0.6
+5,Charmeleon,"Utvecklas från Charmander och är stridslysten.",1.1
+6,Charizard,"Utvecklas från Charmeleon och är känd för sin stora eld.",1.7
+7,Squirtle,"En av Kantos start-Pokémon med ett hårt skal.",0.5
+8,Wartortle,"Utvecklas från Squirtle med ett robustare skal.",1.0
+9,Blastoise,"Utvecklas från Wartortle och har vattenkanoner på sitt skal.",1.6
+10,Caterpie,"En liten larv-Pokémon.",0.3
+11,Metapod,"Utvecklas från Caterpie och skyddas av sitt hårda skal.",0.7
+12,Butterfree,"Utvecklas från Metapod och har vackra fjärilsvingar.",1.1
+13,Weedle,"En liten larv med giftiga taggar.",0.3
+14,Kakuna,"Utvecklas från Weedle och är lugn innan utveckling.",0.6
+15,Beedrill,"Utvecklas från Kakuna – snabb med tre giftiga sting.",1.0
+16,Pidgey,"En liten fågel-Pokémon som är vanlig i Kanto.",0.3
+17,Pidgeotto,"Utvecklas från Pidgey med skarpare sinnen.",1.1
+18,Pidgeot,"Utvecklas från Pidgeotto och är en majestätisk flygare.",1.5
+19,Rattata,"En vanlig gnagare som är snabb och anpassningsbar.",0.3
+20,Raticate,"Utvecklas från Rattata och är starkare och mer aggressiv.",0.7
+21,Spearow,"En liten fågel med en vass näbb.",0.3
+22,Fearow,"Utvecklas från Spearow med lång hals och näbb.",1.2
+23,Ekans,"En orm-Pokémon som är smidig och giftig.",2.0
+24,Arbok,"Utvecklas från Ekans med ett mönster som liknar ett ansikte.",3.5
+25,Pikachu,"En ikonisk maskot som är söt och elektrifierande.",0.4
+26,Raichu,"Utvecklas från Pikachu och besitter stor elektrisk kraft.",0.8
+27,Sandshrew,"En liten Pokémon med ett skyddande pansar.",0.6
+28,Sandslash,"Utvecklas från Sandshrew och har vassa taggar.",1.0
+29,Nidoran♀,"En liten Pokémon med horn.",0.4
+30,Nidorina,"Utvecklas från Nidoran♀ och är något större.",0.8
+31,Nidoqueen,"Utvecklas från Nidorina och är mäktig och skyddande.",1.3
+32,Nidoran♂,"En liten Pokémon med spetsiga öron.",0.5
+33,Nidorino,"Utvecklas från Nidoran♂ och är större och starkare.",0.9
+34,Nidoking,"Utvecklas från Nidorino – kraftfull och aggressiv.",1.4
+35,Clefairy,"Söt och mystisk, förknippad med månen.",0.6
+36,Clefable,"Utvecklas från Clefairy och är elegant och magisk.",1.3
+37,Vulpix,"En vacker räv-Pokémon med flera svansar.",0.6
+38,Ninetales,"Utvecklas från Vulpix med långa, eleganta svansar.",1.1
+39,Jigglypuff,"Känd för sin sång som får folk att somna.",0.5
+40,Wigglytuff,"Utvecklas från Jigglypuff och är större och mjukare.",1.0
+41,Zubat,"En fladdermusliknande Pokémon som undviker ljus.",0.8
+42,Golbat,"Utvecklas från Zubat och har förbättrad flygförmåga.",1.6
+43,Oddish,"En liten växt-Pokémon som trivs i mörker.",0.5
+44,Gloom,"Utvecklas från Oddish och avger en stark lukt.",0.8
+45,Vileplume,"Utvecklas från Gloom och är känd för sin stora blomma.",1.2
+46,Paras,"En liten Pokémon med svampar på ryggen.",0.3
+47,Parasect,"Utvecklas från Paras där svampen tar över kroppen.",1.0
+48,Venonat,"En nattaktiv Pokémon med stora ögon.",1.0
+49,Venomoth,"Utvecklas från Venonat och har vackra vingar.",1.5
+50,Diglett,"En liten grävande Pokémon som knappt syns.",0.2
+51,Dugtrio,"Utvecklas från Diglett med tre sammankopplade huvuden.",0.7
+52,Meowth,"En kattliknande Pokémon känd från Team Rocket.",0.4
+53,Persian,"Utvecklas från Meowth och är elegant och snabb.",1.0
+54,Psyduck,"En andliknande Pokémon med konstant huvudvärk.",0.8
+55,Golduck,"Utvecklas från Psyduck och är en stark simmare.",1.7
+56,Mankey,"En aggressiv apa-Pokémon.",0.5
+57,Primeape,"Utvecklas från Mankey – rasande och envis.",1.0
+58,Growlithe,"Lojal och modig – ofta en vakthund.",0.7
+59,Arcanine,"Utvecklas från Growlithe och är storslagen samt snabb.",1.9
+60,Poliwag,"En groddliknande Pokémon med en spiral på magen.",0.6
+61,Poliwhirl,"Utvecklas från Poliwag med ett virvelmönster.",1.0
+62,Poliwrath,"Utvecklas från Poliwhirl och är stark samt vältränad.",1.3
+63,Abra,"En mystisk Pokémon som teleporterar sig vid fara.",0.9
+64,Kadabra,"Utvecklas från Abra och har starka psykiska krafter.",1.3
+65,Alakazam,"Utvecklas från Kadabra – känd för sin intelligens.",1.5
+66,Machop,"En muskulös Pokémon tränad i strid.",0.8
+67,Machoke,"Utvecklas från Machop och är stark samt vältränad.",1.5
+68,Machamp,"Utvecklas från Machoke och har fyra armar.",1.6
+69,Bellsprout,"En växt-Pokémon med en lång, smal hals.",0.7
+70,Weepinbell,"Utvecklas från Bellsprout med en stor mun likt en klocka.",1.0
+71,Victreebel,"Utvecklas från Weepinbell och liknar en fälla.",1.7
+72,Tentacool,"En manetliknande Pokémon med många tentakler.",0.9
+73,Tentacruel,"Utvecklas från Tentacool med långa tentakler.",1.6
+74,Geodude,"En liten klippa med armar som ofta ses i bergen.",0.4
+75,Graveler,"Utvecklas från Geodude och är kraftigare.",1.0
+76,Golem,"Utvecklas från Graveler – massiv och stark.",1.4
+77,Ponyta,"En hästliknande Pokémon med flammande man.",1.0
+78,Rapidash,"Utvecklas från Ponyta och är snabb samt elegant.",1.7
+79,Slowpoke,"En lugn och något förvirrad Pokémon.",1.2
+80,Slowbro,"Utvecklas från Slowpoke med hjälp av Shellder.",1.6
+81,Magnemite,"En liten magnet-Pokémon som svävar.",0.3
+82,Magneton,"Fusions-Pokémon utvecklad från Magnemite.",1.0
+83,Farfetch'd,"En fågel-Pokémon med en grön lök som vapen.",0.8
+84,Doduo,"En tvåhövdad Pokémon som har svårt att flyga.",1.4
+85,Dodrio,"Utvecklas från Doduo och har tre huvuden.",1.8
+86,Seel,"En säl-liknande Pokémon med tjock päls.",1.1
+87,Dewgong,"Utvecklas från Seel – stor och elegant.",1.7
+88,Grimer,"En smutsig Pokémon som lever av avfall.",0.9
+89,Muk,"Utvecklas från Grimer och är ännu smutsigare.",1.2
+90,Shellder,"En mussel-liknande Pokémon med ett hårt skal.",0.3
+91,Cloyster,"Utvecklas från Shellder med ett massivt skal.",1.5
+92,Gastly,"En eterisk Pokémon som består av gas.",1.3
+93,Haunter,"Utvecklas från Gastly och är kusligt flytande.",1.6
+94,Gengar,"Utvecklas från Haunter – känd för att förfölja människor.",1.5
+95,Onix,"En gigantisk slingrande stenorm.",8.8
+96,Drowzee,"En drömliknande Pokémon som äter drömmar.",1.0
+97,Hypno,"Utvecklas från Drowzee och har hypnotiska krafter.",1.6
+98,Krabby,"En krabba-Pokémon med kraftiga klor.",0.4
+99,Kingler,"Utvecklas från Krabby med en enorm klo.",1.3
+100,Voltorb,"En rund Pokémon som liknar en Pokéball.",0.5
+101,Electrode,"Utvecklas från Voltorb – explosiv och rund.",1.2
+102,Exeggcute,"En klunga ägg som kommunicerar telepatiskt.",0.4
+103,Exeggutor,"Utvecklas från Exeggcute med en lång, palm-liknande hals.",2.0
+104,Cubone,"En ensam Pokémon som bär sin döda moders skalle.",0.4
+105,Marowak,"Utvecklas från Cubone och använder ett ben som vapen.",1.0
+106,Hitmonlee,"Känd för sina kraftfulla sparkar.",1.5
+107,Hitmonchan,"Känd för snabba och kraftfulla slag.",1.4
+108,Lickitung,"En Pokémon med en lång, förlängningsbar tunga.",1.2
+109,Koffing,"En liten, flytande Pokémon som kan explodera.",0.6
+110,Weezing,"Utvecklas från Koffing och består av två gasbubblor.",1.2
+111,Rhyhorn,"En Pokémon med tjocka ben och horn.",1.0
+112,Rhydon,"Utvecklas från Rhyhorn – enorm och stark.",1.9
+113,Chansey,"En vänlig Pokémon känd för sina helande egenskaper.",1.1
+114,Tangela,"En Pokémon helt täckt av lianer.",1.0
+115,Kangaskhan,"En moderlig Pokémon med en mage för sin unge.",2.2
+116,Horsea,"En liten sjöhästliknande Pokémon.",0.4
+117,Seadra,"Utvecklas från Horsea – mer aggressiv och snabb.",1.2
+118,Goldeen,"En fiskliknande Pokémon med vackra fenor.",0.6
+119,Seaking,"Utvecklas från Goldeen och har ett horn på huvudet.",1.3
+120,Staryu,"En stjärnformad Pokémon med en central kärna.",0.8
+121,Starmie,"Utvecklas från Staryu med flera strålande armar.",1.1
+122,Mr. Mime,"En mimande Pokémon som skapar osynliga barriärer.",1.3
+123,Scyther,"En ninja-liknande Pokémon med stora klor.",1.5
+124,Jynx,"En humanoid Pokémon känd för sin kyss.",1.4
+125,Electabuzz,"En strömliknande Pokémon med kraftfulla stötar.",1.1
+126,Magmar,"En flammande Pokémon med het andedräkt.",1.3
+127,Pinsir,"En kraftfull Pokémon med stora klor.",1.5
+128,Tauros,"En tjur-liknande Pokémon känd för sina horn.",1.4
+129,Magikarp,"En svag men envis Pokémon som utvecklas till något stort.",0.9
+130,Gyarados,"Utvecklas från Magikarp – enorm och rasande.",6.5
+131,Lapras,"En vänlig Pokémon som transporterar människor.",2.5
+132,Ditto,"En formskiftande Pokémon som kopierar andra.",0.3
+133,Eevee,"En genetiskt instabil Pokémon med många utvecklingsalternativ.",0.3
+134,Vaporeon,"Utvecklas från Eevee med en vattensten – elegant simmare.",1.0
+135,Jolteon,"Utvecklas från Eevee med en elektrisk sten – snabb och spetsig.",0.8
+136,Flareon,"Utvecklas från Eevee med en eldstens – brinnande passion.",0.9
+137,Porygon,"En digital Pokémon skapad av datorer.",0.8
+138,Omanyte,"En uråldrig Pokémon återupplivad från fossil.",0.4
+139,Omastar,"Utvecklas från Omanyte med tentakler för att fånga byten.",1.0
+140,Kabuto,"En uråldrig skalbärande Pokémon från fossil.",0.5
+141,Kabutops,"Utvecklas från Kabuto – snabb och farlig jägare.",1.3
+142,Aerodactyl,"En förhistorisk Pokémon med en vass näbb.",1.8
+143,Snorlax,"En enorm och lat Pokémon som sover mycket.",2.1
+144,Articuno,"En legendarisk fågel-Pokémon som kontrollerar is.",1.7
+145,Zapdos,"En legendarisk fågel-Pokémon med blixtar.",1.6
+146,Moltres,"En legendarisk fågel-Pokémon som kontrollerar eld.",2.0
+147,Dratini,"En sällsynt drak-Pokémon – graciös och svårfångad.",1.8
+148,Dragonair,"Utvecklas från Dratini med en lång, elegant kropp.",4.0
+149,Dragonite,"Utvecklas från Dragonair – kraftfull och vänlig.",2.2
+150,Mewtwo,"En skapad legendarisk Pokémon med enorm kraft.",2.0
+151,Mew,"En mytisk och sällsynt Pokémon som kan bemästra alla förmågor.",0.4
 312798312, MISSINGNO., RI�%&/m�J�J��t��$@�����iy�裟�, -97
