@@ -1,153 +1,153 @@
 Nr,Name,Info,Height (m)
-1,Bulbasaur,"En av Kantos start-Pokémon med en blomma på ryggen.",0.7
-2,Ivysaur,"Utvecklas från Bulbasaur.",1.0
-3,Venusaur,"Utvecklas från Ivysaur – ikonisk för sin blomma.",2.0
-4,Charmander,"En av Kantos start-Pokémon med en eld på svansen.",0.6
-5,Charmeleon,"Utvecklas från Charmander och är stridslysten.",1.1
-6,Charizard,"Utvecklas från Charmeleon och är känd för sin stora eld.",1.7
-7,Squirtle,"En av Kantos start-Pokémon med ett hårt skal.",0.5
-8,Wartortle,"Utvecklas från Squirtle med ett robustare skal.",1.0
-9,Blastoise,"Utvecklas från Wartortle och har vattenkanoner på sitt skal.",1.6
-10,Caterpie,"En liten larv-Pokémon.",0.3
-11,Metapod,"Utvecklas från Caterpie och skyddas av sitt hårda skal.",0.7
-12,Butterfree,"Utvecklas från Metapod och har vackra fjärilsvingar.",1.1
-13,Weedle,"En liten larv med giftiga taggar.",0.3
-14,Kakuna,"Utvecklas från Weedle och är lugn innan utveckling.",0.6
-15,Beedrill,"Utvecklas från Kakuna – snabb med tre giftiga sting.",1.0
-16,Pidgey,"En liten fågel-Pokémon som är vanlig i Kanto.",0.3
-17,Pidgeotto,"Utvecklas från Pidgey med skarpare sinnen.",1.1
-18,Pidgeot,"Utvecklas från Pidgeotto och är en majestätisk flygare.",1.5
-19,Rattata,"En vanlig gnagare som är snabb och anpassningsbar.",0.3
-20,Raticate,"Utvecklas från Rattata och är starkare och mer aggressiv.",0.7
-21,Spearow,"En liten fågel med en vass näbb.",0.3
-22,Fearow,"Utvecklas från Spearow med lång hals och näbb.",1.2
-23,Ekans,"En orm-Pokémon som är smidig och giftig.",2.0
-24,Arbok,"Utvecklas från Ekans med ett mönster som liknar ett ansikte.",3.5
-25,Pikachu,"En ikonisk maskot som är söt och elektrifierande.",0.4
-26,Raichu,"Utvecklas från Pikachu och besitter stor elektrisk kraft.",0.8
-27,Sandshrew,"En liten Pokémon med ett skyddande pansar.",0.6
-28,Sandslash,"Utvecklas från Sandshrew och har vassa taggar.",1.0
-29,Nidoran♀,"En liten Pokémon med horn.",0.4
-30,Nidorina,"Utvecklas från Nidoran♀ och är något större.",0.8
-31,Nidoqueen,"Utvecklas från Nidorina och är mäktig och skyddande.",1.3
-32,Nidoran♂,"En liten Pokémon med spetsiga öron.",0.5
-33,Nidorino,"Utvecklas från Nidoran♂ och är större och starkare.",0.9
-34,Nidoking,"Utvecklas från Nidorino – kraftfull och aggressiv.",1.4
-35,Clefairy,"Söt och mystisk, förknippad med månen.",0.6
-36,Clefable,"Utvecklas från Clefairy och är elegant och magisk.",1.3
-37,Vulpix,"En vacker räv-Pokémon med flera svansar.",0.6
-38,Ninetales,"Utvecklas från Vulpix med långa, eleganta svansar.",1.1
-39,Jigglypuff,"Känd för sin sång som får folk att somna.",0.5
-40,Wigglytuff,"Utvecklas från Jigglypuff och är större och mjukare.",1.0
-41,Zubat,"En fladdermusliknande Pokémon som undviker ljus.",0.8
-42,Golbat,"Utvecklas från Zubat och har förbättrad flygförmåga.",1.6
-43,Oddish,"En liten växt-Pokémon som trivs i mörker.",0.5
-44,Gloom,"Utvecklas från Oddish och avger en stark lukt.",0.8
-45,Vileplume,"Utvecklas från Gloom och är känd för sin stora blomma.",1.2
-46,Paras,"En liten Pokémon med svampar på ryggen.",0.3
-47,Parasect,"Utvecklas från Paras där svampen tar över kroppen.",1.0
-48,Venonat,"En nattaktiv Pokémon med stora ögon.",1.0
-49,Venomoth,"Utvecklas från Venonat och har vackra vingar.",1.5
-50,Diglett,"En liten grävande Pokémon som knappt syns.",0.2
-51,Dugtrio,"Utvecklas från Diglett med tre sammankopplade huvuden.",0.7
-52,Meowth,"En kattliknande Pokémon känd från Team Rocket.",0.4
-53,Persian,"Utvecklas från Meowth och är elegant och snabb.",1.0
-54,Psyduck,"En andliknande Pokémon med konstant huvudvärk.",0.8
-55,Golduck,"Utvecklas från Psyduck och är en stark simmare.",1.7
-56,Mankey,"En aggressiv apa-Pokémon.",0.5
-57,Primeape,"Utvecklas från Mankey – rasande och envis.",1.0
-58,Growlithe,"Lojal och modig – ofta en vakthund.",0.7
-59,Arcanine,"Utvecklas från Growlithe och är storslagen samt snabb.",1.9
-60,Poliwag,"En groddliknande Pokémon med en spiral på magen.",0.6
-61,Poliwhirl,"Utvecklas från Poliwag med ett virvelmönster.",1.0
-62,Poliwrath,"Utvecklas från Poliwhirl och är stark samt vältränad.",1.3
-63,Abra,"En mystisk Pokémon som teleporterar sig vid fara.",0.9
-64,Kadabra,"Utvecklas från Abra och har starka psykiska krafter.",1.3
-65,Alakazam,"Utvecklas från Kadabra – känd för sin intelligens.",1.5
-66,Machop,"En muskulös Pokémon tränad i strid.",0.8
-67,Machoke,"Utvecklas från Machop och är stark samt vältränad.",1.5
-68,Machamp,"Utvecklas från Machoke och har fyra armar.",1.6
-69,Bellsprout,"En växt-Pokémon med en lång, smal hals.",0.7
-70,Weepinbell,"Utvecklas från Bellsprout med en stor mun likt en klocka.",1.0
-71,Victreebel,"Utvecklas från Weepinbell och liknar en fälla.",1.7
-72,Tentacool,"En manetliknande Pokémon med många tentakler.",0.9
-73,Tentacruel,"Utvecklas från Tentacool med långa tentakler.",1.6
-74,Geodude,"En liten klippa med armar som ofta ses i bergen.",0.4
-75,Graveler,"Utvecklas från Geodude och är kraftigare.",1.0
-76,Golem,"Utvecklas från Graveler – massiv och stark.",1.4
-77,Ponyta,"En hästliknande Pokémon med flammande man.",1.0
-78,Rapidash,"Utvecklas från Ponyta och är snabb samt elegant.",1.7
-79,Slowpoke,"En lugn och något förvirrad Pokémon.",1.2
-80,Slowbro,"Utvecklas från Slowpoke med hjälp av Shellder.",1.6
-81,Magnemite,"En liten magnet-Pokémon som svävar.",0.3
-82,Magneton,"Fusions-Pokémon utvecklad från Magnemite.",1.0
-83,Farfetch'd,"En fågel-Pokémon med en grön lök som vapen.",0.8
-84,Doduo,"En tvåhövdad Pokémon som har svårt att flyga.",1.4
-85,Dodrio,"Utvecklas från Doduo och har tre huvuden.",1.8
-86,Seel,"En säl-liknande Pokémon med tjock päls.",1.1
-87,Dewgong,"Utvecklas från Seel – stor och elegant.",1.7
-88,Grimer,"En smutsig Pokémon som lever av avfall.",0.9
-89,Muk,"Utvecklas från Grimer och är ännu smutsigare.",1.2
-90,Shellder,"En mussel-liknande Pokémon med ett hårt skal.",0.3
-91,Cloyster,"Utvecklas från Shellder med ett massivt skal.",1.5
-92,Gastly,"En eterisk Pokémon som består av gas.",1.3
-93,Haunter,"Utvecklas från Gastly och är kusligt flytande.",1.6
-94,Gengar,"Utvecklas från Haunter – känd för att förfölja människor.",1.5
-95,Onix,"En gigantisk slingrande stenorm.",8.8
-96,Drowzee,"En drömliknande Pokémon som äter drömmar.",1.0
-97,Hypno,"Utvecklas från Drowzee och har hypnotiska krafter.",1.6
-98,Krabby,"En krabba-Pokémon med kraftiga klor.",0.4
-99,Kingler,"Utvecklas från Krabby med en enorm klo.",1.3
-100,Voltorb,"En rund Pokémon som liknar en Pokéball.",0.5
-101,Electrode,"Utvecklas från Voltorb – explosiv och rund.",1.2
-102,Exeggcute,"En klunga ägg som kommunicerar telepatiskt.",0.4
-103,Exeggutor,"Utvecklas från Exeggcute med en lång, palm-liknande hals.",2.0
-104,Cubone,"En ensam Pokémon som bär sin döda moders skalle.",0.4
-105,Marowak,"Utvecklas från Cubone och använder ett ben som vapen.",1.0
-106,Hitmonlee,"Känd för sina kraftfulla sparkar.",1.5
-107,Hitmonchan,"Känd för snabba och kraftfulla slag.",1.4
-108,Lickitung,"En Pokémon med en lång, förlängningsbar tunga.",1.2
-109,Koffing,"En liten, flytande Pokémon som kan explodera.",0.6
-110,Weezing,"Utvecklas från Koffing och består av två gasbubblor.",1.2
-111,Rhyhorn,"En Pokémon med tjocka ben och horn.",1.0
-112,Rhydon,"Utvecklas från Rhyhorn – enorm och stark.",1.9
-113,Chansey,"En vänlig Pokémon känd för sina helande egenskaper.",1.1
-114,Tangela,"En Pokémon helt täckt av lianer.",1.0
-115,Kangaskhan,"En moderlig Pokémon med en mage för sin unge.",2.2
-116,Horsea,"En liten sjöhästliknande Pokémon.",0.4
-117,Seadra,"Utvecklas från Horsea – mer aggressiv och snabb.",1.2
-118,Goldeen,"En fiskliknande Pokémon med vackra fenor.",0.6
-119,Seaking,"Utvecklas från Goldeen och har ett horn på huvudet.",1.3
-120,Staryu,"En stjärnformad Pokémon med en central kärna.",0.8
-121,Starmie,"Utvecklas från Staryu med flera strålande armar.",1.1
-122,Mr. Mime,"En mimande Pokémon som skapar osynliga barriärer.",1.3
-123,Scyther,"En ninja-liknande Pokémon med stora klor.",1.5
-124,Jynx,"En humanoid Pokémon känd för sin kyss.",1.4
-125,Electabuzz,"En strömliknande Pokémon med kraftfulla stötar.",1.1
-126,Magmar,"En flammande Pokémon med het andedräkt.",1.3
-127,Pinsir,"En kraftfull Pokémon med stora klor.",1.5
-128,Tauros,"En tjur-liknande Pokémon känd för sina horn.",1.4
-129,Magikarp,"En svag men envis Pokémon som utvecklas till något stort.",0.9
-130,Gyarados,"Utvecklas från Magikarp – enorm och rasande.",6.5
-131,Lapras,"En vänlig Pokémon som transporterar människor.",2.5
-132,Ditto,"En formskiftande Pokémon som kopierar andra.",0.3
-133,Eevee,"En genetiskt instabil Pokémon med många utvecklingsalternativ.",0.3
-134,Vaporeon,"Utvecklas från Eevee med en vattensten – elegant simmare.",1.0
-135,Jolteon,"Utvecklas från Eevee med en elektrisk sten – snabb och spetsig.",0.8
-136,Flareon,"Utvecklas från Eevee med en eldstens – brinnande passion.",0.9
-137,Porygon,"En digital Pokémon skapad av datorer.",0.8
-138,Omanyte,"En uråldrig Pokémon återupplivad från fossil.",0.4
-139,Omastar,"Utvecklas från Omanyte med tentakler för att fånga byten.",1.0
-140,Kabuto,"En uråldrig skalbärande Pokémon från fossil.",0.5
-141,Kabutops,"Utvecklas från Kabuto – snabb och farlig jägare.",1.3
-142,Aerodactyl,"En förhistorisk Pokémon med en vass näbb.",1.8
-143,Snorlax,"En enorm och lat Pokémon som sover mycket.",2.1
-144,Articuno,"En legendarisk fågel-Pokémon som kontrollerar is.",1.7
-145,Zapdos,"En legendarisk fågel-Pokémon med blixtar.",1.6
-146,Moltres,"En legendarisk fågel-Pokémon som kontrollerar eld.",2.0
-147,Dratini,"En sällsynt drak-Pokémon – graciös och svårfångad.",1.8
-148,Dragonair,"Utvecklas från Dratini med en lång, elegant kropp.",4.0
-149,Dragonite,"Utvecklas från Dragonair – kraftfull och vänlig.",2.2
-150,Mewtwo,"En skapad legendarisk Pokémon med enorm kraft.",2.0
-151,Mew,"En mytisk och sällsynt Pokémon som kan bemästra alla förmågor.",0.4
-312798312, MISSINGNO., RI�%&/m�J�J��t��$@�����iy�裟�, -97
+1,Bulbasaur,"En av Kantos start-Pokémon. Den har en lök på ryggen som lagrar näring och låter den klara sig i dagar utan mat.",0.7
+2,Ivysaur,"Löken på ryggen har vuxit till en knopp. För att bära den extra vikten har dess ben blivit starkare.",1.0
+3,Venusaur,"Knoppen på ryggen har slagit ut till en stor blomma med en lugnande doft, som omvandlar solljus till energi.",2.0
+4,Charmander,"En av Kantos start-Pokémon. Lågan på dess svans visar dess livskraft; om den slocknar, dör den.",0.6
+5,Charmeleon,"En stridslysten Pokémon som aktivt söker upp motståndare. Dess eld blir blåvit när den blir exalterad.",1.1
+6,Charizard,"Dess eld är så het att den kan smälta stenblock. Den är känd för att oavsiktligt orsaka skogsbränder, men attackerar aldrig en svagare motståndare.",1.7
+7,Squirtle,"En av Kantos start-Pokémon. Den drar sig tillbaka in i sitt hårda skal för skydd och sprutar vatten från munnen för att attackera.",0.5
+8,Wartortle,"Den använder sina yviga öron och svans för att balansera i vattnet. Sägs kunna leva i 10 000 år.",1.0
+9,Blastoise,"De två kanonerna på dess skal kan skjuta vattenstrålar som är starka nog att krossa stål.",1.6
+10,Caterpie,"Dess fötter har sugkoppar som låter den klättra på väggar. Försvarar sig genom att avge en stank från sina antenner.",0.3
+11,Metapod,"Dess hårda skal skyddar den medan den väntar på att utvecklas. När den är hotad kan den göra skalet ännu hårdare för att skydda sina mjuka inre delar.",0.7
+12,Butterfree,"Vingarna är täckta av ett giftigt, vattenavvisande pulver. Den samlar nektar från blommor.",1.1
+13,Weedle,"Har en giftig gadd på huvudet för försvar. Använder sitt akuta luktsinne för att hitta de blad den gillar bäst.",0.3
+14,Kakuna,"Förblir nästan helt orörlig medan den förbereder sig för att utvecklas, men kan sticka ut sin gadd för att försvara sig.",0.6
+15,Beedrill,"Lever i svärmar och attackerar allt som kommer nära deras bo. Använder sina tre giftiga gaddar för att besegra byten.",1.0
+16,Pidgey,"En foglig fågel-Pokémon som föredrar att sparka upp sand i fiendens ögon istället för att slåss. Har ett utmärkt lokalsinne.",0.3
+17,Pidgeotto,"En territoriell Pokémon som patrullerar sitt område i cirklar från luften, på jakt efter byten som Exeggcute.",1.1
+18,Pidgeot,"Kan flyga i Mach 2-hastighet. Dess glänsande fjädrar gör den populär bland tränare. Jagar fisk som Magikarp.",1.5
+19,Rattata,"Dess framtänder växer konstant, så den måste gnaga på hårda föremål för att hålla dem nere. Lever i stora kolonier.",0.3
+20,Raticate,"Använder sina morrhår för att hålla balansen. Dess simhudsförsedda fötter gör den till en duktig simmare.",0.7
+21,Spearow,"En snabb men inte särskilt skicklig flygare. Använder sina höga rop för att varna andra Spearow för fara.",0.3
+22,Fearow,"Dess långa hals och näbb är praktiska för att plocka insekter och fisk. Har uthållighet nog att flyga en hel dag.",1.2
+23,Ekans,"Använder sin tunga för att känna av dofter och hitta byten. Kan lossa sin käke för att svälja stora byten hela.",2.0
+24,Arbok,"Mönstret på dess mage liknar ett skrämmande ansikte, som varierar beroende på region. Kan krossa oljefat med sin kropp.",3.5
+25,Pikachu,"Pokémon-seriens maskot. Lagrar elektricitet i kindpåsarna och släpper ut den genom sin svans, som den använder för att kolla sin omgivning.",0.4
+26,Raichu,"Kan lagra över 100 000 volt elektricitet. Använder sin svans som jordledning för att skydda sig från sin egen kraft.",0.8
+27,Sandshrew,"Rullar ihop sig till en boll för att försvara sig. Gräver hålor djupt under marken där den vilar.",0.6
+28,Sandslash,"Rullar ihop sig till en taggig boll för att attackera eller skydda sig. Använder sina klor för att slita sönder byten.",1.0
+29,Nidoran♀,"En foglig Pokémon som inte gillar att slåss, men dess horn kan utsöndra ett kraftfullt gift om den provoceras.",0.4
+30,Nidorina,"Dess horn växer långsamt. När den tvingas slåss föredrar den att rivas och bitas istället för att använda hornet.",0.8
+31,Nidoqueen,"En mycket beskyddande Pokémon som använder sin kraftfulla kropp för att försvara sina ungar. Taggarna utsöndrar inte gift när den är med sina barn.",1.3
+32,Nidoran♂,"Viftar med sina stora öron för att känna av omgivningen. Dess horn innehåller ett starkt gift.",0.5
+33,Nidorino,"Dess horn är hårdare än diamant. Den är aggressiv och använder hornet för att krossa stenar i jakt på Månstenar.",0.9
+34,Nidoking,"Extremt kraftfull och aggressiv. Dess tjocka svans kan välta ett el-torn och dess horn kan krossa diamanter.",1.4
+35,Clefairy,"En skygg varelse som sällan visar sig. De sägs komma ut i grupp för att dansa under fullmånen.",0.6
+36,Clefable,"Sägs ha kommit från månen. Dess känsliga hörsel gör att den kan höra ett knappnål falla på 1 km avstånd.",1.3
+37,Vulpix,"Föds med en vit svans som delar sig i sex när den blir äldre. Kan kontrollera eld och skapa irrljus.",0.6
+38,Ninetales,"Inspirerad av den niosvansade räven. Kan förstå mänskligt tal och lägga en förbannelse över dem som behandlar den illa.",1.1
+39,Jigglypuff,"Kan blåsa upp sig som en ballong. Dess sång har en våglängd som får nästan alla som hör den att somna.",0.5
+40,Wigglytuff,"Genom att andas in kan den blåsa upp sig till 20 gånger sin normala storlek för att skrämma bort fiender.",1.0
+41,Zubat,"Har utvecklats utan ögon och använder ekolokalisering för att navigera. Ogillar solljus och gömmer sig i grottor.",0.8
+42,Golbat,"Använder sina ihåliga huggtänder för att suga blod från sina byten. Kan dricka så mycket att den blir för tung för att flyga.",1.6
+43,Oddish,"Gräver ner sig i jorden under dagen. På natten vandrar den runt för att sprida sina frön.",0.5
+44,Gloom,"Den illaluktande nektarn från dess mun kan få någon att svimma på över en kilometers avstånd, men vissa använder den för att göra parfym.",0.8
+45,Vileplume,"De stora kronbladen på dess huvud sprider giftigt pollen som förlamar byten innan den äter dem.",1.2
+46,Paras,"Har parasitsvampar kallade tochukaso på ryggen. Svamparna dränerar näring från värden.",0.3
+47,Parasect,"Svampen på ryggen har tagit över värdkroppen helt och hållet. Gruppen suger ut näring från träd tills de dör.",1.0
+48,Venonat,"Dess stora fasettögon fungerar som en radar och kan skjuta ljusstrålar. Jagar små insekter på natten.",1.0
+49,Venomoth,"Vingarna är täckta av giftiga fjäll. Ljusare fjäll orsakar förlamning, medan mörkare är direkt giftiga.",1.5
+50,Diglett,"Ingen har någonsin sett hela kroppen på en Diglett. Bönder använder den ibland för att plöja sina åkrar.",0.2
+51,Dugtrio,"Tre Diglett som har förenats. Kan gräva sig fram i 100 km/h, upp till 100 km under jord.",0.7
+52,Meowth,"Känd från Team Rocket i animen. Den älskar allt som är runt och skinande, särskilt mynt, och patrullerar sitt revir på natten i jakt på borttappade slantar.",0.4
+53,Persian,"Populär bland rika tack vare sin eleganta päls, men dess nyckfulla och arroganta attityd gör den svår att uppfostra.",1.0
+54,Psyduck,"Lider av konstant huvudvärk. När värken blir tillräckligt svår, släpper den omedvetet lös psykiska krafter.",0.8
+55,Golduck,"En extremt skicklig simmare som kan ta sig fram även i stormiga hav. Känd för att rädda människor från skeppsbrott.",1.7
+56,Mankey,"Blir arg för minsta lilla och attackerar omedelbart. Om en Mankey i en flock blir arg, blir alla det.",0.5
+57,Primeape,"När den blir arg ökar dess blodcirkulation, vilket gör den starkare men också dummare. Kan bli så arg att den dör.",1.0
+58,Growlithe,"En lojal och modig Pokémon som ofta används som vakthund. Har ett utmärkt luktsinne.",0.7
+59,Arcanine,"Känd för sin otroliga snabbhet; sägs kunna springa 10 000 km på ett dygn. Dess skönhet har beundrats sedan urminnes tider.",1.9
+60,Poliwag,"Dess tunna hud gör att man kan se dess inre organ som en spiral. Spiralens riktning varierar beroende på region.",0.6
+61,Poliwhirl,"Kan leva både på land och i vatten. Dess kropp är täckt av en oljig vätska som gör den hal och svår att fånga.",1.0
+62,Poliwrath,"En expert på simning som kan simma ifrån professionella idrottare. Dess muskler är så starka att den kan krossa stenblock med sina slag.",1.3
+63,Abra,"Sover 18 timmar om dygnet. Även i sömnen känner den av fara och teleporterar sig till säkerhet.",0.9
+64,Kadabra,"Utsänder alfavågor som kan orsaka huvudvärk och få maskiner att sluta fungera. En teori är att den en gång var en människa.",1.3
+65,Alakazam,"Dess hjärnceller multipliceras oändligt, vilket ger den ett minne av allt sedan den föddes. Använder psykiska krafter för att röra sin kropp.",1.5
+66,Machop,"Dess muskler blir aldrig ömma, oavsett hur mycket den tränar. Älskar att lyfta tunga saker som Graveler.",0.8
+67,Machoke,"Dess bälte reglerar dess otroliga styrka. Den tar bara av sig det när den möter en verkligt kraftfull motståndare.",1.5
+68,Machamp,"Med sina fyra armar kan den dela ut 500 slag på en sekund. En enda arm kan flytta ett berg.",1.6
+69,Bellsprout,"Dess kropp är tunn och flexibel. Den kan plantera sina fötter i marken för att absorbera fukt men kan då inte röra sig.",0.7
+70,Weepinbell,"Hänger i en trädgren med sin krokförsedda bakdel medan den sover. Om bytet inte löses upp av syra, skär den det i bitar med sina blad.",1.0
+71,Victreebel,"Lockar till sig byten med en nektarliknande doft och sväljer dem sedan hela. Ju mer den äter, desto sötare blir doften.",1.7
+72,Tentacool,"Består av 99% vatten. Dess tentakler kan växa tillbaka snabbt om de bryts av.",0.9
+73,Tentacruel,"Har 80 tentakler som den kan förlänga och dra in efter behag. Använder dem för att fånga byten och injicera gift.",1.6
+74,Geodude,"Stolt över sin hårda kropp och tävlar ofta mot andra för att se vem som är hårdast. Ligger ofta stilla och misstas för vanliga stenar.",0.4
+75,Graveler,"Rullar nerför berg för att förflytta sig och krossar allt i sin väg. Bryr sig inte om delar av kroppen flisas av, eftersom de växer tillbaka.",1.0
+76,Golem,"Ömsar skinn en gång om året för att växa. Kan dra in sina lemmar i sitt skal och rulla nerför berg i hög hastighet.",1.4
+77,Ponyta,"När den föds är den ostadig på benen, men blir snabbt en stark löpare. Kan välja om dess flammor ska brännas eller inte.",1.0
+78,Rapidash,"En tävlingsinriktad Pokémon som springer i upp till 240 km/h om den ser något snabbare än sig själv. Ju snabbare den springer, desto längre blir manen.",1.7
+79,Slowpoke,"Så långsam och trög att det kan ta fem sekunder innan den känner smärta. Fiskar med sin svans utan att märka om något nappar.",1.2
+80,Slowbro,"Utvecklas när en Shellder biter sig fast i dess svans. Giftet från Shellder gör att den inte känner smärta, men kan ge den plötsliga inspirationsblixtar.",1.6
+81,Magnemite,"Svävar med hjälp av elektromagnetism. Dras till el och kan orsaka strömavbrott genom att fästa sig vid kraftledningar.",0.3
+82,Magneton,"Bildas när flera Magnemite länkas samman av en stark magnetisk kraft. Avger mystiska radiosignaler.",1.0
+83,Farfetch'd,"Bär alltid med sig en purjolöksstjälk som den använder som ett vapen. Kan inte leva utan sin stjälk och skyddar den med sitt liv.",0.8
+84,Doduo,"Dess två huvuden har identiska hjärnor. Ett huvud sover medan det andra håller vakt.",1.4
+85,Dodrio,"De tre huvudena representerar glädje, sorg och ilska. När de planerar strategier tillsammans kan de bli handlingsförlamade om de inte kommer överens.",1.8
+86,Seel,"Älskar att simma i iskallt vatten. Dess horn är hårt nog att krossa isblock. Sover på havsbotten under dagen.",1.1
+87,Dewgong,"Kan lagra värmeenergi i kroppen för att klara extrem kyla. Jagar på natten och vilar på isflak under dagen.",1.7
+88,Grimer,"Består av förorenat slam. Kan tränga sig igenom de minsta springor och lever på avfall i avloppssystem.",0.8
+89,Muk,"Extremt giftig; en enda droppe från dess kropp kan förgifta en hel damm. Marken den rör sig över blir obrukbar i tre år.",1.2
+90,Shellder,"Dess hårda skal skyddar den mot de flesta attacker. Den simmar baklänges genom att snabbt öppna och stänga sitt skal.",0.3
+91,Cloyster,"Dess skal är hårdare än diamant och kan inte förstöras ens av en bomb. Öppnar bara skalet för att attackera.",1.5
+92,Gastly,"Dess kropp består av en giftig gas. Den kan omsluta ett byte av vilken storlek som helst och förgifta det genom huden.",1.3
+93,Haunter,"Sägs komma från en annan dimension. Lickar sina offer med sin gasformiga tunga för att sakta stjäla deras livskraft.",1.6
+94,Gengar,"Älskar att skrämmas och gömmer sig i skuggor. Om temperaturen plötsligt sjunker kan en Gengar vara i närheten.",1.5
+95,Onix,"Lever under jorden och gräver tunnlar i 80 km/h. När den äter hårda objekt blir dess stenkropp solid som diamant.",8.8
+96,Drowzee,"Äter drömmar från sovande människor och Pokémon genom deras näsborrar. Föredrar barns drömmar eftersom de är godare.",1.0
+97,Hypno,"Använder sin pendel för att hypnotisera sina offer och äta deras drömmar. Enligt en ökänd incident sägs den ha fört bort ett barn den hypnotiserat.",1.6
+98,Krabby,"Lever på stränder. Om den förlorar en klo i strid växer en ny snabbt ut igen.",0.4
+99,Kingler,"Dess enorma vänstra klo har en krossande styrka på 10 000 hästkrafter, men den är så tung att den är svår att sikta med.",1.3
+100,Voltorb,"Man tror att den skapades när en Pokéboll träffades av en energipuls. Exploderar vid minsta beröring.",0.5
+101,Electrode,"Ju mer elektricitet den lagrar, desto snabbare rör den sig. Känd för att explodera utan anledning, bara för skojs skull.",1.2
+102,Exeggcute,"Ser ut som ägg men är egentligen en klunga frön. De kommunicerar telepatiskt och om en separeras från gruppen, hittar de snabbt tillbaka till varandra.",0.4
+103,Exeggutor,"Kallas 'den vandrande djungeln'. Varje huvud tänker självständigt. Om ett huvud faller av, blir det en ny Exeggcute.",2.0
+104,Cubone,"Bär skallen från sin avlidna mor. Ingen har någonsin sett dess sanna ansikte. Fläckarna på skallen kommer från dess tårar.",0.4
+105,Marowak,"Har övervunnit sorgen efter sin mors död och blivit stark och aggressiv. Använder ben som vapen och kastar dem som bumeranger.",1.0
+106,Hitmonlee,"Kallas 'Sparkmästaren'. Dess ben kan sträckas ut till dubbel längd, vilket ger den en otrolig räckvidd i strid.",1.5
+107,Hitmonchan,"Sägs ha själen av en boxare. Dess slag är så snabba att de är osynliga för blotta ögat och kan borra sig igenom betong.",1.4
+108,Lickitung,"Utforskar världen med sin två meter långa tunga. Dess saliv kan orsaka utslag om den inte tvättas bort omedelbart.",1.2
+109,Koffing,"Lagrar en mängd olika giftiga gaser i sin kropp. Blandar dem med sopor för att skapa ännu giftigare gaser.",0.6
+110,Weezing,"Bildas när två Koffing smälter samman. Genom att växla gaser mellan sina två huvuden kan den göra giftet ännu starkare.",1.2
+111,Rhyhorn,"Har en enkelspårig hjärna och rusar bara rakt fram, krossar allt i sin väg. Glömmer ofta varför den började springa.",1.0
+112,Rhydon,"Den allra första Pokémon som designades. Dess pansarliknande hud skyddar den från värme upp till 2000 grader. Kan krossa diamanter med sitt horn.",1.9
+113,Chansey,"En snäll Pokémon som delar med sig av sina näringsrika ägg till skadade. Används ofta på Pokémon-center.",1.1
+114,Tangela,"Hela dess kropp är täckt av tjocka, blåa lianer som döljer dess sanna identitet. Om en lian slits av växer den tillbaka nästa dag.",1.0
+115,Kangaskhan,"Uppfostrar sin unge i sin pung i tre år. Extremt beskyddande och attackerar allt som hotar dess barn.",2.2
+116,Horsea,"Använder sin stjärt för att förankra sig vid koraller för att inte svepas bort av strömmar. Skjuter bläck mot fiender.",0.4
+117,Seadra,"Dess fenor är täckta av giftiga taggar. Hanarna tar hand om de nyfödda Horsea.",1.2
+118,Goldeen,"Känd som 'Vattendansaren' på grund av sina graciösa rörelser. Använder sitt horn för att slå hål i akvarier om den hålls fången.",0.6
+119,Seaking,"Simmar uppför vattenfall för att lägga sina ägg. Hanen och honan turas om att vakta boet, som kan vara i en månad.",1.3
+120,Staryu,"Så länge dess röda kärna i mitten är oskadd, kan den regenerera hela sin kropp även om den blir sliten i bitar.",0.8
+121,Starmie,"Kärnan i mitten lyser i sju olika färger och sägs sända ut mystiska radiovågor mot rymden.",1.1
+122,Mr. Mime,"En mästare på pantomim. Kan skapa osynliga väggar genom att få luften att vibrera. Störs den, slår den till med sina stora händer.",1.3
+123,Scyther,"Rör sig med ninjaliknande snabbhet. Dess liar är så vassa att de kan fälla ett stort träd med ett enda hugg.",1.5
+124,Jynx,"Kommunicerar med en serie dansliknande rörelser. Dess tal har ännu inte kunnat dechiffreras.",1.4
+125,Electabuzz,"Samlas vid kraftverk under åskväder för att äta elektricitet, vilket ofta orsakar stora strömavbrott.",1.1
+126,Magmar,"Lever i aktiva vulkaner. Dess kroppstemperatur är 1200 grader. Den ogillar kalla platser och värmer upp sin omgivning med eld.",1.3
+127,Pinsir,"Använder sina stora horn för att greppa och krossa sina byten. Kan lyfta objekt som väger dubbelt så mycket som den själv.",1.5
+128,Tauros,"Piskar sig själv med sina tre svansar för att bli rasande innan den stormar fram. Kan bara springa rakt fram.",1.4
+129,Magikarp,"En nästan värdelös Pokémon som mest bara plaskar runt. I forntiden var den dock betydligt starkare.",0.9
+130,Gyarados,"När en Magikarp utvecklas genomgår dess hjärna en stor förändring, vilket gör den extremt våldsam och destruktiv.",6.5
+131,Lapras,"En mild och intelligent Pokémon som älskar att transportera människor över vattnet. Drevs nästan till utrotning av tjuvjägare.",2.5
+132,Ditto,"Kan omstrukturera hela sin cellstruktur för att förvandla sig till en exakt kopia av allt den ser, även om ansiktet ofta blir en aning fel.",0.3
+133,Eevee,"Har en instabil genetisk kod som gör att den kan utvecklas till åtta olika former beroende på omgivning och stimuli.",0.3
+134,Vaporeon,"Dess cellstruktur liknar vattenmolekyler, vilket gör att den kan smälta in i vatten och bli osynlig.",1.0
+135,Jolteon,"Kan generera 10 000 volt elektricitet. Dess päls består av vassa taggar som den kan skjuta iväg mot fiender.",0.8
+136,Flareon,"Lågan i dess kropp kan nå en temperatur på 1700 grader. Den fluffiga pälsen hjälper till att reglera kroppstemperaturen.",0.9
+137,Porygon,"Den första artificiella Pokémon som skapades av människan. Består helt av programmeringskod och kan röra sig fritt i cyberrymden.",0.8
+138,Omanyte,"En uråldrig Pokémon som återupplivats från ett Helix-fossil. Använder sina tio tentakler för att fånga byten.",0.4
+139,Omastar,"Man tror att den dog ut eftersom dess skal blev för stort och tungt, vilket gjorde den för långsam för att jaga.",1.0
+140,Kabuto,"Återupplivad från ett Dom-fossil. Den skyddades av sitt hårda skal och har inte förändrats på 300 miljoner år.",0.5
+141,Kabutops,"En forntida jägare som använde sina vassa liar till armar för att slita isär sina byten och dricka deras kroppsvätskor.",1.3
+142,Aerodactyl,"En våldsam förhistorisk Pokémon som återupplivats från en bärnsten. Dess sågtandade huggtänder kan slita sönder stål.",1.8
+143,Snorlax,"Dess enda aktiviteter är att äta och sova. Behöver äta 400 kg mat om dagen och kan äta nästan vad som helst.",2.1
+144,Articuno,"En legendarisk fågel-Pokémon. Sägs kunna skapa snöstormar genom att flaxa med sina vingar. Visar sig för vilsna resenärer i bergen.",1.7
+145,Zapdos,"En legendarisk fågel-Pokémon. Den får sin kraft från blixten och sägs dyka upp ur åskmoln.",1.6
+146,Moltres,"En legendarisk fågel-Pokémon. Sägs kunna hela sina skador genom att doppa sig i lava. Dess ankomst sägs förebåda våren.",2.0
+147,Dratini,"Ömsar ständigt sitt skinn medan den växer. Den gömmer sig bakom vattenfall för skydd under denna sårbara process.",1.8
+148,Dragonair,"Sägs kunna kontrollera vädret genom att frigöra energi från kristallerna på sin kropp. Att se en i början av året sägs ge god hälsa.",4.0
+149,Dragonite,"Har en intelligens som motsvarar en människas och ett gott hjärta. Den guidar förlista skepp till säkerhet och kan flyga runt jorden på 16 timmar.",2.2
+150,Mewtwo,"Skapades genom genmanipulation av Mews DNA. Trots sin otroliga psykiska kraft, gav forskarna den inte ett medkännande hjärta.",2.0
+151,Mew,"En mytisk Pokémon som sägs vara förfadern till alla Pokémon, eftersom den bär på den genetiska koden för dem alla. Kan göra sig osynlig.",0.4
+312798312, MISSINGNO., RI�%&/m�J�J��t��$@�ERROR����MISSINGiy�裟��%&/m�J�JNONEXISTENTPKMN�%&/m�J�J, -97
