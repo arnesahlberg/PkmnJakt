@@ -445,7 +445,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                             color: AppColors.white,
                                           ),
                                           SizedBox(width: 8),
-                                          Text("Mitt Pokédex"),
+                                          Text("Min Pokédex"),
                                         ],
                                       ),
                                     ),

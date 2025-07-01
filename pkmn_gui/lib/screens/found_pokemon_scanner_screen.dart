@@ -450,7 +450,7 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
                                         '/pokedex',
                                       );
                                     },
-                                    child: const Text("Mitt Pokédex"),
+                                    child: const Text("Min Pokédex"),
                                   ),
                                 ),
                               ),

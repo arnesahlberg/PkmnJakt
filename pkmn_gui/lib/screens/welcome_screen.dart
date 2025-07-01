@@ -123,11 +123,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                           height: UIConstants.spacing24,
                                         ),
                                         const Text(
-                                          'Detta är en Pokémon-jakt du kan delta i om du är med på rikslägret. '
-                                          'Lite överallt på Stensund finns Pokémon gömda. Kan du hitta alla 151? \n\n'
-                                          'Du kan fånga Pokémon via telefonen om du först loggar in genom att klickar på knappen nedan '
-                                          'och scannar deltagarbandet du fick vid registreringen. \n\n'
-                                          'Du kan även delta analogt genom att hämta formulär i info.',
+                                          'Detta är en pokémonjakt du kan delta i om du är med på Frisksportlägret! '
+                                          'Lite överallt på Stensund finns pokémon gömda. Kan du hitta alla 151?\n\n'
+                                          'Du kan fånga pokémon via telefonen. Först loggar du in genom att klicka på knappen nedan '
+                                          'och klicka på "scanna bandet" (ditt deltagarband du fick vid mottagningen).\n\n'
+                                          'Det finns också en daglig pokémonjakt som du kan delta analogt med lappar du hämtar i info.',
                                           style: AppTextStyles.bodyLarge,
                                           textAlign: TextAlign.center,
                                         ),
