@@ -21,6 +21,7 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
   bool _scanned = false;
   bool _isProcessing = false;
   late AnimationController _rotationController;
+  List<MilestoneDefinition>? _pendingMilestones;
 
   @override
   void initState() {
@@ -125,6 +126,32 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
         ),
       ),
     );
+  }
+
+  Future<void> _showMilestonesAndNavigate(String route) async {
+    // First close the pokemon dialog
+    Navigator.pop(context);
+    
+    // Show any pending milestones
+    if (_pendingMilestones != null && _pendingMilestones!.isNotEmpty) {
+      for (int i = 0; i < _pendingMilestones!.length; i++) {
+        final milestone = _pendingMilestones![i];
+        // Add a small delay between milestones (except for the first one)
+        if (i > 0) {
+          await Future.delayed(const Duration(milliseconds: 300));
+        }
+        if (!mounted) return;
+        await _showMilestoneDialog(context, milestone);
+        if (!mounted) return;
+      }
+    }
+    
+    // Clear pending milestones
+    _pendingMilestones = null;
+    
+    // Navigate to the requested route
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, route);
   }
 
   Color _parseColor(String colorString) {
@@ -327,20 +354,13 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
       // Set processing to false *before* showing the dialog
       setState(() => _isProcessing = false);
       
-      // Show milestone dialogs if any were achieved
+      // Store milestones to show after pokemon dialog
       // Sort milestones by order to ensure consistent display
-      final sortedMilestones = List<MilestoneDefinition>.from(achievedMilestones)
-        ..sort((a, b) => a.order.compareTo(b.order));
-      
-      for (int i = 0; i < sortedMilestones.length; i++) {
-        final milestone = sortedMilestones[i];
-        // Add a small delay between milestones (except for the first one)
-        if (i > 0) {
-          await Future.delayed(const Duration(milliseconds: 300));
-        }
-        if (!mounted) return;
-        await _showMilestoneDialog(context, milestone);
-        if (!mounted) return;
+      if (achievedMilestones.isNotEmpty) {
+        _pendingMilestones = List<MilestoneDefinition>.from(achievedMilestones)
+          ..sort((a, b) => a.order.compareTo(b.order));
+      } else {
+        _pendingMilestones = null;
       }
 
       // show popup with pokemon info and image
@@ -443,12 +463,8 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
                                     horizontal: 8.0,
                                   ),
                                   child: PokedexButton(
-                                    onPressed: () {
-                                      Navigator.pop(dialogContext);
-                                      Navigator.pushReplacementNamed(
-                                        context,
-                                        '/pokedex',
-                                      );
+                                    onPressed: () async {
+                                      await _showMilestonesAndNavigate('/pokedex');
                                     },
                                     child: const Text("Min Pokédex"),
                                   ),
@@ -460,12 +476,8 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
                                     horizontal: 8.0,
                                   ),
                                   child: PokedexButton(
-                                    onPressed: () {
-                                      Navigator.pop(dialogContext);
-                                      Navigator.pushReplacementNamed(
-                                        context,
-                                        '/home',
-                                      );
+                                    onPressed: () async {
+                                      await _showMilestonesAndNavigate('/home');
                                     },
                                     child: const Text("Tillbaka"),
                                   ),
