@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../constants.dart';
 import 'pokedex_container.dart';
 import '../screens/user_statistics_screen.dart';
+import '../api_calls.dart';
 
 class HighscoreList extends StatefulWidget {
   final List<dynamic> highscores;
@@ -10,6 +11,9 @@ class HighscoreList extends StatefulWidget {
   final bool showContainer;
   final bool clickable;
   final bool showFirstPlacesIcons;
+  final bool linkToHighscorePage;
+  final int currentPage;
+  final bool hasActiveSearch;
 
   const HighscoreList({
     super.key,
@@ -18,6 +22,9 @@ class HighscoreList extends StatefulWidget {
     this.showContainer = true,
     this.clickable = false,
     this.showFirstPlacesIcons = false,
+    this.linkToHighscorePage = false,
+    this.currentPage = 1,
+    this.hasActiveSearch = false,
   });
 
   @override
@@ -26,6 +33,17 @@ class HighscoreList extends StatefulWidget {
 
 class _HighscoreListState extends State<HighscoreList> {
   int? _pressedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(HighscoreList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
+
 
   bool _hasDuplicateScore(dynamic currentScore) {
     return widget.highscores.where((s) => s['score'] == currentScore['score']).length >
@@ -37,15 +55,41 @@ class _HighscoreListState extends State<HighscoreList> {
     Widget content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.title,
-          style: const TextStyle(
-            fontFamily: 'PixelFontTitle',
-            fontSize: 20,
-            color: Color(0xFFE3350D),
+        if (widget.title.isNotEmpty) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                widget.title,
+                style: const TextStyle(
+                  fontFamily: 'PixelFontTitle',
+                  fontSize: 20,
+                  color: Color(0xFFE3350D),
+                ),
+              ),
+              if (widget.linkToHighscorePage)
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/highscore');
+                  },
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text(
+                    "Visa alla →",
+                    style: TextStyle(
+                      fontFamily: 'PixelFont',
+                      fontSize: 14,
+                      color: Color(0xFF992109),
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
+        ],
         if (widget.highscores.isEmpty)
           const Text("Ingen highscore data än.")
         else
@@ -73,7 +117,10 @@ class _HighscoreListState extends State<HighscoreList> {
                   ),
                   child: Row(
                     children: [
-                      if (widget.showFirstPlacesIcons && index < 3) ...[
+                      if (widget.showFirstPlacesIcons && 
+                          widget.currentPage == 1 && 
+                          !widget.hasActiveSearch && 
+                          index < 3) ...[
                         Icon(
                           Icons.emoji_events,
                           color:
@@ -91,13 +138,19 @@ class _HighscoreListState extends State<HighscoreList> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              score['name'],
-                              style: const TextStyle(
-                                fontFamily: 'PixelFont',
-                                fontSize: 16,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    score['name'],
+                                    style: const TextStyle(
+                                      fontFamily: 'PixelFont',
+                                      fontSize: 16,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
                             ),
                             Text(
                               "ID: ${score['id']}",

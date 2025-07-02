@@ -4,7 +4,12 @@ import 'package:http/http.dart' as http;
 
 Map<String, dynamic> decodeUtf8Json(http.Response response) {
   final decodedString = utf8.decode(response.bodyBytes);
-  return jsonDecode(decodedString);
+  final decoded = jsonDecode(decodedString);
+  if (decoded is Map<String, dynamic>) {
+    return decoded;
+  } else {
+    throw FormatException('Expected Map<String, dynamic> but got ${decoded.runtimeType}');
+  }
 }
 
 class ApiService {
@@ -15,10 +20,6 @@ class ApiService {
     if (token != null) "Authorization": token,
   };
 
-  static Map<String, dynamic> decodeUtf8Json(http.Response response) {
-    final decodedString = utf8.decode(response.bodyBytes);
-    return jsonDecode(decodedString);
-  }
 
   // login
   // look for response on the form:
@@ -222,7 +223,110 @@ class ApiService {
     // and return as List<dynamic>
     // this is a json array with pokemon data
     final decodedString = utf8.decode(response.bodyBytes);
-    return jsonDecode(decodedString) as List<dynamic>;
+    final List<dynamic> jsonList = jsonDecode(decodedString) as List<dynamic>;
+    return jsonList.toList();
+  }
+
+  static Future<List<int>> getUserMilestones(String userId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/user_milestones/$userId'),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load user milestones: ${response.statusCode}');
+    }
+    final decodedString = utf8.decode(response.bodyBytes);
+    final List<dynamic> jsonList = jsonDecode(decodedString) as List<dynamic>;
+    return jsonList.map((e) => e as int).toList();
+  }
+
+  static Future<List<dynamic>> getUserMilestoneDefinitions(String userId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/user_milestone_definitions/$userId'),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load user milestone definitions: ${response.statusCode}');
+    }
+    final decodedString = utf8.decode(response.bodyBytes);
+    final List<dynamic> jsonList = jsonDecode(decodedString) as List<dynamic>;
+    return jsonList;
+  }
+
+  // Paginated highscores
+  static Future<Map<String, dynamic>> getHighscores({
+    required int page,
+    int perPage = 20,
+  }) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/highscores?page=$page&per_page=$perPage'),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load highscores: ${response.statusCode}');
+    }
+    return decodeUtf8Json(response);
+  }
+
+  // Search highscores
+  static Future<Map<String, dynamic>> searchHighscores({
+    required String search,
+    required int page,
+    int perPage = 20,
+  }) async {
+    final encodedSearch = Uri.encodeQueryComponent(search);
+    final response = await http.get(
+      Uri.parse(
+        '$baseUrl/highscores/search?search=$encodedSearch&page=$page&per_page=$perPage',
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to search highscores: ${response.statusCode}');
+    }
+    return decodeUtf8Json(response);
+  }
+
+  // Get user Pokemon count by type
+  static Future<Map<String, dynamic>> getUserPokemonByType(
+    String userId,
+  ) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/user_pokemon_by_type/$userId'),
+    );
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Failed to load user Pokemon by type: ${response.statusCode}',
+      );
+    }
+    print('getUserPokemonByType response: ${response.body}');
+    final decodedString = utf8.decode(response.bodyBytes);
+    final decoded = jsonDecode(decodedString);
+    if (decoded is Map<String, dynamic>) {
+      return decoded;
+    } else if (decoded is List) {
+      // If API returns a list, convert it to a Map
+      // Assuming the list contains objects with 'type' and 'count' fields
+      final Map<String, dynamic> typeMap = {};
+      for (var item in decoded) {
+        if (item is Map<String, dynamic> && item.containsKey('type') && item.containsKey('count')) {
+          typeMap[item['type']] = item['count'];
+        }
+      }
+      return typeMap;
+    } else {
+      // Return empty map as fallback
+      return {};
+    }
+  }
+
+  // Get total Pokemon count by type (global statistics)
+  static Future<Map<String, dynamic>> getTotalPokemonByType() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/total_pokemon_by_type'),
+    );
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Failed to load total Pokemon by type: ${response.statusCode}',
+      );
+    }
+    return decodeUtf8Json(response);
   }
 }
 
@@ -236,7 +340,11 @@ class AdminApiService {
       Uri.parse('$baseUrl/am_i_admin'),
       headers: ApiService._headers(token),
     );
-    return response.statusCode == 200;
+    if (response.statusCode != 200 && response.statusCode != 401) {
+      throw Exception('Failed to check admin status: ${response.statusCode}');
+    }
+    final json = decodeUtf8Json(response);
+    return json['is_admin'] ?? false;
   }
 
   // get users in interval (post)

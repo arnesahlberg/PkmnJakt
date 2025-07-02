@@ -6,6 +6,8 @@ import '../widgets/data_matrix_scanner.dart';
 import '../widgets/pokedex_container.dart';
 import '../widgets/pokedex_button.dart';
 import '../constants.dart';
+import '../widgets/type_badge.dart';
+import '../models/milestone.dart';
 
 class FoundPokemonScannerScreen extends StatefulWidget {
   const FoundPokemonScannerScreen({super.key});
@@ -19,6 +21,7 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
   bool _scanned = false;
   bool _isProcessing = false;
   late AnimationController _rotationController;
+  List<MilestoneDefinition>? _pendingMilestones;
 
   @override
   void initState() {
@@ -33,6 +36,137 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
   void dispose() {
     _rotationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _showMilestoneDialog(BuildContext context, MilestoneDefinition milestone) async {
+    final color = _parseColor(milestone.color);
+    
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: PokedexContainer(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.stars,
+                    size: UIConstants.iconSizeHuge * 1.5,
+                    color: Colors.amber,
+                  ),
+                  const SizedBox(height: UIConstants.spacing16),
+                  const Text(
+                    "MILSTOLPE!",
+                    style: TextStyle(
+                      fontFamily: 'PixelFontTitle',
+                      fontSize: 28,
+                      color: AppColors.primaryRed,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    milestone.displayText,
+                    style: const TextStyle(
+                      fontFamily: 'PixelFont',
+                      fontSize: 20,
+                      color: AppColors.secondaryRed,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  // Milestone badge icon
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: color,
+                        width: 4,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withOpacity(0.5),
+                          blurRadius: 20,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        milestone.icon,
+                        style: TextStyle(
+                          fontFamily: 'PixelFontTitle',
+                          fontSize: milestone.icon.length > 2 ? 24 : 40,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  PokedexButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text("Fortsätt"),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showMilestonesAndNavigate(String route) async {
+    // First close the pokemon dialog
+    Navigator.pop(context);
+    
+    // Show any pending milestones
+    if (_pendingMilestones != null && _pendingMilestones!.isNotEmpty) {
+      for (int i = 0; i < _pendingMilestones!.length; i++) {
+        final milestone = _pendingMilestones![i];
+        // Add a small delay between milestones (except for the first one)
+        if (i > 0) {
+          await Future.delayed(const Duration(milliseconds: 300));
+        }
+        if (!mounted) return;
+        await _showMilestoneDialog(context, milestone);
+        if (!mounted) return;
+      }
+    }
+    
+    // Clear pending milestones
+    _pendingMilestones = null;
+    
+    // Navigate to the requested route
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, route);
+  }
+
+  Color _parseColor(String colorString) {
+    try {
+      // Remove the # if present
+      String hexColor = colorString.replaceAll('#', '');
+      // Add alpha if not present
+      if (hexColor.length == 6) {
+        hexColor = 'FF' + hexColor;
+      }
+      return Color(int.parse(hexColor, radix: 16));
+    } catch (e) {
+      // Fallback to amber if parsing fails
+      return Colors.amber;
+    }
   }
 
   void _onGetResult(String result) async {
@@ -196,11 +330,38 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
       final pokemonDetails = await ApiService.getPokemon(pokemonId);
       final pokemonName = pokemonDetails['name'];
       final pokemonDescription = pokemonDetails['description'];
+      final pokemonTypes = pokemonDetails['types'];
+      
+      // Parse achieved milestones
+      final milestonesData = foundResponse['milestones_achieved'] as List<dynamic>? ?? [];
+      final achievedMilestones = milestonesData
+          .map((data) => MilestoneDefinition.fromJson(data as Map<String, dynamic>))
+          .toList();
+      
+      // Debug: Print how many milestones were achieved
+      if (achievedMilestones.isNotEmpty) {
+        debugPrint("Achieved ${achievedMilestones.length} milestone(s):");
+        for (final milestone in achievedMilestones) {
+          debugPrint("  - ${milestone.displayText} (order: ${milestone.order})");
+        }
+      }
+      
+      // Keep backward compatibility (not used but maintained for API compatibility)
+      // final milestoneReached = foundResponse['milestone_reached'];
 
       if (!mounted) return;
 
       // Set processing to false *before* showing the dialog
       setState(() => _isProcessing = false);
+      
+      // Store milestones to show after pokemon dialog
+      // Sort milestones by order to ensure consistent display
+      if (achievedMilestones.isNotEmpty) {
+        _pendingMilestones = List<MilestoneDefinition>.from(achievedMilestones)
+          ..sort((a, b) => a.order.compareTo(b.order));
+      } else {
+        _pendingMilestones = null;
+      }
 
       // show popup with pokemon info and image
       showDialog(
@@ -274,7 +435,13 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
                                   ),
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
+                          if (pokemonTypes != null)
+                            TypeBadgeList(
+                              types: List<String>.from(pokemonTypes),
+                              fontSize: 14,
+                            ),
+                          const SizedBox(height: 16),
                           if (pokemonDescription != null &&
                               pokemonDescription.isNotEmpty)
                             Text(
@@ -296,14 +463,10 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
                                     horizontal: 8.0,
                                   ),
                                   child: PokedexButton(
-                                    onPressed: () {
-                                      Navigator.pop(dialogContext);
-                                      Navigator.pushReplacementNamed(
-                                        context,
-                                        '/pokedex',
-                                      );
+                                    onPressed: () async {
+                                      await _showMilestonesAndNavigate('/pokedex');
                                     },
-                                    child: const Text("Mitt Pokédex"),
+                                    child: const Text("Min Pokédex"),
                                   ),
                                 ),
                               ),
@@ -313,12 +476,8 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
                                     horizontal: 8.0,
                                   ),
                                   child: PokedexButton(
-                                    onPressed: () {
-                                      Navigator.pop(dialogContext);
-                                      Navigator.pushReplacementNamed(
-                                        context,
-                                        '/home',
-                                      );
+                                    onPressed: () async {
+                                      await _showMilestonesAndNavigate('/home');
                                     },
                                     child: const Text("Tillbaka"),
                                   ),

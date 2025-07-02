@@ -2,12 +2,14 @@ use std::path;
 
 use actix_web::{web, HttpResponse, HttpRequest};
 use serde::{Deserialize, Serialize};
+use log::{info, warn, error, debug};
 use crate::misc::{self, validate_token};
-use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore};
+use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats};
+use crate::milestones::MilestoneDefinition;
 use crate::databaseconnection;
 
 pub const USER_NAME_MIN_LENGTH: usize = 3;
-pub const USER_NAME_MAX_LENGTH: usize = 20;
+pub const USER_NAME_MAX_LENGTH: usize = 40;
 pub const PASSWORD_MIN_LENGTH: usize = 4;
 
 pub const AUHTORIZATION_HEADER_LABEL : &str = "Authorization";
@@ -63,9 +65,25 @@ pub struct LoginResponse {
 }
 
 pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    info!("Login attempt for user: {}", info.id);
+    
+    let conn = match databaseconnection::get_conn(get_env_dbpath()) {
+        Ok(c) => c,
+        Err(e) => {
+            error!("Failed to get database connection: {}", e);
+            return HttpResponse::InternalServerError().json(LoginResponse {
+                id: info.id.clone(),
+                token: None,
+                name: None,
+                message: "Database connection failed".to_string(),
+                result_code: CallResultCode::Ok,
+            });
+        }
+    };
+    
     let user_exists = databaseconnection::user_id_exists(&info.id, &conn).unwrap();
     if !user_exists {
+        warn!("Login failed - user not found: {}", info.id);
         let response = LoginResponse {
             id: info.id.clone(),
             token: None,
@@ -75,9 +93,11 @@ pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
         };
         return HttpResponse::NotFound().json(response);
     }
+    
     let (user, token) = match databaseconnection::login_and_get_user_by_id_pwd(&info.id, &info.password, &conn).unwrap() {
         Some((user, token)) => (user, token),
         None => {
+            warn!("Login failed - invalid password for user: {}", info.id);
             let response = LoginResponse {
                 id: info.id.clone(),
                 token: None,
@@ -88,6 +108,8 @@ pub async fn login(info: web::Json<LoginRequest>) -> HttpResponse {
             return HttpResponse::Unauthorized().json(response);
         }
     };
+    
+    info!("Login successful for user: {} ({})", user.user_id, user.name);
     let response = LoginResponse {
         id: user.user_id,
         token: Some(token),
@@ -106,9 +128,26 @@ pub struct CreateUserRequest {
 }
 
 pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
-    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    info!("User creation attempt - ID: {}, Name: {}, Name length: {}", 
+          info.id, info.name, info.name.len());
+    
+    let conn = match databaseconnection::get_conn(get_env_dbpath()) {
+        Ok(c) => c,
+        Err(e) => {
+            error!("Failed to get database connection: {}", e);
+            return HttpResponse::InternalServerError().json(LoginResponse {
+                id: info.id.clone(),
+                name: None,
+                token: None,
+                message: "Database connection failed".to_string(),
+                result_code: CallResultCode::Ok, // Should add a new error code for this
+            });
+        }
+    };
+    
     let user_exists = databaseconnection::user_id_exists(&info.id, &conn).unwrap();
     if user_exists {
+        warn!("User creation failed - user already exists: {}", info.id);
         let response = LoginResponse {
             id: info.id.clone(),
             name: None,
@@ -121,6 +160,7 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
 
     // check if name is too short or long
     if info.name.len() < USER_NAME_MIN_LENGTH {
+        warn!("User creation failed - name too short: {} (length: {})", info.name, info.name.len());
         let response = LoginResponse {
             id: info.id.clone(),
             name: None,
@@ -132,6 +172,7 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
     }
 
     if info.name.len() > USER_NAME_MAX_LENGTH {
+        warn!("User creation failed - name too long: {} (length: {})", info.name, info.name.len());
         let response = LoginResponse {
             id: info.id.clone(),
             name: None,
@@ -144,6 +185,7 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
 
     // password check
     if info.password.len() < PASSWORD_MIN_LENGTH {
+        warn!("User creation failed - password too short for user: {}", info.id);
         let response = LoginResponse {
             id: info.id.clone(),
             name: None,
@@ -155,15 +197,29 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
     }
 
     // if good then create user
-    let (user, token) = databaseconnection::create_user(&info.id, &info.name, &info.password, &conn).unwrap();
-    let response = LoginResponse {
-        id: user.user_id,
-        name: Some(user.name),
-        token: Some(token),
-        message: format!("Created new user {}", info.name),
-        result_code: CallResultCode::Ok,
-    };
-    HttpResponse::Ok().json(response)
+    match databaseconnection::create_user(&info.id, &info.name, &info.password, &conn) {
+        Ok((user, token)) => {
+            info!("User created successfully - ID: {}, Name: {}", user.user_id, user.name);
+            let response = LoginResponse {
+                id: user.user_id,
+                name: Some(user.name.clone()),
+                token: Some(token),
+                message: format!("Created new user {}", user.name),
+                result_code: CallResultCode::Ok,
+            };
+            HttpResponse::Ok().json(response)
+        },
+        Err(e) => {
+            error!("Failed to create user {}: {}", info.id, e);
+            HttpResponse::InternalServerError().json(LoginResponse {
+                id: info.id.clone(),
+                name: None,
+                token: None,
+                message: "Failed to create user".to_string(),
+                result_code: CallResultCode::Ok, // Should add a new error code for this
+            })
+        }
+    }
 }
 
 
@@ -447,61 +503,91 @@ pub struct FoundPokemonResponse {
     pub pokemon_id: Option<u32>,
     pub message: String,
     pub result_code: CallResultCode,
+    pub milestone_reached: Option<u32>, // Keep for backward compatibility
+    pub milestones_achieved: Vec<MilestoneDefinition>,
 }
 
 pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokemonRequest>) -> HttpResponse {
+    debug!("Pokemon catch attempt with catch code");
+    
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
     let user_id = misc::get_user_id_from_token(token).unwrap();
+    
     if !validate_token(&user_id, token, &conn) {
+        warn!("Pokemon catch failed - invalid token for user: {}", user_id);
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
             pokemon_id: None,
             message: "Invalid token".to_string(),
             result_code: CallResultCode::InvalidToken,
+            milestone_reached: None,
+            milestones_achieved: Vec::new(),
         };
         return HttpResponse::BadRequest().json(response);
     }
+    
     let user_exists = databaseconnection::user_id_exists(&user_id, &conn).unwrap();
     if !user_exists {
+        error!("Pokemon catch failed - user does not exist: {}", user_id);
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
             pokemon_id: None,
             message: format!("User does not exist {}", user_id),
             result_code: CallResultCode::UserNotFound,
+            milestone_reached: None,
+            milestones_achieved: Vec::new(),
         };
         return HttpResponse::BadRequest().json(response);
     }
+    
     let pokemon_exists = databaseconnection::check_if_pokemon_exists_by_catch_code(&info.catch_code, &conn).unwrap();
     if !pokemon_exists {
+        warn!("Pokemon catch failed - invalid catch code for user: {}", user_id);
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
             pokemon_id: None,
             message: "Cannot find pokemon".to_string(),
             result_code: CallResultCode::PokemonNotFound,
+            milestone_reached: None,
+            milestones_achieved: Vec::new(),
         };
         return HttpResponse::BadRequest().json(response);
     }
+    
     let pokemon = databaseconnection::get_pokemon_by_catch_code(&info.catch_code, &conn).unwrap();
     let found_before =
         databaseconnection::check_if_you_found_pokemon_before(&user_id, &info.catch_code, &conn).unwrap();
     if found_before {
+        info!("Pokemon already caught - user: {}, pokemon: {} ({})", user_id, pokemon.name, pokemon.number);
         let response = FoundPokemonResponse {
             user_id: user_id.clone(),
             pokemon_id: Some(pokemon.number.clone()),
             message: format!("Already found pokemon"),
             result_code: CallResultCode::PokemonAlreadyFound,
+            milestone_reached: None,
+            milestones_achieved: Vec::new(),
         };
         return HttpResponse::Ok().json(response);
     }
-    databaseconnection::found_pokemon(&user_id, &info.catch_code, &conn).unwrap();
+    
+    let milestones_achieved = databaseconnection::found_pokemon(&user_id, &info.catch_code, &conn).unwrap();
+    info!("Pokemon caught successfully - user: {}, pokemon: {} ({})", user_id, pokemon.name, pokemon.number);
+    
+    // Keep backward compatibility with milestone_reached
+    let milestone_reached = milestones_achieved.iter()
+        .find(|m| m.milestone_type == crate::milestones::MilestoneType::CountBased)
+        .and_then(|m| m.requirement.parse::<u32>().ok());
+    
     let response = FoundPokemonResponse {
         user_id: user_id.clone(),
         pokemon_id: Some(pokemon.number.clone()),
         message: format!("Caught {} (#{})", pokemon.name, pokemon.number),
         result_code: CallResultCode::Ok,
+        milestone_reached,
+        milestones_achieved,
     };
     HttpResponse::Ok().json(response)
 }
@@ -570,6 +656,76 @@ pub async fn get_statistics_highscore() -> HttpResponse  {
             user_scores : scores,
             result_code: CallResultCode::Ok,
         };
+    HttpResponse::Ok().json(res)
+}
+
+// Paginated highscores endpoints (public, no auth required)
+#[derive(Debug, Deserialize)]
+pub struct GetHighscoresRequest {
+    pub page: u32,
+    pub per_page: Option<u32>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct GetHighscoresResponse {
+    pub scores: Vec<UserScore>,
+    pub total_count: u32,
+    pub page: u32,
+    pub per_page: u32,
+    pub total_pages: u32,
+    pub result_code: CallResultCode,
+}
+
+pub async fn get_highscores(query: web::Query<GetHighscoresRequest>) -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    
+    let per_page = query.per_page.unwrap_or(20).min(50); // Max 50 per page
+    let page = query.page.max(1); // Ensure page is at least 1
+    let offset = (page - 1) * per_page;
+    
+    let scores = databaseconnection::get_highscores_paginated(per_page, offset, &conn).unwrap();
+    let total_count = databaseconnection::get_highscores_total_count(&conn).unwrap();
+    let total_pages = (total_count + per_page - 1) / per_page; // Ceiling division
+    
+    let res = GetHighscoresResponse {
+        scores,
+        total_count,
+        page,
+        per_page,
+        total_pages,
+        result_code: CallResultCode::Ok,
+    };
+    
+    HttpResponse::Ok().json(res)
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SearchHighscoresRequest {
+    pub search: String,
+    pub page: u32,
+    pub per_page: Option<u32>,
+}
+
+pub async fn search_highscores(query: web::Query<SearchHighscoresRequest>) -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    
+    let per_page = query.per_page.unwrap_or(20).min(50); // Max 50 per page
+    let page = query.page.max(1); // Ensure page is at least 1
+    let offset = (page - 1) * per_page;
+    
+    let scores = databaseconnection::get_highscores_filtered(&query.search, per_page, offset, &conn).unwrap();
+    let total_count = databaseconnection::get_highscores_filtered_count(&query.search, &conn).unwrap();
+    let total_pages = (total_count + per_page - 1) / per_page; // Ceiling division
+    
+    let res = GetHighscoresResponse {
+        scores,
+        total_count,
+        page,
+        per_page,
+        total_pages,
+        result_code: CallResultCode::Ok,
+    };
+    
     HttpResponse::Ok().json(res)
 }
 
@@ -850,6 +1006,28 @@ pub async fn get_user_pokedex(path: web::Path<String>) -> HttpResponse {
     HttpResponse::Ok().json(pokedex)
 }
 
+pub async fn get_user_milestones(path: web::Path<String>) -> HttpResponse {
+    let user_id = path.into_inner();
+    // first check if user exists
+    if !databaseconnection::user_id_exists(&user_id, &databaseconnection::get_conn(get_env_dbpath()).unwrap()).unwrap() {
+        return HttpResponse::NotFound().finish();
+    }
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let milestones = databaseconnection::get_user_milestones(&user_id, &conn).unwrap();
+    HttpResponse::Ok().json(milestones)
+}
+
+pub async fn get_user_milestone_definitions(path: web::Path<String>) -> HttpResponse {
+    let user_id = path.into_inner();
+    // first check if user exists
+    if !databaseconnection::user_id_exists(&user_id, &databaseconnection::get_conn(get_env_dbpath()).unwrap()).unwrap() {
+        return HttpResponse::NotFound().finish();
+    }
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let milestone_definitions = databaseconnection::get_user_milestone_definitions(&user_id, &conn).unwrap();
+    HttpResponse::Ok().json(milestone_definitions)
+}
+
 pub async fn validate_token_request(req: HttpRequest) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
@@ -862,7 +1040,33 @@ pub async fn validate_token_request(req: HttpRequest) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
+// Get Pokemon count by type for a specific user
+pub async fn get_user_pokemon_by_type(path: web::Path<String>) -> HttpResponse {
+    let user_id = path.into_inner();
+    // first check if user exists
+    if !databaseconnection::user_id_exists(&user_id, &databaseconnection::get_conn(get_env_dbpath()).unwrap()).unwrap() {
+        return HttpResponse::NotFound().finish();
+    }
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let type_stats = databaseconnection::user_pokemon_by_type(&user_id, &conn).unwrap();
+    HttpResponse::Ok().json(type_stats)
+}
+
+// Get total Pokemon catches by type across all users
+pub async fn get_total_pokemon_by_type() -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let type_stats = databaseconnection::total_pokemon_by_type(&conn).unwrap();
+    HttpResponse::Ok().json(type_stats)
+}
+
 // admin endpoints
+
+#[derive(Debug, Serialize)]
+pub struct AmIAdminResponse {
+    pub is_admin: bool,
+    pub user_id: String,
+    pub result_code: CallResultCode,
+}
 
 pub async fn am_i_admin(req: HttpRequest) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
@@ -871,13 +1075,27 @@ pub async fn am_i_admin(req: HttpRequest) -> HttpResponse {
     let user_id = misc::get_user_id_from_token(token).unwrap();
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     if !validate_token(&user_id, token, &conn) {
-        return HttpResponse::Unauthorized().finish();
+        let response = AmIAdminResponse {
+            is_admin: false,
+            user_id: user_id.clone(),
+            result_code: CallResultCode::InvalidToken,
+        };
+        return HttpResponse::Unauthorized().json(response);
     }
     let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
-    if !is_admin {
-        return HttpResponse::Forbidden().finish();
-    }
-    HttpResponse::Ok().finish()
+    let response = AmIAdminResponse {
+        is_admin,
+        user_id: user_id.clone(),
+        result_code: CallResultCode::Ok,
+    };
+    HttpResponse::Ok().json(response)
+}
+
+#[derive(Debug, Serialize)]
+pub struct IsUserAdminResponse {
+    pub is_admin: bool,
+    pub user_id: String,
+    pub result_code: CallResultCode,
 }
 
 pub async fn is_user_admin(req: HttpRequest, path: web::Path<String>) -> HttpResponse {
@@ -888,14 +1106,29 @@ pub async fn is_user_admin(req: HttpRequest, path: web::Path<String>) -> HttpRes
     let user_id = misc::get_user_id_from_token(token).unwrap();
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     if !validate_token(&user_id, token, &conn) {
-        return HttpResponse::Unauthorized().finish();
+        let response = IsUserAdminResponse {
+            is_admin: false,
+            user_id: target_user_id.clone(),
+            result_code: CallResultCode::InvalidToken,
+        };
+        return HttpResponse::Unauthorized().json(response);
     }
-    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
-    if !is_admin {
-        return HttpResponse::Forbidden().finish();
+    let requesting_user_is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !requesting_user_is_admin {
+        let response = IsUserAdminResponse {
+            is_admin: false,
+            user_id: target_user_id.clone(),
+            result_code: CallResultCode::UserNotAdmin,
+        };
+        return HttpResponse::Forbidden().json(response);
     }
-    let is_admin = databaseconnection::user_is_admin(&target_user_id, &conn).unwrap();
-    HttpResponse::Ok().body(is_admin.to_string())
+    let target_is_admin = databaseconnection::user_is_admin(&target_user_id, &conn).unwrap();
+    let response = IsUserAdminResponse {
+        is_admin: target_is_admin,
+        user_id: target_user_id.clone(),
+        result_code: CallResultCode::Ok,
+    };
+    HttpResponse::Ok().json(response)
 }
 
 // make user admin
@@ -1018,6 +1251,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/view_found_pokemon", web::post().to(view_found_pokemon))
         .route("/statistics_highscore", web::get().to(get_statistics_highscore))
         .route("/statistics_latest_pokemon_found", web::get().to(get_statistics_latest_pokemon_found))
+        .route("/highscores", web::get().to(get_highscores))
+        .route("/highscores/search", web::get().to(search_highscores))
         .route("/get_user/{user_id}", web::get().to(get_user))
         .route("/num_users", web::get().to(num_users))
         .route("/get_pokemon/{number}", web::get().to(get_pokemon))
@@ -1025,6 +1260,10 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/user_ranking/{user_id}", web::get().to(get_user_ranking))
         .route("/my_pokedex", web::get().to(get_my_pokedex))
         .route("/user_pokedex/{user_id}", web::get().to(get_user_pokedex))
+        .route("/user_milestones/{user_id}", web::get().to(get_user_milestones))
+        .route("/user_milestone_definitions/{user_id}", web::get().to(get_user_milestone_definitions))
+        .route("/user_pokemon_by_type/{user_id}", web::get().to(get_user_pokemon_by_type))
+        .route("/total_pokemon_by_type", web::get().to(get_total_pokemon_by_type))
         // admin endpoints
         .route("/am_i_admin", web::get().to(am_i_admin))
         .route("/is_user_admin/{user_id}", web::get().to(is_user_admin))

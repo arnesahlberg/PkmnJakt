@@ -6,6 +6,7 @@ import '../api_calls.dart';
 import '../main.dart';
 import '../utils/auth_utils.dart';
 import '../constants.dart';
+import '../widgets/type_badge.dart';
 
 class PokedexScreen extends StatefulWidget {
   const PokedexScreen({super.key});
@@ -104,11 +105,12 @@ class _PokedexScreenState extends State<PokedexScreen> {
               borderRadius: BorderRadius.circular(UIConstants.borderRadius16),
             ),
             child: PokedexContainer(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                     Text(
                       pokemon['name'],
                       style: const TextStyle(
@@ -182,6 +184,12 @@ class _PokedexScreenState extends State<PokedexScreen> {
                           ),
                         ),
                       ),
+                    const SizedBox(height: 16),
+                    if (pokemon['types'] != null)
+                      TypeBadgeList(
+                        types: List<String>.from(pokemon['types']),
+                        fontSize: 14,
+                      ),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
@@ -206,6 +214,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
               ),
             ),
           ),
+        ),
     );
   }
 
@@ -388,7 +397,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                           child: Container(
                                             margin: const EdgeInsets.all(6),
                                             decoration: BoxDecoration(
-                                              color: Colors.grey.shade100,
+                                              color: Colors.white,
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               border: Border.all(
@@ -399,31 +408,40 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                             child: ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(7),
-                                              child:
-                                                  isCaught
-                                                      ? Image.asset(
-                                                        'assets/images/pkmn/${pokemon['number']}.jpg',
-                                                        fit: BoxFit.contain,
-                                                        errorBuilder:
-                                                            (
-                                                              context,
-                                                              error,
-                                                              stackTrace,
-                                                            ) => const Icon(
-                                                              Icons
-                                                                  .image_outlined,
+                                              child: Container(
+                                                color: Colors.white,
+                                                child:
+                                                    isCaught
+                                                        ? Image.asset(
+                                                          'assets/images/pkmn/${pokemon['number']}.jpg',
+                                                          fit: BoxFit.contain,
+                                                          errorBuilder:
+                                                              (
+                                                                context,
+                                                                error,
+                                                                stackTrace,
+                                                              ) => Container(
+                                                                color: Colors.white,
+                                                                child: const Icon(
+                                                                  Icons
+                                                                      .image_outlined,
+                                                                  size: 48,
+                                                                ),
+                                                              ),
+                                                        )
+                                                        : Container(
+                                                          color: Colors.white,
+                                                          child: const Center(
+                                                            child: Icon(
+                                                              Icons.question_mark,
                                                               size: 48,
+                                                              color:
+                                                                  AppColors
+                                                                      .secondaryRed,
                                                             ),
-                                                      )
-                                                      : const Center(
-                                                        child: Icon(
-                                                          Icons.question_mark,
-                                                          size: 48,
-                                                          color:
-                                                              AppColors
-                                                                  .secondaryRed,
+                                                          ),
                                                         ),
-                                                      ),
+                                              ),
                                             ),
                                           ),
                                         ),

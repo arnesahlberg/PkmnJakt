@@ -14,3 +14,7 @@ pkmn_gui/release.sh
 Testing/logincodes
 
 **/*.pem
+uploads
+**/*.log
+
+**/__pycache__
