@@ -144,7 +144,7 @@ lazy_static! {
                 requirement: "150".to_string(),
                 display_text: "Mewtwo fångad!".to_string(),
                 color: "#9C27B0".to_string(),
-                icon: "✨✨\nMewtwo".to_string(),
+                icon: "🧪\nMewtwo".to_string(),
                 order: 203,
             }
         );
