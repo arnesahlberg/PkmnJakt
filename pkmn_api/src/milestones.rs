@@ -61,24 +61,24 @@ lazy_static! {
         
         // Type-based milestones (first Pokemon of each type)
         let type_milestones = vec![
-            ("Normal", "Första Normal-typ!", "#A8A878", "Normal"),
+            ("Normal", "Första Normal-typ!", "#A8A878", "🐾"),
             ("Eld", "Första Eld-typ!", "#F08030", "🔥"),
             ("Vatten", "Första Vatten-typ!", "#6890F0", "💧"),
             ("Gräs", "Första Gräs-typ!", "#78C850", "🍃"),
-            ("Elektro", "Första Elektro-typ!", "#F8D030", "⚡️"),
+            ("Elektro", "Första Elektro-typ!", "#F8D030", "🔋"),
             ("Is", "Första Is-typ!", "#98D8D8", "🧊"),
             ("Kamp", "Första Kamp-typ!", "#C03028", "🤜🤛"),
             ("Gift", "Första Gift-typ!", "#A040A0", "☠️"),
             ("Mark", "Första Mark-typ!", "#E0C068", "Mark"),
             ("Flyg", "Första Flyg-typ!", "#A890F0", "🪽"),
-            ("Psykisk", "Första Psykisk-typ!", "#F85888", "Psy"),
+            ("Psykisk", "Första Psykisk-typ!", "#F85888", "🧠"),
             ("Insekt", "Första Insekt-typ!", "#A8B820", "🐜"),
             ("Sten", "Första Sten-typ!", "#B8A038", "🪨"),
             ("Spöke", "Första Spöke-typ!", "#705898", "👻"),
             ("Drake", "Första Drake-typ!", "#7038F8", "🐉"),
-            ("Mörk", "Första Mörk-typ!", "#705848", "Mörk"),
-            ("Stål", "Första Stål-typ!", "#B8B8D0", "Stål"),
-            ("Fé", "Första Fé-typ!", "#EE99AC", "Fé"),
+            ("Mörk", "Första Mörk-typ!", "#705848", "🌑"),
+            ("Stål", "Första Stål-typ!", "#B8B8D0", "🛡️"),
+            ("Fé", "Första Fé-typ!", "#EE99AC", "🧚"),
         ];
         
         for (i, (type_name, text, color, icon)) in type_milestones.iter().enumerate() {
