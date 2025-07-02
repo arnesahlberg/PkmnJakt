@@ -75,7 +75,6 @@ class _AdminScreenState extends State<AdminScreen> {
       );
       setState(() {
         _users = result['users'] ?? [];
-        debugPrint('Users: $_users');
       });
     } else {
       final result = await AdminApiService.getUsersFilter(

@@ -91,7 +91,6 @@ class _ChangePasswordPromptState extends State<ChangePasswordPrompt> {
     } catch (e) {
       setState(() {
         errorMessage = "Kunde inte validera lösenord: $e";
-        debugPrint("Error validating password: $e");
         isValidating = false;
       });
     }

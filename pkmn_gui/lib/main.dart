@@ -35,13 +35,8 @@ class UserSession extends ChangeNotifier {
       userName = prefs.getString("userName");
       token = prefs.getString("token");
       validUntil = prefs.getString("valid_until");
-      if (validUntil != null) {
-        debugPrint("Loaded validUntil: $validUntil");
-      }
       notifyListeners();
     } catch (e, s) {
-      debugPrint('Error loading user session from SharedPreferences: $e');
-      debugPrint('Stack trace: $s');
       rethrow; // Rethrow to indicate initialization failure
     }
   }
@@ -104,12 +99,9 @@ void main() async {
 
   final userSession = UserSession(); // create instance
   try {
-    debugPrint("Initializing user session...");
     await userSession.ensureInitialized(); // wait for storage to load
-    debugPrint("User session initialization completed.");
   } catch (e, s) {
-    debugPrint('Failed to initialize user session in main: $e');
-    debugPrint('Stack trace: $s');
+    // Silent failure - app will continue with empty session
   }
 
   runApp(

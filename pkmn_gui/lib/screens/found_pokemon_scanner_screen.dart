@@ -175,15 +175,11 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
     setState(() => _isProcessing = true);
     try {
       final session = Provider.of<UserSession>(context, listen: false);
-      debugPrint("foundPokemon: $result");
-      debugPrint("token: ${session.token}");
 
       final foundResponse = await ApiService.foundPokemon(
         result,
         session.token!,
       );
-
-      debugPrint("catchResult: $foundResponse");
 
       // Check CallResultCode for errors
       if (foundResponse['result_code'] != CallResultCode.ok) {
@@ -337,14 +333,6 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
       final achievedMilestones = milestonesData
           .map((data) => MilestoneDefinition.fromJson(data as Map<String, dynamic>))
           .toList();
-      
-      // Debug: Print how many milestones were achieved
-      if (achievedMilestones.isNotEmpty) {
-        debugPrint("Achieved ${achievedMilestones.length} milestone(s):");
-        for (final milestone in achievedMilestones) {
-          debugPrint("  - ${milestone.displayText} (order: ${milestone.order})");
-        }
-      }
       
       // Keep backward compatibility (not used but maintained for API compatibility)
       // final milestoneReached = foundResponse['milestone_reached'];

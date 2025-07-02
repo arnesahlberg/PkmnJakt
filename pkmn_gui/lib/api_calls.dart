@@ -8,7 +8,9 @@ Map<String, dynamic> decodeUtf8Json(http.Response response) {
   if (decoded is Map<String, dynamic>) {
     return decoded;
   } else {
-    throw FormatException('Expected Map<String, dynamic> but got ${decoded.runtimeType}');
+    throw FormatException(
+      'Expected Map<String, dynamic> but got ${decoded.runtimeType}',
+    );
   }
 }
 
@@ -19,7 +21,6 @@ class ApiService {
     "Content-Type": "application/json",
     if (token != null) "Authorization": token,
   };
-
 
   // login
   // look for response on the form:
@@ -124,7 +125,6 @@ class ApiService {
   }
 
   static Future<bool> validateToken(String token) async {
-    debugPrint('validateToken: $token');
     final response = await http.post(
       Uri.parse('$baseUrl/validate_token'),
       headers: _headers(token),
@@ -136,8 +136,6 @@ class ApiService {
     String catchCode,
     String token,
   ) async {
-    debugPrint('foundPokemon: $catchCode');
-    debugPrint("token: $token");
     final response = await http.post(
       Uri.parse('$baseUrl/found_pokemon'),
       body: jsonEncode({'catch_code': catchCode}),
@@ -150,8 +148,6 @@ class ApiService {
     int n,
     String token,
   ) async {
-    debugPrint('viewFoundPokemon: $n');
-    debugPrint("token: $token");
     final response = await http.post(
       Uri.parse('$baseUrl/view_found_pokemon'),
       body: jsonEncode({'n': n}),
@@ -163,7 +159,6 @@ class ApiService {
   //Get statistics (no Authorization required)
   static Future<Map<String, dynamic>> getStatisticsHighscore() async {
     final response = await http.get(Uri.parse('$baseUrl/statistics_highscore'));
-    // print(response.body);
     return decodeUtf8Json(response);
   }
 
@@ -215,7 +210,6 @@ class ApiService {
 
   static Future<List<dynamic>> getUserPokedex(String userId) async {
     final response = await http.get(Uri.parse('$baseUrl/user_pokedex/$userId'));
-    print('getUserPokedex response: ${response.body}');
     if (response.statusCode != 200) {
       throw Exception('Failed to load user pokedex: ${response.statusCode}');
     }
@@ -239,12 +233,16 @@ class ApiService {
     return jsonList.map((e) => e as int).toList();
   }
 
-  static Future<List<dynamic>> getUserMilestoneDefinitions(String userId) async {
+  static Future<List<dynamic>> getUserMilestoneDefinitions(
+    String userId,
+  ) async {
     final response = await http.get(
       Uri.parse('$baseUrl/user_milestone_definitions/$userId'),
     );
     if (response.statusCode != 200) {
-      throw Exception('Failed to load user milestone definitions: ${response.statusCode}');
+      throw Exception(
+        'Failed to load user milestone definitions: ${response.statusCode}',
+      );
     }
     final decodedString = utf8.decode(response.bodyBytes);
     final List<dynamic> jsonList = jsonDecode(decodedString) as List<dynamic>;
@@ -295,7 +293,6 @@ class ApiService {
         'Failed to load user Pokemon by type: ${response.statusCode}',
       );
     }
-    print('getUserPokemonByType response: ${response.body}');
     final decodedString = utf8.decode(response.bodyBytes);
     final decoded = jsonDecode(decodedString);
     if (decoded is Map<String, dynamic>) {
@@ -305,7 +302,9 @@ class ApiService {
       // Assuming the list contains objects with 'type' and 'count' fields
       final Map<String, dynamic> typeMap = {};
       for (var item in decoded) {
-        if (item is Map<String, dynamic> && item.containsKey('type') && item.containsKey('count')) {
+        if (item is Map<String, dynamic> &&
+            item.containsKey('type') &&
+            item.containsKey('count')) {
           typeMap[item['type']] = item['count'];
         }
       }
