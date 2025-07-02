@@ -41,7 +41,7 @@ lazy_static! {
             (130, "130 Pokémon!", "#E65100"),
             (140, "140 Pokémon - nästan alla!", "#FF6F00"),
             (150, "150 Pokémon - otroligt!", "#FF5722"),
-            (151, "ALLA 151 - Helt fantastiskt! Vi trodde faktiskt inte att någon skulle göra det! Du får en våffelbiljett om du pratar Arne eller Josefin!", "#673AB7"),
+            (151, "ALLA 151 - Helt fantastiskt! Vi trodde faktiskt inte att någon skulle göra det!", "#673AB7"),
         ];
         
         for (i, (count, text, color)) in count_milestones.iter().enumerate() {
@@ -61,16 +61,16 @@ lazy_static! {
         
         // Type-based milestones (first Pokemon of each type)
         let type_milestones = vec![
-            ("Normal", "Första Normal-typ!", "#A8A878", "Norm"),
+            ("Normal", "Första Normal-typ!", "#A8A878", "Normal"),
             ("Eld", "Första Eld-typ!", "#F08030", "🔥"),
             ("Vatten", "Första Vatten-typ!", "#6890F0", "💧"),
-            ("Gräs", "Första Gräs-typ!", "#78C850", "Gräs"),
-            ("Elektro", "Första Elektro-typ!", "#F8D030", "El"),
+            ("Gräs", "Första Gräs-typ!", "#78C850", "🍃"),
+            ("Elektro", "Första Elektro-typ!", "#F8D030", "⚡️"),
             ("Is", "Första Is-typ!", "#98D8D8", "🧊"),
-            ("Kamp", "Första Kamp-typ!", "#C03028", "Kamp"),
-            ("Gift", "Första Gift-typ!", "#A040A0", "Gift"),
+            ("Kamp", "Första Kamp-typ!", "#C03028", "🤜🤛"),
+            ("Gift", "Första Gift-typ!", "#A040A0", "☠️"),
             ("Mark", "Första Mark-typ!", "#E0C068", "Mark"),
-            ("Flyg", "Första Flyg-typ!", "#A890F0", "Flyg"),
+            ("Flyg", "Första Flyg-typ!", "#A890F0", "🪽"),
             ("Psykisk", "Första Psykisk-typ!", "#F85888", "Psy"),
             ("Insekt", "Första Insekt-typ!", "#A8B820", "🐜"),
             ("Sten", "Första Sten-typ!", "#B8A038", "🪨"),
@@ -168,7 +168,7 @@ lazy_static! {
                 id: "pokemon_312798312".to_string(),
                 milestone_type: MilestoneType::SpecificPokemon,
                 requirement: "312798312".to_string(),
-                display_text: "MissingNo. fångad!".to_string(),
+                display_text: "Hittat bug-pokémon MissingNo!".to_string(),
                 color: "#757575".to_string(),
                 icon: "👾\nMissingNo".to_string(),
                 order: 205,
@@ -182,7 +182,7 @@ lazy_static! {
                 id: "legendary_birds".to_string(),
                 milestone_type: MilestoneType::SpecificPokemon,
                 requirement: "144,145,146".to_string(),
-                display_text: "Alla legendariska fåglar!".to_string(),
+                display_text: "Alla tre legendariska fåglar hittade!".to_string(),
                 color: "#FFD700".to_string(),
                 icon: "❄️⚡️🔥".to_string(),
                 order: 206,
