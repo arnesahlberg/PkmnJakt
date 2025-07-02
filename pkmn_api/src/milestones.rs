@@ -131,7 +131,7 @@ lazy_static! {
                 requirement: "146".to_string(),
                 display_text: "Moltres fångad!".to_string(),
                 color: "#FF6B35".to_string(),
-                icon: "🔥\nMoltres".to_string(),
+                icon: "🐦‍🔥\nMoltres".to_string(),
                 order: 202,
             }
         );
@@ -184,7 +184,7 @@ lazy_static! {
                 requirement: "144,145,146".to_string(),
                 display_text: "Alla tre legendariska fåglar hittade!".to_string(),
                 color: "#FFD700".to_string(),
-                icon: "🦅".to_string(),
+                icon: "🐦‍🔥".to_string(),
                 order: 206,
             }
         );
