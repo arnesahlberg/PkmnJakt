@@ -69,7 +69,7 @@ lazy_static! {
             ("Is", "Första Is-typ!", "#98D8D8", "🧊"),
             ("Kamp", "Första Kamp-typ!", "#C03028", "🤜🤛"),
             ("Gift", "Första Gift-typ!", "#A040A0", "☠️"),
-            ("Mark", "Första Mark-typ!", "#E0C068", "Mark"),
+            ("Mark", "Första Mark-typ!", "#E0C068", "🪏"),
             ("Flyg", "Första Flyg-typ!", "#A890F0", "🪽"),
             ("Psykisk", "Första Psykisk-typ!", "#F85888", "🧠"),
             ("Insekt", "Första Insekt-typ!", "#A8B820", "🐜"),
