@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pkmn_gui/screens/admin_screen.dart';
 import 'package:pkmn_gui/screens/pokedex_screen.dart';
-import 'package:pkmn_gui/screens/pokemon_found_screen.dart';
+import 'package:pkmn_gui/screens/admin_pokemon_found_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // import shared_preferences
 import 'screens/main_screen.dart';
@@ -163,7 +163,7 @@ class MyApp extends StatelessWidget {
         '/pokedex': (_) => const PokedexScreen(),
         '/admin': (_) => const AdminScreen(),
         '/highscore': (_) => const HighscorePage(),
-        '/pokemon_found': (_) => const PokemonFoundScreen(),
+        '/pokemon_found': (_) => const AdminPokemonFoundScreen(),
       },
     );
   }

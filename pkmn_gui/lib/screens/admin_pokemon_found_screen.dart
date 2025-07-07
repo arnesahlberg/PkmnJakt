@@ -3,15 +3,17 @@ import 'package:pkmn_gui/api_calls.dart';
 import 'package:pkmn_gui/constants.dart';
 import 'package:pkmn_gui/widgets/common_app_bar.dart';
 import 'package:pkmn_gui/widgets/pokedex_container.dart';
+import 'package:provider/provider.dart';
+import '../main.dart';
 
-class PokemonFoundScreen extends StatefulWidget {
-  const PokemonFoundScreen({super.key});
+class AdminPokemonFoundScreen extends StatefulWidget {
+  const AdminPokemonFoundScreen({super.key});
 
   @override
-  State<PokemonFoundScreen> createState() => _PokemonFoundScreenState();
+  State<AdminPokemonFoundScreen> createState() => _AdminPokemonFoundScreenState();
 }
 
-class _PokemonFoundScreenState extends State<PokemonFoundScreen> {
+class _AdminPokemonFoundScreenState extends State<AdminPokemonFoundScreen> {
   List<dynamic> _pokemonCounts = [];
   List<dynamic> _filteredPokemonCounts = [];
   bool _isLoading = true;
@@ -22,7 +24,36 @@ class _PokemonFoundScreenState extends State<PokemonFoundScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _checkAdminAndLoadData();
+  }
+
+  Future<void> _checkAdminAndLoadData() async {
+    final session = Provider.of<UserSession>(context, listen: false);
+    if (session.token == null) {
+      // Not logged in, redirect to home
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+      return;
+    }
+
+    try {
+      final isAdmin = await AdminApiService.amIAdmin(session.token!);
+      if (!isAdmin) {
+        // Not admin, redirect to home
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+        return;
+      }
+      // User is admin, proceed to load data
+      await _loadData();
+    } catch (e) {
+      // Error checking admin status, redirect to home
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    }
   }
 
   @override
@@ -231,79 +262,90 @@ class _PokemonFoundScreenState extends State<PokemonFoundScreen> {
                     ),
                     // Pokemon list
                     Expanded(
-                      child: ListView.builder(
+                      child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        itemCount: _filteredPokemonCounts.length,
-                        itemBuilder: (context, index) {
-                          final pokemon = _filteredPokemonCounts[index];
-                          final count = pokemon['count'] as int;
-                          final countColor = _getCountColor(count);
+                        child: PokedexContainer(
+                          child: ListView.separated(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            itemCount: _filteredPokemonCounts.length,
+                            separatorBuilder: (context, index) => Divider(
+                              color: AppColors.secondaryRed.withOpacity(0.3),
+                              height: 1,
+                            ),
+                            itemBuilder: (context, index) {
+                              final pokemon = _filteredPokemonCounts[index];
+                              final count = pokemon['count'] as int;
+                              final countColor = _getCountColor(count);
 
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: PokedexContainer(
-                              child: Row(
-                                children: [
-                                  // Pokemon image
-                                  Container(
-                                    width: 60,
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(
-                                        UIConstants.borderRadius8,
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                  vertical: 8.0,
+                                ),
+                                child: Row(
+                                  children: [
+                                    // Pokemon image
+                                    Container(
+                                      width: 60,
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(
+                                          UIConstants.borderRadius8,
+                                        ),
+                                        border: Border.all(
+                                          color: AppColors.secondaryRed,
+                                          width: UIConstants.borderWidth2,
+                                        ),
                                       ),
-                                      border: Border.all(
-                                        color: AppColors.secondaryRed,
-                                        width: UIConstants.borderWidth2,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(6),
+                                        child: Image.asset(
+                                          'assets/images/pkmn/${pokemon['pokemon_number']}.jpg',
+                                          fit: BoxFit.contain,
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              const Icon(
+                                                Icons.image_not_supported,
+                                                size: 40,
+                                                color: Colors.grey,
+                                              ),
+                                        ),
                                       ),
                                     ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(6),
-                                      child: Image.asset(
-                                        'assets/images/pkmn/${pokemon['pokemon_number']}.jpg',
-                                        fit: BoxFit.contain,
-                                        errorBuilder: (context, error, stackTrace) =>
-                                            const Icon(
-                                              Icons.image_not_supported,
-                                              size: 40,
+                                    const SizedBox(width: UIConstants.spacing12),
+                                    // Pokemon info
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            pokemon['pokemon_name'],
+                                            style: AppTextStyles.titleSmall,
+                                          ),
+                                          Text(
+                                            'Nr. ${pokemon['pokemon_number']}',
+                                            style: AppTextStyles.bodySmall.copyWith(
                                               color: Colors.grey,
                                             ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: UIConstants.spacing12),
-                                  // Pokemon info
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          pokemon['pokemon_name'],
-                                          style: AppTextStyles.titleSmall,
-                                        ),
-                                        Text(
-                                          'Nr. ${pokemon['pokemon_number']}',
-                                          style: AppTextStyles.bodySmall.copyWith(
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
+                                    // Count
+                                    Text(
+                                      count.toString(),
+                                      style: AppTextStyles.titleLarge.copyWith(
+                                        color: countColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  // Count
-                                  Text(
-                                    count.toString(),
-                                    style: AppTextStyles.titleLarge.copyWith(
-                                      color: countColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       ),
                     ),
                   ],
