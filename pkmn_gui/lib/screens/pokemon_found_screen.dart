@@ -83,33 +83,16 @@ class _PokemonFoundScreenState extends State<PokemonFoundScreen> {
     }
   }
 
-  Color _getDifficultyColor(int count, int maxCount) {
+  Color _getCountColor(int count) {
     if (count == 0) return Colors.red.shade900;
-    if (maxCount == 0) return Colors.grey;
-    
-    double ratio = count / maxCount;
-    if (ratio >= 0.7) return Colors.green.shade700;
-    if (ratio >= 0.4) return Colors.yellow.shade700;
-    if (ratio >= 0.2) return Colors.orange.shade700;
+    if (count >= 20) return Colors.green.shade700;
+    if (count >= 10) return Colors.yellow.shade700;
+    if (count >= 5) return Colors.orange.shade700;
     return Colors.red.shade700;
-  }
-
-  String _getDifficultyText(int count, int maxCount) {
-    if (count == 0) return 'Ej hittad';
-    if (maxCount == 0) return 'Okänd';
-    
-    double ratio = count / maxCount;
-    if (ratio >= 0.7) return 'Lätt';
-    if (ratio >= 0.4) return 'Medium';
-    if (ratio >= 0.2) return 'Svår';
-    return 'Mycket svår';
   }
 
   @override
   Widget build(BuildContext context) {
-    final maxCount = _pokemonCounts.isEmpty ? 0 : 
-      _pokemonCounts.map((p) => p['count'] as int).reduce((a, b) => a > b ? a : b);
-
     return Scaffold(
       appBar: const CommonAppBar(
         title: "Hittade Pokémon",
@@ -189,15 +172,15 @@ class _PokemonFoundScreenState extends State<PokemonFoundScreen> {
                                     segments: const [
                                       ButtonSegment(
                                         value: 'count',
-                                        label: Text('Antal'),
+                                        label: Text('Antal', style: TextStyle(color: AppColors.textPrimary)),
                                       ),
                                       ButtonSegment(
                                         value: 'number',
-                                        label: Text('Nummer'),
+                                        label: Text('Nummer', style: TextStyle(color: AppColors.textPrimary)),
                                       ),
                                       ButtonSegment(
                                         value: 'name',
-                                        label: Text('Namn'),
+                                        label: Text('Namn', style: TextStyle(color: AppColors.textPrimary)),
                                       ),
                                     ],
                                     selected: {_sortBy},
@@ -213,6 +196,21 @@ class _PokemonFoundScreenState extends State<PokemonFoundScreen> {
                                           fontFamily: 'PixelFont',
                                           fontSize: 14,
                                         ),
+                                      ),
+                                      backgroundColor: MaterialStateProperty.resolveWith((states) {
+                                        if (states.contains(MaterialState.selected)) {
+                                          return AppColors.primaryRed;
+                                        }
+                                        return Colors.white;
+                                      }),
+                                      foregroundColor: MaterialStateProperty.resolveWith((states) {
+                                        if (states.contains(MaterialState.selected)) {
+                                          return Colors.white;
+                                        }
+                                        return AppColors.textPrimary;
+                                      }),
+                                      side: MaterialStateProperty.all(
+                                        BorderSide(color: AppColors.primaryRed, width: 2),
                                       ),
                                     ),
                                   ),
@@ -231,8 +229,7 @@ class _PokemonFoundScreenState extends State<PokemonFoundScreen> {
                         itemBuilder: (context, index) {
                           final pokemon = _filteredPokemonCounts[index];
                           final count = pokemon['count'] as int;
-                          final difficultyColor = _getDifficultyColor(count, maxCount);
-                          final difficultyText = _getDifficultyText(count, maxCount);
+                          final countColor = _getCountColor(count);
 
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
@@ -286,39 +283,13 @@ class _PokemonFoundScreenState extends State<PokemonFoundScreen> {
                                       ],
                                     ),
                                   ),
-                                  // Count and difficulty
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        count.toString(),
-                                        style: AppTextStyles.titleMedium.copyWith(
-                                          color: difficultyColor,
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: difficultyColor.withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(
-                                            UIConstants.borderRadius8,
-                                          ),
-                                          border: Border.all(
-                                            color: difficultyColor,
-                                            width: UIConstants.borderWidth1,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          difficultyText,
-                                          style: AppTextStyles.labelSmall.copyWith(
-                                            color: difficultyColor,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                  // Count
+                                  Text(
+                                    count.toString(),
+                                    style: AppTextStyles.titleLarge.copyWith(
+                                      color: countColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
