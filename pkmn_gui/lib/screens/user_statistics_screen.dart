@@ -29,6 +29,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
   late Future<List<dynamic>> _comprehensiveMilestonesFuture;
   late Future<Map<String, dynamic>> _typeStatsFuture;
   late Future<Map<String, dynamic>> _currentUserPokedexFuture;
+  late Future<bool> _isAdminFuture;
 
   @override
   void initState() {
@@ -42,8 +43,10 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
     final session = Provider.of<UserSession>(context, listen: false);
     if (session.token != null) {
       _currentUserPokedexFuture = ApiService.getMyPokedex(session.token!);
+      _isAdminFuture = AdminApiService.amIAdmin(session.token!);
     } else {
       _currentUserPokedexFuture = Future.value({'pokedex': []});
+      _isAdminFuture = Future.value(false);
     }
   }
 
@@ -61,6 +64,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
             _comprehensiveMilestonesFuture,
             _typeStatsFuture,
             _currentUserPokedexFuture,
+            _isAdminFuture,
           ]),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -110,6 +114,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
             final comprehensiveMilestonesData = snapshot.data![2] as List<dynamic>;
             final typeStats = snapshot.data![3] as Map<String, dynamic>;
             final currentUserPokedexData = snapshot.data![4] as Map<String, dynamic>;
+            final isAdmin = snapshot.data![5] as bool;
             final caughtCount = caughtPokemon.length;
             
             // Parse comprehensive milestones
@@ -335,7 +340,7 @@ class _UserStatisticsScreenState extends State<UserStatisticsScreen> {
                       itemBuilder: (context, index) {
                         final pokemon = caughtPokemon[index];
                         final pokemonNumber = pokemon['number'] as int;
-                        final isCaughtByViewer = currentUserCaughtNumbers.contains(pokemonNumber);
+                        final isCaughtByViewer = currentUserCaughtNumbers.contains(pokemonNumber) || isAdmin;
                         
                         return Container(
                           decoration: BoxDecoration(

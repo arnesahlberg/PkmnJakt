@@ -129,10 +129,18 @@ class _PokemonFoundScreenState extends State<PokemonFoundScreen> {
                                   _applyFiltersAndSort();
                                 });
                               },
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontFamily: 'PixelFont',
+                              ),
+                              cursorColor: AppColors.primaryRed,
                               decoration: InputDecoration(
                                 labelText: 'Sök Pokémon',
                                 labelStyle: AppTextStyles.labelMedium,
-                                prefixIcon: const Icon(Icons.search),
+                                prefixIcon: const Icon(
+                                  Icons.search,
+                                  color: AppColors.textPrimary,
+                                ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(
                                     UIConstants.borderRadius8,
