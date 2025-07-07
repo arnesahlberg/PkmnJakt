@@ -169,6 +169,13 @@ class ApiService {
     return decodeUtf8Json(response);
   }
 
+  static Future<Map<String, dynamic>> getPokemonFoundCounts() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/pokemon_found_counts'),
+    );
+    return decodeUtf8Json(response);
+  }
+
   // returns
   /*
     name: String,

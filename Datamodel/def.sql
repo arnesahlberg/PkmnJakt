@@ -157,6 +157,17 @@ CREATE VIEW IF NOT EXISTS ViewLatestFoundPokemon AS
 SELECT * FROM ViewFoundPokemon
 ORDER BY TimeStamp DESC ;
 
+-- view to show how many of each pokemon are found (including zero counts)
+CREATE VIEW IF NOT EXISTS ViewPokemonFoundCounts AS
+SELECT 
+    p.name AS Pokemon,
+    p.pokemon_id AS PokemonNumber,
+    COUNT(fp.pokemon_id) AS Count
+FROM Pokemon p
+LEFT JOIN FoundPokemon fp ON p.pokemon_id = fp.pokemon_id AND fp.user_id != 'admin'
+WHERE p.active = 1
+GROUP BY p.pokemon_id, p.name
+ORDER BY Count DESC, p.name;
 
 -- view number of pokemon found by user
 CREATE VIEW IF NOT EXISTS ViewNumPokemonFound AS

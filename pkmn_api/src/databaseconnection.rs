@@ -4,7 +4,7 @@ use core::panic;
 use chrono::{Utc, Duration};
 use chrono_tz::Europe::Stockholm;
 use rusqlite::{params, Connection, Result};
-use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats};
+use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats, PokemonFoundCount};
 use crate::misc::{self, create_token};
 use crate::milestones::{MilestoneDefinition, get_count_milestone_for_count, get_type_milestone_for_type, get_pokemon_milestone};
 
@@ -712,4 +712,21 @@ pub fn get_user_milestone_definitions(user_id: &str, conn: &Connection) -> Resul
     achieved_milestones.sort_by_key(|m| m.order);
     
     Ok(achieved_milestones)
+}
+
+pub fn get_pokemon_found_counts(conn: &Connection) -> Result<Vec<PokemonFoundCount>> {
+    let mut stmt = conn.prepare(
+        "SELECT Pokemon, PokemonNumber, Count FROM ViewPokemonFoundCounts ORDER BY Count DESC, Pokemon"
+    )?;
+    
+    let pokemon_counts = stmt.query_map([], |row| {
+        Ok(PokemonFoundCount {
+            pokemon_name: row.get(0)?,
+            pokemon_number: row.get(1)?,
+            count: row.get(2)?,
+        })
+    })?
+    .collect::<Result<Vec<_>, _>>()?;
+    
+    Ok(pokemon_counts)
 }

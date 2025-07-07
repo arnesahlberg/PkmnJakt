@@ -88,6 +88,12 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
                       child: Text('Admin-panel'),
                     ),
                   );
+                  menuItems.add(
+                    const PopupMenuItem(
+                      value: 'pokemon_found',
+                      child: Text('Hittade Pokémon'),
+                    ),
+                  );
                 }
                 menuItems.add(
                   const PopupMenuItem(value: 'logout', child: Text('Logga ut')),
@@ -109,6 +115,8 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
                         Navigator.pushNamed(context, '/profile');
                       } else if (value == 'admin') {
                         Navigator.pushNamed(context, '/admin');
+                      } else if (value == 'pokemon_found') {
+                        Navigator.pushNamed(context, '/pokemon_found');
                       } else if (value == 'logout') {
                         session.logout();
                         Navigator.pushReplacementNamed(context, '/');

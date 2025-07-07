@@ -95,3 +95,10 @@ pub struct TypeStats {
     pub type_name: String,
     pub total_catches: u32,
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PokemonFoundCount {
+    pub pokemon_name: String,
+    pub pokemon_number: u32,
+    pub count: u32,
+}

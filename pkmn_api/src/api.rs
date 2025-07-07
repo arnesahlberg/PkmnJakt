@@ -4,7 +4,7 @@ use actix_web::{web, HttpResponse, HttpRequest};
 use serde::{Deserialize, Serialize};
 use log::{info, warn, error, debug};
 use crate::misc::{self, validate_token};
-use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats};
+use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats, PokemonFoundCount};
 use crate::milestones::MilestoneDefinition;
 use crate::databaseconnection;
 
@@ -1059,6 +1059,23 @@ pub async fn get_total_pokemon_by_type() -> HttpResponse {
     HttpResponse::Ok().json(type_stats)
 }
 
+// Get Pokemon found counts (public endpoint)
+#[derive(Debug, Serialize)]
+pub struct GetPokemonFoundCountsResponse {
+    pub pokemon_counts: Vec<PokemonFoundCount>,
+    pub result_code: CallResultCode,
+}
+
+pub async fn get_pokemon_found_counts() -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let counts = databaseconnection::get_pokemon_found_counts(&conn).unwrap();
+    let res = GetPokemonFoundCountsResponse {
+        pokemon_counts: counts,
+        result_code: CallResultCode::Ok,
+    };
+    HttpResponse::Ok().json(res)
+}
+
 // admin endpoints
 
 #[derive(Debug, Serialize)]
@@ -1264,6 +1281,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/user_milestone_definitions/{user_id}", web::get().to(get_user_milestone_definitions))
         .route("/user_pokemon_by_type/{user_id}", web::get().to(get_user_pokemon_by_type))
         .route("/total_pokemon_by_type", web::get().to(get_total_pokemon_by_type))
+        .route("/pokemon_found_counts", web::get().to(get_pokemon_found_counts))
         // admin endpoints
         .route("/am_i_admin", web::get().to(am_i_admin))
         .route("/is_user_admin/{user_id}", web::get().to(is_user_admin))
