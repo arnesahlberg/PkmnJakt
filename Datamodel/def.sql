@@ -180,6 +180,7 @@ SELECT
 FROM FoundPokemon
 JOIN Users ON FoundPokemon.user_id = Users.user_id
 WHERE UserID != 'admin' -- exclude admin user
+  AND FoundPokemon.pokemon_id <= 151 -- exclude Pokemon with ID > 151 (like Missingno)
 GROUP BY Users.name;
 
 -- view number of pokemon found by user (excluding MissingNo for milestones)
@@ -236,7 +237,6 @@ JOIN Users ON FoundPokemon.user_id = Users.user_id
 WHERE Users.admin = 0
 GROUP BY Users.name;
 
--- ViewUserMilestones removed - milestones are now calculated dynamically from FoundPokemon
 
 -- Pokemon type statistics views
 CREATE VIEW IF NOT EXISTS ViewUserPokemonByType AS
