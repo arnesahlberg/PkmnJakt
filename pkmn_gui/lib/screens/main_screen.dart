@@ -6,6 +6,7 @@ import '../widgets/common_app_bar.dart';
 import '../widgets/pokedex_container.dart';
 import '../widgets/pokedex_button.dart';
 import '../widgets/highscore_list.dart';
+import '../widgets/game_status_banner.dart';
 import 'package:intl/intl.dart';
 import '../api_calls.dart';
 import '../utils/auth_utils.dart';
@@ -30,6 +31,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   int _ranking = 0;
   int _pokemonCount = 0;
   List<MilestoneDefinition> _comprehensiveMilestones = [];
+  bool _isGameOver = false;
 
   Future<void> _loadData() async {
     final session = Provider.of<UserSession>(context, listen: false);
@@ -355,8 +357,27 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       if (isValid) {
         _loadData();
         _loadExtraData();
+        _checkGameStatus();
       }
     });
+  }
+
+  Future<void> _checkGameStatus() async {
+    try {
+      final response = await ApiService.isGameOver();
+      if (mounted) {
+        setState(() {
+          _isGameOver = response['is_game_over'] as bool? ?? false;
+        });
+      }
+    } catch (e) {
+      // If there's an error, default to game not over
+      if (mounted) {
+        setState(() {
+          _isGameOver = false;
+        });
+      }
+    }
   }
 
   @override
@@ -384,6 +405,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const GameStatusBanner(),
+                        const SizedBox(height: 16),
                         PokedexContainer(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -457,7 +480,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 children: [
                                   Expanded(
                                     child: PokedexButton(
-                                      onPressed: () {
+                                      onPressed: _isGameOver ? () {} : () {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -470,16 +493,18 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                           _refreshData();
                                         });
                                       },
-                                      child: const Row(
+                                      child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.catching_pokemon,
-                                            color: AppColors.white,
+                                            color: _isGameOver ? AppColors.mediumGrey : AppColors.white,
                                           ),
-                                          SizedBox(width: 8),
-                                          Text("Fånga Pokémon"),
+                                          const SizedBox(width: 8),
+                                          Text(_isGameOver 
+                                              ? "Spelet är slut" 
+                                              : "Fånga Pokémon"),
                                         ],
                                       ),
                                     ),

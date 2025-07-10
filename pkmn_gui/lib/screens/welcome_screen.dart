@@ -6,6 +6,7 @@ import '../widgets/common_app_bar.dart';
 import '../widgets/pokedex_container.dart';
 import '../widgets/pokedex_button.dart';
 import '../widgets/highscore_list.dart';
+import '../widgets/game_status_banner.dart';
 import "login_scanner_screen.dart";
 import '../main.dart'; // for UserSession
 import '../api_calls.dart'; // for fetching statistics
@@ -80,6 +81,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         children: [
+                          const GameStatusBanner(),
+                          const SizedBox(height: 16),
                           PokedexContainer(
                             child:
                                 session.isLoggedIn
