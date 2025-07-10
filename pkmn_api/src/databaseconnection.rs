@@ -1,6 +1,4 @@
 
-use core::panic;
-
 use chrono::{Utc, Duration};
 use chrono_tz::Europe::Stockholm;
 use rusqlite::{params, Connection, Result};
@@ -729,4 +727,198 @@ pub fn get_pokemon_found_counts(conn: &Connection) -> Result<Vec<PokemonFoundCou
     .collect::<Result<Vec<_>, _>>()?;
     
     Ok(pokemon_counts)
+}
+
+pub fn get_setting(setting_id: &str, conn: &Connection) -> Result<Option<String>> {
+    let mut stmt = conn.prepare("SELECT setting_value FROM Settings WHERE setting_id = ?1")?;
+    match stmt.query_row(params![setting_id], |row| row.get::<_, String>(0)) {
+        Ok(value) => Ok(Some(value)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e),
+    }
+}
+
+pub fn count_users_with_pokemon_threshold(threshold: u32, conn: &Connection) -> Result<u32> {
+    let mut stmt = conn.prepare(
+        "SELECT COUNT(DISTINCT user_id) FROM FoundPokemon 
+         WHERE user_id != 'admin' 
+         GROUP BY user_id 
+         HAVING COUNT(DISTINCT pokemon_id) >= ?1"
+    )?;
+    
+    let count: u32 = stmt.query_map(params![threshold], |_| Ok(1))?
+        .count() as u32;
+    
+    Ok(count)
+}
+
+pub fn get_catches_per_hour(datetime0: Option<&str>, datetime1: Option<&str>, conn: &Connection) -> Result<Vec<crate::model::HourlyCatchStats>> {
+    let mut query = String::from(
+        "SELECT 
+            CAST(strftime('%H', found_timestamp) AS INTEGER) as hour,
+            COUNT(*) as count
+         FROM FoundPokemon
+         WHERE user_id != 'admin'"
+    );
+    
+    let mut params_vec: Vec<String> = vec![];
+    
+    if let Some(start) = datetime0 {
+        query.push_str(" AND found_timestamp >= ?");
+        params_vec.push(start.to_string());
+    }
+    
+    if let Some(end) = datetime1 {
+        query.push_str(" AND found_timestamp <= ?");
+        params_vec.push(end.to_string());
+    }
+    
+    query.push_str(" GROUP BY hour ORDER BY hour");
+    
+    let mut stmt = conn.prepare(&query)?;
+    let params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|p| p as &dyn rusqlite::ToSql).collect();
+    
+    let hourly_stats = stmt.query_map(&params[..], |row| {
+        Ok(crate::model::HourlyCatchStats {
+            hour: row.get(0)?,
+            catches: row.get(1)?,
+        })
+    })?
+    .filter_map(|r| r.ok())
+    .filter(|stat| {
+        // Exclude hours between 22:30-06:30
+        // We include hour 6 (06:00-06:59) and exclude hour 22 after 30 minutes
+        // For simplicity, we'll exclude entire hours 23, 0, 1, 2, 3, 4, 5
+        stat.hour >= 7 && stat.hour <= 22
+    })
+    .collect();
+    
+    Ok(hourly_stats)
+}
+
+pub fn get_first_catch(datetime0: Option<&str>, datetime1: Option<&str>, conn: &Connection) -> Result<Option<crate::model::FirstLastCatch>> {
+    let mut query = String::from(
+        "SELECT u.name, p.name, p.pokemon_id, fp.found_timestamp
+         FROM FoundPokemon fp
+         JOIN Users u ON fp.user_id = u.user_id
+         JOIN Pokemon p ON fp.pokemon_id = p.pokemon_id
+         WHERE fp.user_id != 'admin'"
+    );
+    
+    let mut params_vec: Vec<String> = vec![];
+    
+    if let Some(start) = datetime0 {
+        query.push_str(" AND fp.found_timestamp >= ?");
+        params_vec.push(start.to_string());
+    }
+    
+    if let Some(end) = datetime1 {
+        query.push_str(" AND fp.found_timestamp <= ?");
+        params_vec.push(end.to_string());
+    }
+    
+    query.push_str(" ORDER BY fp.found_timestamp ASC LIMIT 1");
+    
+    let mut stmt = conn.prepare(&query)?;
+    let params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|p| p as &dyn rusqlite::ToSql).collect();
+    
+    match stmt.query_row(&params[..], |row| {
+        Ok(crate::model::FirstLastCatch {
+            user_name: row.get(0)?,
+            pokemon_name: row.get(1)?,
+            pokemon_number: row.get(2)?,
+            caught_at: row.get(3)?,
+        })
+    }) {
+        Ok(catch) => Ok(Some(catch)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e),
+    }
+}
+
+pub fn get_last_catch(datetime0: Option<&str>, datetime1: Option<&str>, conn: &Connection) -> Result<Option<crate::model::FirstLastCatch>> {
+    let mut query = String::from(
+        "SELECT u.name, p.name, p.pokemon_id, fp.found_timestamp
+         FROM FoundPokemon fp
+         JOIN Users u ON fp.user_id = u.user_id
+         JOIN Pokemon p ON fp.pokemon_id = p.pokemon_id
+         WHERE fp.user_id != 'admin'"
+    );
+    
+    let mut params_vec: Vec<String> = vec![];
+    
+    if let Some(start) = datetime0 {
+        query.push_str(" AND fp.found_timestamp >= ?");
+        params_vec.push(start.to_string());
+    }
+    
+    if let Some(end) = datetime1 {
+        query.push_str(" AND fp.found_timestamp <= ?");
+        params_vec.push(end.to_string());
+    }
+    
+    query.push_str(" ORDER BY fp.found_timestamp DESC LIMIT 1");
+    
+    let mut stmt = conn.prepare(&query)?;
+    let params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|p| p as &dyn rusqlite::ToSql).collect();
+    
+    match stmt.query_row(&params[..], |row| {
+        Ok(crate::model::FirstLastCatch {
+            user_name: row.get(0)?,
+            pokemon_name: row.get(1)?,
+            pokemon_number: row.get(2)?,
+            caught_at: row.get(3)?,
+        })
+    }) {
+        Ok(catch) => Ok(Some(catch)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e),
+    }
+}
+
+pub fn get_most_caught_pokemon(limit: u32, conn: &Connection) -> Result<Vec<crate::model::PokemonCatchStats>> {
+    let mut stmt = conn.prepare(
+        "SELECT p.name, p.pokemon_id, COUNT(fp.pokemon_id) as count
+         FROM Pokemon p
+         LEFT JOIN FoundPokemon fp ON p.pokemon_id = fp.pokemon_id AND fp.user_id != 'admin'
+         WHERE p.active = 1
+         GROUP BY p.pokemon_id, p.name
+         HAVING count > 0
+         ORDER BY count DESC, p.name
+         LIMIT ?1"
+    )?;
+    
+    let pokemon_stats = stmt.query_map(params![limit], |row| {
+        Ok(crate::model::PokemonCatchStats {
+            pokemon_name: row.get(0)?,
+            pokemon_number: row.get(1)?,
+            times_caught: row.get(2)?,
+        })
+    })?
+    .collect::<Result<Vec<_>, _>>()?;
+    
+    Ok(pokemon_stats)
+}
+
+pub fn get_least_caught_pokemon(limit: u32, conn: &Connection) -> Result<Vec<crate::model::PokemonCatchStats>> {
+    let mut stmt = conn.prepare(
+        "SELECT p.name, p.pokemon_id, COUNT(fp.pokemon_id) as count
+         FROM Pokemon p
+         LEFT JOIN FoundPokemon fp ON p.pokemon_id = fp.pokemon_id AND fp.user_id != 'admin'
+         WHERE p.active = 1
+         GROUP BY p.pokemon_id, p.name
+         ORDER BY count ASC, p.name
+         LIMIT ?1"
+    )?;
+    
+    let pokemon_stats = stmt.query_map(params![limit], |row| {
+        Ok(crate::model::PokemonCatchStats {
+            pokemon_name: row.get(0)?,
+            pokemon_number: row.get(1)?,
+            times_caught: row.get(2)?,
+        })
+    })?
+    .collect::<Result<Vec<_>, _>>()?;
+    
+    Ok(pokemon_stats)
 }

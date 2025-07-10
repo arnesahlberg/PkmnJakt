@@ -23,6 +23,11 @@ CREATE TABLE IF NOT EXISTS Tokens (
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
 
+CREATE TABLE IF NOT EXISTS Settings (
+    setting_id TEXT PRIMARY KEY,
+    setting_value TEXT NOT NULL
+);
+
 
 CREATE TABLE IF NOT EXISTS Pokemon (
     pokemon_id   INTEGER PRIMARY KEY,

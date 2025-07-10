@@ -402,6 +402,51 @@ def run_tests():
     print(f"{Fore.YELLOW}Test 23d: Get total Pokemon catches by type without authentication (expecting 200){Style.RESET_ALL}")
     make_request("GET", "total_pokemon_by_type", None, expected_status=200)
 
+    # 24. Test game status endpoints (no auth required)
+    print(f"{Fore.YELLOW}\nTest 24a: Check if game is over{Style.RESET_ALL}")
+    response = make_request("GET", "is_game_over", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  Game is over: {data.get('is_game_over')}")
+        print(f"  Current time: {data.get('current_time')}")
+        print(f"  Game end time: {data.get('game_end_time')}")
+    
+    print(f"{Fore.YELLOW}Test 24b: Check if game has started{Style.RESET_ALL}")
+    response = make_request("GET", "has_game_started", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  Game has started: {data.get('has_game_started')}")
+        print(f"  Current time: {data.get('current_time')}")
+        print(f"  Game start time: {data.get('game_start_time')}")
+    
+    print(f"{Fore.YELLOW}Test 24c: Get server time{Style.RESET_ALL}")
+    response = make_request("GET", "server_time", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  Server time UTC: {data.get('server_time_utc')}")
+        print(f"  Server time CET: {data.get('server_time_cet')}")
+    
+    # 25. Test game summary statistics endpoint (no auth required)
+    print(f"{Fore.YELLOW}\nTest 25a: Get game summary statistics (no time window){Style.RESET_ALL}")
+    response = make_request("GET", "statistics/game_summary", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  Total users: {data.get('total_users_registered')}")
+        print(f"  Users with 10+ catches: {data.get('users_with_10_plus_catches')}")
+        print(f"  Users with 100+ catches: {data.get('users_with_100_plus_catches')}")
+        print(f"  First catch: {data.get('first_catch')}")
+        print(f"  Last catch: {data.get('last_catch')}")
+        print(f"  Top 10 players count: {len(data.get('top_10_players', []))}")
+        print(f"  Most caught pokemon count: {len(data.get('most_caught_pokemon', []))}")
+        print(f"  Least caught pokemon count: {len(data.get('least_caught_pokemon', []))}")
+        print(f"  Hourly catches count: {len(data.get('catches_per_hour', []))}")
+    
+    print(f"{Fore.YELLOW}Test 25b: Get game summary statistics with time window{Style.RESET_ALL}")
+    response = make_request("GET", "statistics/game_summary?datetime0=2025-07-07 12:00:00&datetime1=2025-07-15 18:00:00", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  Time window start: {data.get('time_window_start')}")
+        print(f"  Time window end: {data.get('time_window_end')}")
 
     # Final: DELETE ALL USERS
     print(f"{Fore.YELLOW}\nTest 18: Deleting all users by looping{Style.RESET_ALL}")

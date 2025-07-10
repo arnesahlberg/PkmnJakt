@@ -1,12 +1,13 @@
-use std::path;
-
 use actix_web::{web, HttpResponse, HttpRequest};
 use serde::{Deserialize, Serialize};
 use log::{info, warn, error, debug};
 use crate::misc::{self, validate_token};
-use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats, PokemonFoundCount};
+use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats, PokemonFoundCount, 
+                  GameStatusResponse, GameStartStatusResponse, ServerTimeResponse, GameSummaryStatistics};
 use crate::milestones::MilestoneDefinition;
 use crate::databaseconnection;
+use chrono::{Utc, DateTime};
+use chrono_tz::Europe::Berlin;
 
 pub const USER_NAME_MIN_LENGTH: usize = 3;
 pub const USER_NAME_MAX_LENGTH: usize = 40;
@@ -1254,6 +1255,115 @@ pub async fn admin_delete_user(req: HttpRequest, info: web::Json<AdminDeleteUser
     HttpResponse::Ok().body(worked.to_string())
 }
 
+// Game status endpoints (no authentication required)
+pub async fn is_game_over() -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    
+    let game_end_time_str = databaseconnection::get_setting("game_end_time", &conn).unwrap();
+    let current_time = Utc::now();
+    
+    let (is_over, end_time_utc) = if let Some(end_time_str) = game_end_time_str {
+        match DateTime::parse_from_str(&format!("{} +02:00", end_time_str), "%Y-%m-%d %H:%M:%S %z") {
+            Ok(end_time) => {
+                let end_time_utc = end_time.with_timezone(&Utc);
+                (current_time > end_time_utc, Some(end_time_utc))
+            },
+            Err(_) => (false, None)
+        }
+    } else {
+        (false, None)
+    };
+    
+    let response = GameStatusResponse {
+        is_game_over: is_over,
+        current_time,
+        game_end_time: end_time_utc,
+    };
+    
+    HttpResponse::Ok().json(response)
+}
+
+pub async fn has_game_started() -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    
+    let game_start_time_str = databaseconnection::get_setting("game_start_time", &conn).unwrap();
+    let current_time = Utc::now();
+    
+    let (has_started, start_time_utc) = if let Some(start_time_str) = game_start_time_str {
+        match DateTime::parse_from_str(&format!("{} +02:00", start_time_str), "%Y-%m-%d %H:%M:%S %z") {
+            Ok(start_time) => {
+                let start_time_utc = start_time.with_timezone(&Utc);
+                (current_time > start_time_utc, Some(start_time_utc))
+            },
+            Err(_) => (true, None) // Default to started if parsing fails
+        }
+    } else {
+        (true, None) // Default to started if no setting found
+    };
+    
+    let response = GameStartStatusResponse {
+        has_game_started: has_started,
+        current_time,
+        game_start_time: start_time_utc,
+    };
+    
+    HttpResponse::Ok().json(response)
+}
+
+pub async fn get_server_time() -> HttpResponse {
+    let current_time_utc = Utc::now();
+    let current_time_cet = current_time_utc.with_timezone(&Berlin);
+    
+    let response = ServerTimeResponse {
+        server_time_utc: current_time_utc,
+        server_time_cet: current_time_cet.format("%Y-%m-%d %H:%M:%S %Z").to_string(),
+    };
+    
+    HttpResponse::Ok().json(response)
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GameSummaryQuery {
+    pub datetime0: Option<String>,
+    pub datetime1: Option<String>,
+}
+
+pub async fn get_game_summary_statistics(query: web::Query<GameSummaryQuery>) -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    
+    // Get all statistics
+    let total_users = databaseconnection::get_num_users(&conn).unwrap() as u32;
+    let users_10_plus = databaseconnection::count_users_with_pokemon_threshold(10, &conn).unwrap();
+    let users_100_plus = databaseconnection::count_users_with_pokemon_threshold(100, &conn).unwrap();
+    
+    let datetime0_ref = query.datetime0.as_deref();
+    let datetime1_ref = query.datetime1.as_deref();
+    
+    let catches_per_hour = databaseconnection::get_catches_per_hour(datetime0_ref, datetime1_ref, &conn).unwrap();
+    let first_catch = databaseconnection::get_first_catch(datetime0_ref, datetime1_ref, &conn).unwrap();
+    let last_catch = databaseconnection::get_last_catch(datetime0_ref, datetime1_ref, &conn).unwrap();
+    
+    let top_10_players = databaseconnection::statistics_users_most_found(10, &conn).unwrap();
+    let most_caught = databaseconnection::get_most_caught_pokemon(10, &conn).unwrap();
+    let least_caught = databaseconnection::get_least_caught_pokemon(10, &conn).unwrap();
+    
+    let response = GameSummaryStatistics {
+        total_users_registered: total_users,
+        users_with_10_plus_catches: users_10_plus,
+        users_with_100_plus_catches: users_100_plus,
+        catches_per_hour,
+        first_catch,
+        last_catch,
+        top_10_players,
+        most_caught_pokemon: most_caught,
+        least_caught_pokemon: least_caught,
+        time_window_start: datetime0_ref.and_then(|s| DateTime::parse_from_str(&format!("{} +02:00", s), "%Y-%m-%d %H:%M:%S %z").ok().map(|dt| dt.with_timezone(&Utc))),
+        time_window_end: datetime1_ref.and_then(|s| DateTime::parse_from_str(&format!("{} +02:00", s), "%Y-%m-%d %H:%M:%S %z").ok().map(|dt| dt.with_timezone(&Utc))),
+    };
+    
+    HttpResponse::Ok().json(response)
+}
+
 // registers all routes.
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.route("/login", web::post().to(login))
@@ -1292,6 +1402,11 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/get_users", web::post().to(get_users))
         .route("/get_users_filter_id", web::post().to(get_users_filter_id))
         .route("/get_users_filter", web::post().to(get_users_filter_id_name)) // this is probably the one to use
+        // game status endpoints (no auth required)
+        .route("/is_game_over", web::get().to(is_game_over))
+        .route("/has_game_started", web::get().to(has_game_started))
+        .route("/server_time", web::get().to(get_server_time))
+        .route("/statistics/game_summary", web::get().to(get_game_summary_statistics))
         ;
 }
 
