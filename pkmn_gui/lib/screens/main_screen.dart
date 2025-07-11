@@ -493,7 +493,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                           ),
                                           const SizedBox(width: 8),
                                           Text(_isGameOver 
-                                              ? "Spelet är slut" 
+                                              ? "Fånga Pokémon (spel slut)" 
                                               : "Fånga Pokémon"),
                                         ],
                                       ),

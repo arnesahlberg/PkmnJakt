@@ -149,6 +149,7 @@ pub struct GameSummaryStatistics {
     pub catches_per_hour: Vec<HourlyCatchStats>,
     pub first_catch: Option<FirstLastCatch>,
     pub last_catch: Option<FirstLastCatch>,
+    pub longest_survivor: Option<FirstLastCatch>,
     pub top_10_players: Vec<UserScore>,
     pub most_caught_pokemon: Vec<PokemonCatchStats>,
     pub least_caught_pokemon: Vec<PokemonCatchStats>,
