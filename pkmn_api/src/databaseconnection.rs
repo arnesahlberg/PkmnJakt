@@ -922,3 +922,61 @@ pub fn get_least_caught_pokemon(limit: u32, conn: &Connection) -> Result<Vec<cra
     
     Ok(pokemon_stats)
 }
+pub fn get_longest_survivor_pokemon(datetime0: Option<&str>, datetime1: Option<&str>, conn: &Connection) -> Result<Option<crate::model::FirstLastCatch>> {
+    let mut query = String::from(
+        "WITH FirstCatches AS (
+            SELECT 
+                p.pokemon_id,
+                p.name as pokemon_name,
+                MIN(fp.found_timestamp) as first_caught
+            FROM Pokemon p
+            INNER JOIN FoundPokemon fp ON p.pokemon_id = fp.pokemon_id AND fp.user_id != 'admin'
+            WHERE p.active = 1"
+    );
+    
+    let mut params_vec: Vec<String> = vec![];
+    
+    if let Some(start) = datetime0 {
+        query.push_str(" AND fp.found_timestamp >= ?");
+        params_vec.push(start.to_string());
+    }
+    
+    if let Some(end) = datetime1 {
+        query.push_str(" AND fp.found_timestamp <= ?");
+        params_vec.push(end.to_string());
+    }
+    
+    query.push_str(
+        " GROUP BY p.pokemon_id, p.name
+        )
+        SELECT 
+            u.name as user_name,
+            fc.pokemon_name,
+            fc.pokemon_id as pokemon_number,
+            fc.first_caught as caught_at
+        FROM FirstCatches fc
+        INNER JOIN FoundPokemon fp ON fc.pokemon_id = fp.pokemon_id 
+            AND fp.found_timestamp = fc.first_caught 
+            AND fp.user_id != 'admin'
+        INNER JOIN Users u ON fp.user_id = u.user_id
+        WHERE fc.first_caught IS NOT NULL
+        ORDER BY fc.first_caught DESC
+        LIMIT 1"
+    );
+    
+    let mut stmt = conn.prepare(&query)?;
+    let params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|p| p as &dyn rusqlite::ToSql).collect();
+    
+    match stmt.query_row(&params[..], |row| {
+        Ok(crate::model::FirstLastCatch {
+            user_name: row.get(0)?,
+            pokemon_name: row.get(1)?,
+            pokemon_number: row.get(2)?,
+            caught_at: row.get(3)?,
+        })
+    }) {
+        Ok(catch) => Ok(Some(catch)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e),
+    }
+}

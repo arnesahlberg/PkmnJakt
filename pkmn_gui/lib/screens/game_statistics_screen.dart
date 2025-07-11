@@ -150,7 +150,8 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
 
           // First and Last Catches
           if (_statistics!['first_catch'] != null ||
-              _statistics!['last_catch'] != null) ...[
+              _statistics!['last_catch'] != null ||
+              _statistics!['longest_survivor'] != null) ...[
             PokedexContainer(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,12 +165,19 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
                       'Första fångsten',
                       _statistics!['first_catch'],
                     ),
-                    if (_statistics!['last_catch'] != null) const Divider(),
+                    if (_statistics!['last_catch'] != null || _statistics!['longest_survivor'] != null) const Divider(),
                   ],
-                  if (_statistics!['last_catch'] != null)
+                  if (_statistics!['last_catch'] != null) ...[
                     _buildCatchInfo(
                       'Sista fångsten',
                       _statistics!['last_catch'],
+                    ),
+                    if (_statistics!['longest_survivor'] != null) const Divider(),
+                  ],
+                  if (_statistics!['longest_survivor'] != null)
+                    _buildCatchInfo(
+                      'Pokémon som klarade sig längst',
+                      _statistics!['longest_survivor'],
                     ),
                 ],
               ),

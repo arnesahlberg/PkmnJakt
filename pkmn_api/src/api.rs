@@ -2,7 +2,7 @@ use actix_web::{web, HttpResponse, HttpRequest};
 use serde::{Deserialize, Serialize};
 use log::{info, warn, error, debug};
 use crate::misc::{self, validate_token};
-use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats, PokemonFoundCount, 
+use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, PokemonFoundCount, 
                   GameStatusResponse, GameStartStatusResponse, ServerTimeResponse, GameSummaryStatistics};
 use crate::milestones::MilestoneDefinition;
 use crate::databaseconnection;
@@ -1342,6 +1342,7 @@ pub async fn get_game_summary_statistics(query: web::Query<GameSummaryQuery>) ->
     let catches_per_hour = databaseconnection::get_catches_per_hour(datetime0_ref, datetime1_ref, &conn).unwrap();
     let first_catch = databaseconnection::get_first_catch(datetime0_ref, datetime1_ref, &conn).unwrap();
     let last_catch = databaseconnection::get_last_catch(datetime0_ref, datetime1_ref, &conn).unwrap();
+    let longest_survivor = databaseconnection::get_longest_survivor_pokemon(datetime0_ref, datetime1_ref, &conn).unwrap();
     
     let top_10_players = databaseconnection::statistics_users_most_found(10, &conn).unwrap();
     let most_caught = databaseconnection::get_most_caught_pokemon(10, &conn).unwrap();
@@ -1354,6 +1355,7 @@ pub async fn get_game_summary_statistics(query: web::Query<GameSummaryQuery>) ->
         catches_per_hour,
         first_catch,
         last_catch,
+        longest_survivor,
         top_10_players,
         most_caught_pokemon: most_caught,
         least_caught_pokemon: least_caught,
