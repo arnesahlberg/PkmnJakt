@@ -131,23 +131,29 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
                   ),
                 ),
                 _buildStatRow(
-                  'Totalt antal fångade Pokémon',
-                  '${_statistics!['total_pokemon_caught'] ?? 0}',
-                ),
-                const Divider(),
-                _buildStatRow(
                   'Totalt antal deltagare',
                   '${_statistics!['total_users_registered'] ?? 0}',
                 ),
                 const Divider(),
                 _buildStatRow(
-                  'Spelare med 10+ fångster',
+                  'Totalt antal Pokémon-fångster',
+                  '${_statistics!['total_pokemon_caught'] ?? 0}',
+                ),
+                const Divider(),
+                _buildStatRow(
+                  'Antal deltagare som fångat 10+ pokémon',
                   '${_statistics!['users_with_10_plus_catches'] ?? 0}',
                 ),
                 const Divider(),
                 _buildStatRow(
-                  'Spelare med 100+ fångster',
+                  'Antal delgatare som fångat 100+ pokémon',
                   '${_statistics!['users_with_100_plus_catches'] ?? 0}',
+                ),
+                const Divider(),
+                const SizedBox(height: 8),
+                const Text(
+                  ".. och vi har haft MASSOR av icke-digitala Pokémon-letare också!",
+                  style: AppTextStyles.bodyMedium,
                 ),
               ],
             ),
