@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../api_calls.dart';
 import '../constants.dart';
 import '../widgets/common_app_bar.dart';
@@ -287,6 +288,19 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
   }
 
   Widget _buildCatchInfo(String title, Map<String, dynamic> catchData) {
+    // Parse the datetime string
+    String dateTimeStr = '';
+    if (catchData['caught_at'] != null) {
+      try {
+        final DateTime dateTime = DateTime.parse(catchData['caught_at']);
+        // Format: "05/07 12:20"
+        dateTimeStr = DateFormat('dd/MM HH:mm').format(dateTime);
+      } catch (e) {
+        // Fallback formatting if parsing fails
+        dateTimeStr = catchData['caught_at'].toString();
+      }
+    }
+    
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
@@ -304,6 +318,15 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
             '${catchData['user_name']} fångade ${catchData['pokemon_name']} (#${catchData['pokemon_number']})',
             style: AppTextStyles.bodyMedium,
           ),
+          if (dateTimeStr.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              dateTimeStr,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -470,7 +470,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 children: [
                                   Expanded(
                                     child: PokedexButton(
-                                      onPressed: _isGameOver ? () {} : () {
+                                      onPressed: () {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -483,18 +483,16 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                           _refreshData();
                                         });
                                       },
-                                      child: Row(
+                                      child: const Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.catching_pokemon,
-                                            color: _isGameOver ? AppColors.mediumGrey : AppColors.white,
+                                            color: AppColors.white,
                                           ),
-                                          const SizedBox(width: 8),
-                                          Text(_isGameOver 
-                                              ? "Fånga Pokémon (spel slut)" 
-                                              : "Fånga Pokémon"),
+                                          SizedBox(width: 8),
+                                          Text("Fånga Pokémon"),
                                         ],
                                       ),
                                     ),

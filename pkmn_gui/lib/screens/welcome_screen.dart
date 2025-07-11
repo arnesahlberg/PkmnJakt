@@ -77,8 +77,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         children: [
-                          const GameStatusBanner(),
-                          const SizedBox(height: 16),
+                          if (!session.isLoggedIn) ...[
+                            const GameStatusBanner(),
+                            const SizedBox(height: 16),
+                          ],
                           PokedexContainer(
                             child:
                                 session.isLoggedIn
