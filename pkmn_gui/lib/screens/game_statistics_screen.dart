@@ -177,21 +177,26 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
             const SizedBox(height: 16),
           ],
 
-          // Top 10 Players
-          if (_statistics!['top_10_players'] != null &&
-              (_statistics!['top_10_players'] as List).isNotEmpty) ...[
+          // Hourly Activity Chart - MOVED UP
+          if (_statistics!['catches_per_hour'] != null &&
+              (_statistics!['catches_per_hour'] as List).isNotEmpty) ...[
             PokedexContainer(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Padding(
-                    padding: EdgeInsets.only(bottom: 16),
+                    padding: EdgeInsets.only(bottom: 8),
                     child: Text(
-                      'Topp 10 spelare',
+                      'Aktivitet per timme',
                       style: AppTextStyles.titleMedium,
                     ),
                   ),
-                  HighscoreList(highscores: _statistics!['top_10_players']),
+                  const Text(
+                    'Totalt antal fångster per timme under hela eventet',
+                    style: AppTextStyles.bodySmall,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildHourlyChart(_statistics!['catches_per_hour']),
                 ],
               ),
             ),
@@ -240,23 +245,12 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
             const SizedBox(height: 16),
           ],
 
-          // Hourly Activity Chart
-          if (_statistics!['catches_per_hour'] != null &&
-              (_statistics!['catches_per_hour'] as List).isNotEmpty) ...[
-            PokedexContainer(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 16),
-                    child: Text(
-                      'Aktivitet per timme',
-                      style: AppTextStyles.titleMedium,
-                    ),
-                  ),
-                  _buildHourlyChart(_statistics!['catches_per_hour']),
-                ],
-              ),
+          // Top 10 Players - MOVED TO BOTTOM
+          if (_statistics!['top_10_players'] != null &&
+              (_statistics!['top_10_players'] as List).isNotEmpty) ...[
+            HighscoreList(
+              highscores: _statistics!['top_10_players'],
+              title: 'Topp 10 spelare',
             ),
             const SizedBox(height: 16),
           ],
@@ -388,8 +382,8 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Timme på dygnet (07:00 - 22:00)',
-            style: TextStyle(fontSize: 12),
+            'Timme på dygnet',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
           ),
         ],
       ),

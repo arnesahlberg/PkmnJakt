@@ -188,7 +188,6 @@ if "--test-users" in os.sys.argv:
         add_pokemon_caught(cursor, '00024', pid)
 
 
-
 conn.commit()
 conn.close()
 
