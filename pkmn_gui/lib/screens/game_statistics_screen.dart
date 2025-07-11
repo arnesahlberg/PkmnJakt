@@ -131,6 +131,11 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
                   ),
                 ),
                 _buildStatRow(
+                  'Totalt antal fångade Pokémon',
+                  '${_statistics!['total_pokemon_caught'] ?? 0}',
+                ),
+                const Divider(),
+                _buildStatRow(
                   'Totalt antal deltagare',
                   '${_statistics!['total_users_registered'] ?? 0}',
                 ),
@@ -166,18 +171,21 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
                       'Första fångsten',
                       _statistics!['first_catch'],
                     ),
-                    if (_statistics!['last_catch'] != null || _statistics!['longest_survivor'] != null) const Divider(),
+                    if (_statistics!['last_catch'] != null ||
+                        _statistics!['longest_survivor'] != null)
+                      const Divider(),
                   ],
                   if (_statistics!['last_catch'] != null) ...[
                     _buildCatchInfo(
                       'Sista fångsten',
                       _statistics!['last_catch'],
                     ),
-                    if (_statistics!['longest_survivor'] != null) const Divider(),
+                    if (_statistics!['longest_survivor'] != null)
+                      const Divider(),
                   ],
                   if (_statistics!['longest_survivor'] != null)
                     _buildCatchInfo(
-                      'Pokémon som klarade sig längst',
+                      'Pokémon som klarade sig längst utan att bli fångad',
                       _statistics!['longest_survivor'],
                     ),
                 ],
@@ -201,7 +209,7 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
                     ),
                   ),
                   const Text(
-                    'Totalt antal fångster per timme under hela eventet',
+                    'Totalt antal fångster per timme under hela lägret',
                     style: AppTextStyles.bodySmall,
                   ),
                   const SizedBox(height: 16),
@@ -300,7 +308,7 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
         dateTimeStr = catchData['caught_at'].toString();
       }
     }
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
@@ -315,18 +323,9 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            '${catchData['user_name']} fångade ${catchData['pokemon_name']} (#${catchData['pokemon_number']})',
+            '${catchData['user_name']} fångade ${catchData['pokemon_name']} (#${catchData['pokemon_number']})${dateTimeStr.isNotEmpty ? " - $dateTimeStr" : ""}',
             style: AppTextStyles.bodyMedium,
           ),
-          if (dateTimeStr.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(
-              dateTimeStr,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
         ],
       ),
     );

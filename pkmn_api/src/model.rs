@@ -146,6 +146,7 @@ pub struct GameSummaryStatistics {
     pub total_users_registered: u32,
     pub users_with_10_plus_catches: u32,
     pub users_with_100_plus_catches: u32,
+    pub total_pokemon_caught: u32,
     pub catches_per_hour: Vec<HourlyCatchStats>,
     pub first_catch: Option<FirstLastCatch>,
     pub last_catch: Option<FirstLastCatch>,

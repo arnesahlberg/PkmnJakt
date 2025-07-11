@@ -752,6 +752,14 @@ pub fn count_users_with_pokemon_threshold(threshold: u32, conn: &Connection) -> 
     Ok(count)
 }
 
+pub fn count_total_pokemon_caught(conn: &Connection) -> Result<u32> {
+    let mut stmt = conn.prepare(
+        "SELECT COUNT(*) FROM FoundPokemon WHERE user_id != 'admin'"
+    )?;
+    let count: u32 = stmt.query_row([], |row| row.get(0))?;
+    Ok(count)
+}
+
 pub fn get_catches_per_hour(datetime0: Option<&str>, datetime1: Option<&str>, conn: &Connection) -> Result<Vec<crate::model::HourlyCatchStats>> {
     let mut query = String::from(
         "SELECT 

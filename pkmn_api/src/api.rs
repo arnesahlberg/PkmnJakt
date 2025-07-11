@@ -1335,6 +1335,7 @@ pub async fn get_game_summary_statistics(query: web::Query<GameSummaryQuery>) ->
     let total_users = databaseconnection::get_num_users(&conn).unwrap() as u32;
     let users_10_plus = databaseconnection::count_users_with_pokemon_threshold(10, &conn).unwrap();
     let users_100_plus = databaseconnection::count_users_with_pokemon_threshold(100, &conn).unwrap();
+    let total_pokemon_caught = databaseconnection::count_total_pokemon_caught(&conn).unwrap();
     
     let datetime0_ref = query.datetime0.as_deref();
     let datetime1_ref = query.datetime1.as_deref();
@@ -1352,6 +1353,7 @@ pub async fn get_game_summary_statistics(query: web::Query<GameSummaryQuery>) ->
         total_users_registered: total_users,
         users_with_10_plus_catches: users_10_plus,
         users_with_100_plus_catches: users_100_plus,
+        total_pokemon_caught,
         catches_per_hour,
         first_catch,
         last_catch,
