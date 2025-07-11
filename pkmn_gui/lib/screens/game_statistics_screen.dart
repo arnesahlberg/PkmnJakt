@@ -16,6 +16,7 @@ class GameStatisticsScreen extends StatefulWidget {
 class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
   Map<String, dynamic>? _statistics;
   bool _isLoading = true;
+  bool _isGameOver = false;
   String? _error;
 
   @override
@@ -31,10 +32,18 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
     });
 
     try {
-      final stats = await AdminApiService.getGameSummaryStatistics();
+      final results = await Future.wait([
+        AdminApiService.getGameSummaryStatistics(),
+        AdminApiService.isGameOver(),
+      ]);
+      
+      final stats = results[0] as Map<String, dynamic>;
+      final gameStatusResponse = results[1] as Map<String, dynamic>;
+      
       if (mounted) {
         setState(() {
           _statistics = stats;
+          _isGameOver = gameStatusResponse['is_game_over'] ?? false;
           _isLoading = false;
         });
       }
@@ -92,31 +101,33 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Game Over Banner
-          PokedexContainer(
-            child: Column(
-              children: [
-                const Icon(
-                  Icons.emoji_events,
-                  size: 64,
-                  color: AppColors.goldMedal,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Spelet är slut!',
-                  style: AppTextStyles.titleLarge.copyWith(fontSize: 28),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Tack till alla som deltog Friskportlägrets Pokémon-jakt!',
-                  style: AppTextStyles.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-              ],
+          // Game Over Banner - only show if game is actually over
+          if (_isGameOver) ...[
+            PokedexContainer(
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.emoji_events,
+                    size: 64,
+                    color: AppColors.goldMedal,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Spelet är slut!',
+                    style: AppTextStyles.titleLarge.copyWith(fontSize: 28),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Tack till alla som deltog Friskportlägrets Pokémon-jakt!',
+                    style: AppTextStyles.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
+          ],
 
           // Overall Statistics
           PokedexContainer(

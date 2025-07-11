@@ -40,6 +40,7 @@ window.addEventListener('load', function() {
     "Samlar statistik om spelet...",
     "Byter ut trasiga kritor...",
     "Letar buggar...",
+    "Förbereder nästa års Pokémonjakt...",
     "Tackar deltagare..."
   ];
   
