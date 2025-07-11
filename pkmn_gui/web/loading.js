@@ -26,7 +26,7 @@ window.addEventListener('load', function() {
     "Letar efter databas...",
     "Laddar Pokédex...",
     "Laddar milstolpar...",
-    "Gått vilse i skogen, vänta lite...",
+    "Fixar pokémon som ramlat ner...",
     "Hämtar borttappade Pokébollar...",
     "Jagar rymda Pokémon...",
     "Putsar Pokébollar...",
@@ -35,12 +35,12 @@ window.addEventListener('load', function() {
     "Ser till att Pokémon som är släkt finns nära varandra...",
     "Ser till att kraftigare Pokémon är mer gömda ...",
     "Felsöker datacentret...",
-    "Aktiverar Pokéscan...",
+    "Sammanfattar veckan...",
     "Ladda highscorelistan...",
-    "Fixar fel QR kod på Porygon...",
-    "Flyttar fixad Porygon lite...",
+    "Samlar statistik om spelet...",
     "Byter ut trasiga kritor...",
-    "Letar buggar..."
+    "Letar buggar...",
+    "Tackar deltagare..."
   ];
   
   // Function to cycle through loading messages randomly
