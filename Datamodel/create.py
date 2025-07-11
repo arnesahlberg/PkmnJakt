@@ -16,7 +16,12 @@ cursor = conn.cursor()
 
 with open('def.sql', 'r') as sql_file:
     sql_script = sql_file.read()
-cursor.executescript(sql_script)
+    cursor.executescript(sql_script)
+
+with open('settings_data.sql', 'r') as sql_file:
+    sql_script = sql_file.read()
+    cursor.executescript(sql_script)
+
 
 with open('../Pkmn/pkmn.csv', 'r', newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
@@ -181,7 +186,6 @@ if "--test-users" in os.sys.argv:
     # add 139 different Pokémon to Arven (IDs 1-139)
     for pid in range(1, 140):
         add_pokemon_caught(cursor, '00024', pid)
-
 
 
 conn.commit()

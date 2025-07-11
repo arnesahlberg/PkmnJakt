@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 Map<String, dynamic> decodeUtf8Json(http.Response response) {
@@ -448,5 +447,69 @@ class AdminApiService {
       headers: ApiService._headers(token),
     );
     return response.statusCode == 200 && response.body == 'true';
+  }
+
+  // Game status endpoints (no authentication required)
+
+  // Check if game is over
+  static Future<Map<String, dynamic>> isGameOver() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/is_game_over'),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to check game status');
+    }
+  }
+
+  // Check if game has started
+  static Future<Map<String, dynamic>> hasGameStarted() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/has_game_started'),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to check game start status');
+    }
+  }
+
+  // Get server time
+  static Future<Map<String, dynamic>> getServerTime() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/server_time'),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to get server time');
+    }
+  }
+
+  // Get game summary statistics
+  static Future<Map<String, dynamic>> getGameSummaryStatistics({
+    String? datetime0,
+    String? datetime1,
+  }) async {
+    final queryParams = <String, String>{};
+    if (datetime0 != null) queryParams['datetime0'] = datetime0;
+    if (datetime1 != null) queryParams['datetime1'] = datetime1;
+    
+    final uri = Uri.parse('$baseUrl/statistics/game_summary')
+        .replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
+    
+    final response = await http.get(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to get game statistics');
+    }
   }
 }

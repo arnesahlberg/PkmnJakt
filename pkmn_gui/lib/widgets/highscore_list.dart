@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../constants.dart';
 import 'pokedex_container.dart';
 import '../screens/user_statistics_screen.dart';
-import '../api_calls.dart';
 
 class HighscoreList extends StatefulWidget {
   final List<dynamic> highscores;
