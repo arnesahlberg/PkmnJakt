@@ -157,7 +157,6 @@ pub struct GameSummaryStatistics {
     pub total_pokemon_caught: u32,
     pub catches_per_hour: Vec<HourlyCatchStats>,
     pub catches_per_day: Vec<DailyCatchStats>,
-    pub daytime_catch_frequency: f64,  // Catches per hour during daytime (06:30-22:30)
     pub first_catch: Option<FirstLastCatch>,
     pub last_catch: Option<FirstLastCatch>,
     pub longest_survivor: Option<FirstLastCatch>,

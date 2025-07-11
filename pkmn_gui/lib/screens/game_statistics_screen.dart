@@ -211,7 +211,7 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
             const SizedBox(height: 16),
           ],
 
-          // // Daytime Catch Frequency
+          // // Daytime Catch Frequency // removed
           // if (_statistics!['daytime_catch_frequency'] != null) ...[
           //   PokedexContainer(
           //     child: Column(
@@ -249,7 +249,7 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
                     ),
                   ),
                   const Text(
-                    'Antal fångster per dag under lägret',
+                    'Fångade pokémon per dag under lägret',
                     style: AppTextStyles.bodySmall,
                   ),
                   const SizedBox(height: 16),

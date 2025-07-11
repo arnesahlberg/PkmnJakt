@@ -989,54 +989,6 @@ pub fn get_longest_survivor_pokemon(datetime0: Option<&str>, datetime1: Option<&
     }
 }
 
-pub fn get_daytime_catch_frequency(datetime0: Option<&str>, datetime1: Option<&str>, conn: &Connection) -> Result<f64> {
-    // Since almost all catches occur during daytime, we'll count all catches
-    // and divide by daytime hours (16 hours per day)
-    let mut query = String::from(
-        "SELECT COUNT(*) as total_catches
-         FROM FoundPokemon
-         WHERE user_id != 'admin'"
-    );
-    
-    let mut params_vec: Vec<String> = vec![];
-    
-    if let Some(start) = datetime0 {
-        query.push_str(" AND found_timestamp >= ?");
-        params_vec.push(start.to_string());
-    }
-    
-    if let Some(end) = datetime1 {
-        query.push_str(" AND found_timestamp <= ?");
-        params_vec.push(end.to_string());
-    }
-    
-    let mut stmt = conn.prepare(&query)?;
-    let params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|p| p as &dyn rusqlite::ToSql).collect();
-    let total_catches: i64 = stmt.query_row(&params[..], |row| row.get(0))?;
-    
-    // Calculate total daytime hours in the period more accurately
-    let start_time = datetime0.map(|s| s.parse::<chrono::DateTime<chrono::Utc>>().ok()).flatten()
-        .unwrap_or_else(|| chrono::Utc::now() - chrono::Duration::days(365));
-    let end_time = datetime1.map(|s| s.parse::<chrono::DateTime<chrono::Utc>>().ok()).flatten()
-        .unwrap_or_else(chrono::Utc::now);
-    
-    // Calculate duration in seconds and convert to hours
-    let duration = end_time - start_time;
-    let total_hours = duration.num_seconds() as f64 / 3600.0;
-    
-    // Calculate daytime hours (16 out of 24 hours per day)
-    let daytime_hours_per_day = 16.0; // 06:30 to 22:30 = 16 hours
-    let total_daytime_hours = total_hours * (daytime_hours_per_day / 24.0);
-    
-    // Calculate catches per hour
-    let frequency = if total_daytime_hours > 0.0 {
-        total_catches as f64 / total_daytime_hours
-    } else {
-        0.0
-    };
-    
-    Ok(frequency)
-}
 
 pub fn get_catches_per_day(datetime0: Option<&str>, datetime1: Option<&str>, conn: &Connection) -> Result<Vec<crate::model::DailyCatchStats>> {
     let mut query = String::from(
