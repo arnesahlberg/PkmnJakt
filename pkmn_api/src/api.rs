@@ -1341,6 +1341,8 @@ pub async fn get_game_summary_statistics(query: web::Query<GameSummaryQuery>) ->
     let datetime1_ref = query.datetime1.as_deref();
     
     let catches_per_hour = databaseconnection::get_catches_per_hour(datetime0_ref, datetime1_ref, &conn).unwrap();
+    let catches_per_day = databaseconnection::get_catches_per_day(datetime0_ref, datetime1_ref, &conn).unwrap();
+    let daytime_catch_frequency = databaseconnection::get_daytime_catch_frequency(datetime0_ref, datetime1_ref, &conn).unwrap();
     let first_catch = databaseconnection::get_first_catch(datetime0_ref, datetime1_ref, &conn).unwrap();
     let last_catch = databaseconnection::get_last_catch(datetime0_ref, datetime1_ref, &conn).unwrap();
     let longest_survivor = databaseconnection::get_longest_survivor_pokemon(datetime0_ref, datetime1_ref, &conn).unwrap();
@@ -1355,6 +1357,8 @@ pub async fn get_game_summary_statistics(query: web::Query<GameSummaryQuery>) ->
         users_with_100_plus_catches: users_100_plus,
         total_pokemon_caught,
         catches_per_hour,
+        catches_per_day,
+        daytime_catch_frequency,
         first_catch,
         last_catch,
         longest_survivor,

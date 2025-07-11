@@ -142,12 +142,22 @@ pub struct PokemonCatchStats {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct DailyCatchStats {
+    pub date: String,  // YYYY-MM-DD format
+    pub weekday: String,  // Swedish weekday name
+    pub day_number: u32,  // Day of month
+    pub catches: u32,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct GameSummaryStatistics {
     pub total_users_registered: u32,
     pub users_with_10_plus_catches: u32,
     pub users_with_100_plus_catches: u32,
     pub total_pokemon_caught: u32,
     pub catches_per_hour: Vec<HourlyCatchStats>,
+    pub catches_per_day: Vec<DailyCatchStats>,
+    pub daytime_catch_frequency: f64,  // Catches per hour during daytime (06:30-22:30)
     pub first_catch: Option<FirstLastCatch>,
     pub last_catch: Option<FirstLastCatch>,
     pub longest_survivor: Option<FirstLastCatch>,

@@ -36,10 +36,10 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
         AdminApiService.getGameSummaryStatistics(),
         AdminApiService.isGameOver(),
       ]);
-      
+
       final stats = results[0] as Map<String, dynamic>;
       final gameStatusResponse = results[1] as Map<String, dynamic>;
-      
+
       if (mounted) {
         setState(() {
           _statistics = stats;
@@ -211,9 +211,32 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
             const SizedBox(height: 16),
           ],
 
-          // Hourly Activity Chart - MOVED UP
-          if (_statistics!['catches_per_hour'] != null &&
-              (_statistics!['catches_per_hour'] as List).isNotEmpty) ...[
+          // // Daytime Catch Frequency
+          // if (_statistics!['daytime_catch_frequency'] != null) ...[
+          //   PokedexContainer(
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         const Padding(
+          //           padding: EdgeInsets.only(bottom: 16),
+          //           child: Text(
+          //             'Fångstfrekvens dagtid',
+          //             style: AppTextStyles.titleMedium,
+          //           ),
+          //         ),
+          //         _buildStatRow(
+          //           'Pokémon per timme (06:30-22:30)',
+          //           _statistics!['daytime_catch_frequency'].toStringAsFixed(1),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          //   const SizedBox(height: 16),
+          // ],
+
+          // Daily Activity Chart
+          if (_statistics!['catches_per_day'] != null &&
+              (_statistics!['catches_per_day'] as List).isNotEmpty) ...[
             PokedexContainer(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,16 +244,16 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
                   const Padding(
                     padding: EdgeInsets.only(bottom: 8),
                     child: Text(
-                      'Aktivitet per timme',
+                      'Aktivitet per dag',
                       style: AppTextStyles.titleMedium,
                     ),
                   ),
                   const Text(
-                    'Totalt antal fångster per timme under hela lägret',
+                    'Antal fångster per dag under lägret',
                     style: AppTextStyles.bodySmall,
                   ),
                   const SizedBox(height: 16),
-                  _buildHourlyChart(_statistics!['catches_per_hour']),
+                  _buildDailyChart(_statistics!['catches_per_day']),
                 ],
               ),
             ),
@@ -376,63 +399,114 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
     );
   }
 
-  Widget _buildHourlyChart(List<dynamic> hourlyData) {
+  Widget _buildDailyChart(List<dynamic> dailyData) {
     // Find max value for scaling
     int maxCatches = 0;
-    for (var data in hourlyData) {
+    for (var data in dailyData) {
       if (data['catches'] > maxCatches) {
         maxCatches = data['catches'] as int;
       }
     }
 
     return Container(
-      height: 200,
+      height: 240,
       padding: const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children:
-                  hourlyData.map<Widget>((data) {
-                    final hour = data['hour'] as int;
-                    final catches = data['catches'] as int;
-                    final heightFactor =
-                        maxCatches > 0 ? catches / maxCatches : 0.0;
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final availableWidth = constraints.maxWidth;
+          final numberOfDays = dailyData.length;
 
-                    return Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            '$catches',
-                            style: const TextStyle(fontSize: 10),
+          // Calculate bar width based on available space
+          // If few days, expand to fill space; if many days, use minimum width with scrolling
+          final minBarWidth = 80.0;
+          final maxBarWidth = 120.0;
+          final spacing = 8.0; // Total horizontal margin per bar
+
+          // Calculate ideal bar width to fill available space
+          final idealBarWidth =
+              (availableWidth - (spacing * numberOfDays)) / numberOfDays;
+
+          // Determine if we need scrolling
+          final needsScrolling = idealBarWidth < minBarWidth;
+          final barWidth =
+              needsScrolling
+                  ? minBarWidth
+                  : idealBarWidth.clamp(minBarWidth, maxBarWidth);
+
+          Widget chartContent = Row(
+            mainAxisAlignment:
+                needsScrolling
+                    ? MainAxisAlignment.start
+                    : MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children:
+                dailyData.map<Widget>((data) {
+                  final weekday = data['weekday'] as String;
+                  final dayNumber = data['day_number'] as int;
+                  final catches = data['catches'] as int;
+                  final heightFactor =
+                      maxCatches > 0 ? catches / maxCatches : 0.0;
+
+                  // Swedish ordinal suffix
+                  String ordinalSuffix = 'e';
+                  if (dayNumber == 1 || dayNumber == 2) {
+                    ordinalSuffix = 'a';
+                  }
+
+                  return Container(
+                    width: barWidth,
+                    margin: EdgeInsets.symmetric(horizontal: spacing / 2),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          '$catches',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 4),
-                          Container(
-                            width: double.infinity,
-                            height: 120 * heightFactor,
-                            margin: const EdgeInsets.symmetric(horizontal: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryRed,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          width: double.infinity,
+                          height: 120 * heightFactor,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryRed,
+                            borderRadius: BorderRadius.circular(4),
                           ),
-                          const SizedBox(height: 4),
-                          Text('$hour', style: const TextStyle(fontSize: 10)),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Timme på dygnet',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-          ),
-        ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          weekday,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '$dayNumber:$ordinalSuffix',
+                          style: const TextStyle(fontSize: 10),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+          );
+
+          return Column(
+            children: [
+              Expanded(
+                child:
+                    needsScrolling
+                        ? SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: chartContent,
+                        )
+                        : Center(child: chartContent),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

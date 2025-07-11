@@ -507,7 +507,8 @@ class AdminApiService {
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      final decodedString = utf8.decode(response.bodyBytes);
+      return jsonDecode(decodedString);
     } else {
       throw Exception('Failed to get game statistics');
     }
