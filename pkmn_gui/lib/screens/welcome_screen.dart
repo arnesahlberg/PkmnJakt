@@ -51,10 +51,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return DateFormat('yyyy-MM-dd HH:mm').format(dateTime);
   }
 
-  bool _hasDuplicateScore(dynamic currentScore, List<dynamic> allScores) {
-    return allScores.where((s) => s['score'] == currentScore['score']).length >
-        1;
-  }
 
   @override
   Widget build(BuildContext context) {

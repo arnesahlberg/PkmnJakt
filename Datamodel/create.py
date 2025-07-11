@@ -16,7 +16,12 @@ cursor = conn.cursor()
 
 with open('def.sql', 'r') as sql_file:
     sql_script = sql_file.read()
-cursor.executescript(sql_script)
+    cursor.executescript(sql_script)
+
+with open('settings_data.sql', 'r') as sql_file:
+    sql_script = sql_file.read()
+    cursor.executescript(sql_script)
+
 
 with open('../Pkmn/pkmn.csv', 'r', newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)

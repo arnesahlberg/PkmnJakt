@@ -6,7 +6,7 @@ import 'pokedex_button.dart';
 class GameStatusBanner extends StatefulWidget {
   final VoidCallback? onStatisticsPressed;
   final bool showButton;
-  
+
   const GameStatusBanner({
     super.key,
     this.onStatisticsPressed,
@@ -29,7 +29,7 @@ class _GameStatusBannerState extends State<GameStatusBanner> {
 
   Future<void> _checkGameStatus() async {
     try {
-      final response = await ApiService.isGameOver();
+      final response = await AdminApiService.isGameOver();
       if (mounted) {
         setState(() {
           _isGameOver = response['is_game_over'] as bool;
@@ -71,11 +71,7 @@ class _GameStatusBannerState extends State<GameStatusBanner> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.info_outline,
-                color: Colors.white,
-                size: 28,
-              ),
+              const Icon(Icons.info_outline, color: Colors.white, size: 28),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -90,7 +86,7 @@ class _GameStatusBannerState extends State<GameStatusBanner> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Tack för att du deltog i Pokémon-jakten!',
+                      'Tack till alla som deltog Friskportlägrets Pokémon-jakt!',
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: Colors.white.withOpacity(0.9),
                       ),
@@ -105,7 +101,8 @@ class _GameStatusBannerState extends State<GameStatusBanner> {
             SizedBox(
               width: double.infinity,
               child: PokedexButton(
-                onPressed: widget.onStatisticsPressed ??
+                onPressed:
+                    widget.onStatisticsPressed ??
                     () {
                       Navigator.pushNamed(context, '/game_statistics');
                     },

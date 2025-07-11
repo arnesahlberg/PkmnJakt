@@ -118,16 +118,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     return formatter.format(dateTime);
   }
 
-  void _navigateToUserStatistics(String userId, String userName) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) =>
-                UserStatisticsScreen(userId: userId, userName: userName),
-      ),
-    );
-  }
 
   void _navigateToMilestones() {
     final session = Provider.of<UserSession>(context, listen: false);
@@ -364,7 +354,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   Future<void> _checkGameStatus() async {
     try {
-      final response = await ApiService.isGameOver();
+      final response = await AdminApiService.isGameOver();
       if (mounted) {
         setState(() {
           _isGameOver = response['is_game_over'] as bool? ?? false;
