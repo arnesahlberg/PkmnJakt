@@ -760,6 +760,7 @@ pub fn count_total_pokemon_caught(conn: &Connection) -> Result<u32> {
     Ok(count)
 }
 
+// not used
 pub fn get_catches_per_hour(datetime0: Option<&str>, datetime1: Option<&str>, conn: &Connection) -> Result<Vec<crate::model::HourlyCatchStats>> {
     let mut query = String::from(
         "SELECT 
@@ -815,7 +816,7 @@ pub fn get_first_catch(datetime0: Option<&str>, datetime1: Option<&str>, conn: &
     
     let mut params_vec: Vec<String> = vec![];
     
-    if let Some(start) = datetime0 {
+    if let Some(start) = datetime0 { // not needed here either
         query.push_str(" AND fp.found_timestamp >= ?");
         params_vec.push(start.to_string());
     }
@@ -991,7 +992,7 @@ pub fn get_longest_survivor_pokemon(datetime0: Option<&str>, datetime1: Option<&
 
 
 pub fn get_catches_per_day(datetime0: Option<&str>, datetime1: Option<&str>, conn: &Connection) -> Result<Vec<crate::model::DailyCatchStats>> {
-    let mut query = String::from(
+    let mut query = String::from( // should be a view up ahead XXXX
         "SELECT 
             strftime('%Y-%m-%d', found_timestamp) as date,
             CAST(strftime('%w', found_timestamp) AS INTEGER) as weekday_num,
@@ -1003,12 +1004,12 @@ pub fn get_catches_per_day(datetime0: Option<&str>, datetime1: Option<&str>, con
     
     let mut params_vec: Vec<String> = vec![];
     
-    if let Some(start) = datetime0 {
+    if let Some(start) = datetime0 { // not needed
         query.push_str(" AND found_timestamp >= ?");
         params_vec.push(start.to_string());
     }
     
-    if let Some(end) = datetime1 {
+    if let Some(end) = datetime1 { // not needed
         query.push_str(" AND found_timestamp <= ?");
         params_vec.push(end.to_string());
     }
