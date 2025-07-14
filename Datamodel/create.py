@@ -50,7 +50,7 @@ def add_user(cursor, user_id, name, password, is_admin=False):
     VALUES (?, ?, ?, ?, ?)
     ''', (user_id, name, password_hash, salt, 1 if is_admin else 0))
 
-# Add admin user
+# always add admin user
 add_user(cursor, 'admin', 'admin', 'stensund', is_admin=True)
 
 def add_pokemon_caught(cursor, user_id, pokemon_id):
@@ -60,7 +60,7 @@ def add_pokemon_caught(cursor, user_id, pokemon_id):
     ''', (user_id, pokemon_id, datetime.datetime.now().isoformat()))
 
 
-
+# Maybe add test users if asked for
 if "--test-users" in os.sys.argv:
     print("Adding test users and Pokémon...")
     # Add demo users too with found pokemon
