@@ -243,7 +243,18 @@ pub async fn validate_password(req: HttpRequest, info: web::Json<VerifyPasswordR
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => {
+            let response = VerifyPasswordResponse {
+                id: "unknown".to_string(),
+                valid: false,
+                message: "Invalid token format".to_string(),
+                result_code: CallResultCode::InvalidToken,
+            };
+            return HttpResponse::Unauthorized().json(response);
+        }
+    };
     if !validate_token(&user_id, token, &conn) {
         let response = VerifyPasswordResponse {
             id: user_id.clone(),
@@ -294,7 +305,17 @@ pub async fn set_user_password(req: HttpRequest, info: web::Json<SetPasswordRequ
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => {
+            let response = SetPasswordResponse {
+                id: "unknown".to_string(),
+                message: "Invalid token format".to_string(),
+                result_code: CallResultCode::InvalidToken,
+            };
+            return HttpResponse::Unauthorized().json(response);
+        }
+    };
     if !validate_token(&user_id, token, &conn) {
         let response = SetPasswordResponse {
             id : user_id.clone(),
@@ -365,7 +386,10 @@ pub async fn set_user_name(req: HttpRequest, info: web::Json<SetUserNameRequest>
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     if !validate_token(&user_id, token, &conn) {
         let response = SetUserNameResponse {
             id: user_id.clone(),
@@ -431,7 +455,10 @@ pub async fn logout(req: HttpRequest) -> HttpResponse {
         .unwrap_or("");
 
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     if !validate_token(&user_id, token, &conn) {
         let response = LogoutResponse {
             logged_out: false,
@@ -456,7 +483,10 @@ pub async fn logout_everywhere(req: HttpRequest) -> HttpResponse {
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     if !validate_token(&user_id, token, &conn) {
         let response = LogoutResponse {
             logged_out: false,
@@ -480,7 +510,10 @@ pub async fn delete_user(req: HttpRequest) -> HttpResponse {
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     if !validate_token(&user_id, token, &conn) {
         return HttpResponse::Unauthorized().finish();
     }
@@ -515,7 +548,10 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     
     if !validate_token(&user_id, token, &conn) {
         warn!("Pokemon catch failed - invalid token for user: {}", user_id);
@@ -612,7 +648,10 @@ pub async fn view_found_pokemon(req: HttpRequest, info: web::Json<ViewFoundPokem
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     if !validate_token(&user_id, token, &conn) {
         let response = ViewFoundPokemonResponse {
             id: user_id.clone(),
@@ -663,7 +702,7 @@ pub async fn get_statistics_highscore() -> HttpResponse  {
 // Paginated highscores endpoints (public, no auth required)
 #[derive(Debug, Deserialize)]
 pub struct GetHighscoresRequest {
-    pub page: u32,
+    pub page: Option<i32>,
     pub per_page: Option<u32>,
 }
 
@@ -681,12 +720,16 @@ pub async fn get_highscores(query: web::Query<GetHighscoresRequest>) -> HttpResp
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     
     let per_page = query.per_page.unwrap_or(20).min(50); // Max 50 per page
-    let page = query.page.max(1); // Ensure page is at least 1
+    
+    // Get total count first to determine valid page range
+    let total_count = databaseconnection::get_highscores_total_count(&conn).unwrap();
+    let total_pages = if total_count == 0 { 1 } else { (total_count + per_page - 1) / per_page }; // Ceiling division
+    
+    // Clamp page to valid range (1 to total_pages)
+    let page = query.page.unwrap_or(1).max(1).min(total_pages as i32) as u32;
     let offset = (page - 1) * per_page;
     
     let scores = databaseconnection::get_highscores_paginated(per_page, offset, &conn).unwrap();
-    let total_count = databaseconnection::get_highscores_total_count(&conn).unwrap();
-    let total_pages = (total_count + per_page - 1) / per_page; // Ceiling division
     
     let res = GetHighscoresResponse {
         scores,
@@ -703,7 +746,7 @@ pub async fn get_highscores(query: web::Query<GetHighscoresRequest>) -> HttpResp
 #[derive(Debug, Deserialize)]
 pub struct SearchHighscoresRequest {
     pub search: String,
-    pub page: u32,
+    pub page: Option<i32>,
     pub per_page: Option<u32>,
 }
 
@@ -711,12 +754,16 @@ pub async fn search_highscores(query: web::Query<SearchHighscoresRequest>) -> Ht
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     
     let per_page = query.per_page.unwrap_or(20).min(50); // Max 50 per page
-    let page = query.page.max(1); // Ensure page is at least 1
+    
+    // Get total count first to determine valid page range
+    let total_count = databaseconnection::get_highscores_filtered_count(&query.search, &conn).unwrap();
+    let total_pages = if total_count == 0 { 1 } else { (total_count + per_page - 1) / per_page }; // Ceiling division
+    
+    // Clamp page to valid range (1 to total_pages)
+    let page = query.page.unwrap_or(1).max(1).min(total_pages as i32) as u32;
     let offset = (page - 1) * per_page;
     
     let scores = databaseconnection::get_highscores_filtered(&query.search, per_page, offset, &conn).unwrap();
-    let total_count = databaseconnection::get_highscores_filtered_count(&query.search, &conn).unwrap();
-    let total_pages = (total_count + per_page - 1) / per_page; // Ceiling division
     
     let res = GetHighscoresResponse {
         scores,
@@ -805,7 +852,10 @@ pub async fn get_users(req: HttpRequest, info: web::Json<GetUsersRequest>) -> Ht
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
     let valid_token = validate_token(&user_id, token, &conn);
@@ -847,7 +897,10 @@ pub async fn get_users_filter_id(req : HttpRequest, info: web::Json<GetUsersFilt
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
     let valid_token = validate_token(&user_id, token, &conn);
@@ -883,7 +936,10 @@ pub async fn get_users_filter_id_name(req: HttpRequest, info: web::Json<GetUsers
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
     let valid_token = validate_token(&user_id, token, &conn);
@@ -978,7 +1034,10 @@ pub async fn get_my_pokedex(req: HttpRequest) -> HttpResponse {
     
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
 
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     if !validate_token(&user_id, token, &conn) {
         let response = SetUserNameResponse {
             id: user_id.clone(),
@@ -1033,7 +1092,12 @@ pub async fn validate_token_request(req: HttpRequest) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
+    
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     if !validate_token(&user_id, token, &conn) {
         return HttpResponse::Unauthorized().finish();
@@ -1090,7 +1154,10 @@ pub async fn am_i_admin(req: HttpRequest) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     if !validate_token(&user_id, token, &conn) {
         let response = AmIAdminResponse {
@@ -1121,7 +1188,10 @@ pub async fn is_user_admin(req: HttpRequest, path: web::Path<String>) -> HttpRes
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     if !validate_token(&user_id, token, &conn) {
         let response = IsUserAdminResponse {
@@ -1159,7 +1229,10 @@ pub async fn make_user_admin(req: HttpRequest, info: web::Json<MakeUserAdminRequ
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     if !validate_token(&user_id, token, &conn) {
         return HttpResponse::Unauthorized().finish();
@@ -1178,7 +1251,10 @@ pub async fn make_user_not_admin(req: HttpRequest, info: web::Json<MakeUserAdmin
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     if !validate_token(&user_id, token, &conn) {
         return HttpResponse::Unauthorized().finish();
@@ -1210,7 +1286,10 @@ pub async fn admin_reset_user_password(req: HttpRequest, info: web::Json<ResetUs
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     if !validate_token(&user_id, token, &conn) {
         return HttpResponse::Unauthorized().finish();
@@ -1238,7 +1317,10 @@ pub async fn admin_delete_user(req: HttpRequest, info: web::Json<AdminDeleteUser
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
-    let user_id = misc::get_user_id_from_token(token).unwrap();
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
     if !validate_token(&user_id, token, &conn) {
         return HttpResponse::Unauthorized().finish();

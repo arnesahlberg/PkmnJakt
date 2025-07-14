@@ -222,6 +222,22 @@ def run_tests():
     print(f"{Fore.YELLOW}Test 12c: Validate token after logout for user 11111 (expecting 401){Style.RESET_ALL}")
     make_request("POST", "validate_token", None, tokens["11111"], expected_status=401)
     
+    # Test logout_everywhere functionality
+    print(f"{Fore.YELLOW}Test 12d: Re-login user 11111 for logout_everywhere test (expecting 200){Style.RESET_ALL}")
+    response = make_request("POST", "login", {
+        "id": "11111",
+        "password": "new_password"  # Password was changed in Test 10e
+    }, expected_status=200)
+    if response and response.status_code == 200:
+        data = json.loads(response.text)
+        if "token" in data and "encoded_token" in data["token"]:
+            tokens["11111"] = data["token"]["encoded_token"]
+    
+    print(f"{Fore.YELLOW}Test 12e: Test logout_everywhere for user 11111 (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "logout_everywhere", None, tokens["11111"], expected_status=200)
+    print(f"{Fore.YELLOW}Test 12f: Validate token after logout_everywhere for user 11111 (expecting 401){Style.RESET_ALL}")
+    make_request("POST", "validate_token", None, tokens["11111"], expected_status=401)
+    
     # 13. Check if user is admin
     print(f"{Fore.YELLOW}Test 13a: Check admin status for non-admin user 11111 (expecting 401){Style.RESET_ALL}")
     response = make_request("GET", "am_i_admin", None, tokens["11111"], expected_status=401)
@@ -447,6 +463,164 @@ def run_tests():
         data = json.loads(response.text)
         print(f"  Time window start: {data.get('time_window_start')}")
         print(f"  Time window end: {data.get('time_window_end')}")
+
+    # 26. Test missing public endpoints
+    print(f"{Fore.YELLOW}\\nTest 26a: Get paginated highscores (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "highscores?page=1&per_page=5", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  Page: {data.get('page')}, Per page: {data.get('per_page')}, Total: {data.get('total_count')}")
+    
+    print(f"{Fore.YELLOW}Test 26b: Search highscores (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "highscores/search?search=katt&page=1&per_page=5", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  Search results: {len(data.get('scores', []))} users found")
+    
+    print(f"{Fore.YELLOW}Test 26c: Get Pokemon found counts (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "pokemon_found_counts", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  Pokemon counts returned: {len(data.get('pokemon_counts', []))}")
+
+    # 27. Test user info endpoints (public endpoints)
+    print(f"{Fore.YELLOW}\\nTest 27a: Get user info for existing user 22222 (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "get_user/22222", None, expected_status=200)
+    
+    print(f"{Fore.YELLOW}Test 27b: Get user info for non-existent user (expecting 404){Style.RESET_ALL}")
+    make_request("GET", "get_user/nonexistent", None, expected_status=404)
+    
+    print(f"{Fore.YELLOW}Test 27c: Check if user exists for existing user 22222 (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "user_exists/22222", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  User exists: {data.get('exists')}")
+    
+    print(f"{Fore.YELLOW}Test 27d: Check if user exists for non-existent user (expecting 200 with false){Style.RESET_ALL}")
+    response = make_request("GET", "user_exists/nonexistent", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  User exists: {data.get('exists')}")
+    
+    print(f"{Fore.YELLOW}Test 27e: Get user ranking for existing user 22222 (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "user_ranking/22222", None, expected_status=200)
+    
+    print(f"{Fore.YELLOW}Test 27f: Get user ranking for non-existent user (expecting 404){Style.RESET_ALL}")
+    make_request("GET", "user_ranking/nonexistent", None, expected_status=404)
+    
+    print(f"{Fore.YELLOW}Test 27g: Get user pokedex for user with Pokemon (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "user_pokedex/11111", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  Pokemon in pokedex: {len(data) if isinstance(data, list) else 'N/A'}")
+    
+    print(f"{Fore.YELLOW}Test 27h: Get user pokedex for non-existent user (expecting 404){Style.RESET_ALL}")
+    make_request("GET", "user_pokedex/nonexistent", None, expected_status=404)
+
+    # 28. Test admin endpoint missing from earlier tests
+    print(f"{Fore.YELLOW}\\nTest 28a: Admin filter users by ID only (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "get_users_filter_id", {
+        "filter": "111",
+        "n": 5
+    }, tokens["admin"], expected_status=200)
+    
+    print(f"{Fore.YELLOW}Test 28b: Non-admin attempting to filter users by ID (expecting 403){Style.RESET_ALL}")
+    make_request("POST", "get_users_filter_id", {
+        "filter": "111",
+        "n": 5
+    }, tokens["22222"], expected_status=403)
+
+    # 29. Test milestone endpoints
+    print(f"{Fore.YELLOW}\\nTest 29a: Get user milestones for user with Pokemon (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "user_milestones/11111", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  Milestones achieved: {data if isinstance(data, list) else 'N/A'}")
+    
+    print(f"{Fore.YELLOW}Test 29b: Get user milestones for non-existent user (expecting 404){Style.RESET_ALL}")
+    make_request("GET", "user_milestones/nonexistent", None, expected_status=404)
+    
+    print(f"{Fore.YELLOW}Test 29c: Get user milestone definitions for user with Pokemon (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "user_milestone_definitions/11111", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  Milestone definitions count: {len(data) if isinstance(data, list) else 'N/A'}")
+    
+    print(f"{Fore.YELLOW}Test 29d: Get user milestone definitions for non-existent user (expecting 404){Style.RESET_ALL}")
+    make_request("GET", "user_milestone_definitions/nonexistent", None, expected_status=404)
+
+    # 30. Edge case and error testing
+    print(f"{Fore.YELLOW}\\nTest 30a: Test pagination edge cases{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Test 30a1: Page 0 (should default to 1) (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "highscores?page=0&per_page=5", None, expected_status=200)
+    
+    print(f"{Fore.YELLOW}Test 30a2: Negative page (should clamp to page 1) (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "highscores?page=-1&per_page=5", None, expected_status=200)
+    
+    print(f"{Fore.YELLOW}Test 30a3: Very large per_page (should be capped at 50) (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "highscores?page=1&per_page=1000", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  Actual per_page returned: {data.get('per_page')} (should be 50 or less)")
+    
+    print(f"{Fore.YELLOW}Test 30a4: Very large page number (should clamp to last page) (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "highscores?page=99999&per_page=5", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        if data.get("page", 0) <= data.get("total_pages", 1):
+            print(f"{Fore.GREEN}✓ Large page number clamped to {data.get('page')} (total pages: {data.get('total_pages')}){Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}✗ Large page number not clamped properly{Style.RESET_ALL}")
+        print(f"  Results on clamped page: {len(data.get('scores', []))}")
+
+    print(f"{Fore.YELLOW}\\nTest 30b: Test invalid token scenarios{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Test 30b1: Invalid token format for protected endpoint (expecting 401){Style.RESET_ALL}")
+    make_request("POST", "validate_token", None, "invalid-token-format", expected_status=401)
+    
+    print(f"{Fore.YELLOW}Test 30b2: Empty token for protected endpoint (expecting 401){Style.RESET_ALL}")
+    make_request("POST", "validate_token", None, "", expected_status=401)
+    
+    print(f"{Fore.YELLOW}Test 30b3: No token header for protected endpoint (expecting 401){Style.RESET_ALL}")
+    make_request("POST", "validate_token", None, None, expected_status=401)
+
+    print(f"{Fore.YELLOW}\\nTest 30c: Test boundary conditions{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Test 30c1: Empty search string (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "highscores/search?search=&page=1&per_page=5", None, expected_status=200)
+    
+    print(f"{Fore.YELLOW}Test 30c2: Very long search string (expecting 200){Style.RESET_ALL}")
+    long_search = "a" * 1000
+    make_request("GET", f"highscores/search?search={long_search}&page=1&per_page=5", None, expected_status=200)
+    
+    print(f"{Fore.YELLOW}Test 30c3: Special characters in search (expecting 200){Style.RESET_ALL}")
+    make_request("GET", "highscores/search?search=%20%21%40%23&page=1&per_page=5", None, expected_status=200)
+
+    print(f"{Fore.YELLOW}\\nTest 30d: Test admin endpoint error conditions{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Test 30d1: Admin operations without admin token (expecting 403){Style.RESET_ALL}")
+    make_request("POST", "make_user_admin", {"id": "22222"}, tokens["22222"], expected_status=403)
+    
+    print(f"{Fore.YELLOW}Test 30d2: Admin operations on non-existent user (expecting 404 or error){Style.RESET_ALL}")
+    make_request("POST", "admin_reset_user_password", {
+        "id": "nonexistent", 
+        "new_password": "newpass"
+    }, tokens["admin"], expected_status=404)
+    
+    print(f"{Fore.YELLOW}Test 30d3: Make non-existent user admin (expecting 200 but no effect){Style.RESET_ALL}")
+    make_request("POST", "make_user_admin", {"id": "nonexistent"}, tokens["admin"], expected_status=200)
+
+    print(f"{Fore.YELLOW}\\nTest 30e: Test Pokemon-related edge cases{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Test 30e1: Get non-existent Pokemon (expecting 404){Style.RESET_ALL}")
+    make_request("GET", "get_pokemon/99999", None, expected_status=404)
+    
+    print(f"{Fore.YELLOW}Test 30e2: Try to catch Pokemon with invalid catch code (expecting 400){Style.RESET_ALL}")
+    make_request("POST", "found_pokemon", {
+        "catch_code": "invalid-catch-code-12345"
+    }, tokens["admin"], expected_status=400)
+    
+    print(f"{Fore.YELLOW}Test 30e3: View found Pokemon with 0 limit (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "view_found_pokemon", {"n": 0}, tokens["admin"], expected_status=200)
+    
+    print(f"{Fore.YELLOW}Test 30e4: View found Pokemon with negative limit (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "view_found_pokemon", {"n": -1}, tokens["admin"], expected_status=200)
 
     # Final: DELETE ALL USERS
     print(f"{Fore.YELLOW}\nTest 18: Deleting all users by looping{Style.RESET_ALL}")

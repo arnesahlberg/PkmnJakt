@@ -9,14 +9,18 @@ pub fn encode_string_base64(input : String) -> String {
     general_purpose::STANDARD.encode(input.as_bytes())
 }
 
-pub fn decode_string_base64(input : String) -> String {
-    let bytes = general_purpose::STANDARD.decode(input)
-        .expect("Failed to decode Base64 string!");
+pub fn decode_string_base64(input : String) -> Result<String, String> {
+    let bytes = match general_purpose::STANDARD.decode(input) {
+        Ok(bytes) => bytes,
+        Err(e) => return Err(format!("Failed to decode Base64 string: {}", e)),
+    };
 
-    let decoded_string = String::from_utf8(bytes)
-        .expect("Decoded bytes are not a UTF-8 string.");
+    let decoded_string = match String::from_utf8(bytes) {
+        Ok(s) => s,
+        Err(e) => return Err(format!("Decoded bytes are not valid UTF-8: {}", e)),
+    };
 
-    decoded_string
+    Ok(decoded_string)
 }
 
 
@@ -46,11 +50,6 @@ pub fn hash_password(password : &str) -> (String,String) {
     (hash, salt)
 }
 
-pub fn verify_hash_password(password : &str, hash : &str, salt : &str) -> bool {
-    let new_hash = hash_password_with_salt(password, salt);
-    new_hash.as_str() == hash
-}
-
 
 
 // database connected functions too
@@ -68,7 +67,11 @@ pub fn create_token(user_id : &str, valid_until : DateTime<Utc>, conn : &Connect
 }
 
 pub fn get_user_id_from_token(token : &str) -> Result<String,String> {
-    let decoded_token = decode_string_base64(token.to_string());
+    let decoded_token = match decode_string_base64(token.to_string()) {
+        Ok(decoded) => decoded,
+        Err(e) => return Err(format!("Token decode error: {}", e)),
+    };
+    
     let token_parts : Vec<&str> = decoded_token.split("--").collect();
     if token_parts.len() != 5 {
         return Err("Invalid token format.".to_string());
@@ -78,7 +81,10 @@ pub fn get_user_id_from_token(token : &str) -> Result<String,String> {
 }
 
 pub fn validate_token(user_id : &str, token : &str, conn : &Connection) -> bool {
-    let decoded_token = decode_string_base64(token.to_string());
+    let decoded_token = match decode_string_base64(token.to_string()) {
+        Ok(decoded) => decoded,
+        Err(_) => return false,  // Invalid Base64 tokens are invalid
+    };
     let token_parts : Vec<&str> = decoded_token.split("--").collect();
     if token_parts.len() != 5 {
         return false;
@@ -95,24 +101,29 @@ pub fn validate_token(user_id : &str, token : &str, conn : &Connection) -> bool 
         return false;
     }
 
-    let expiry = DateTime::parse_from_rfc3339(token_expiry.replace(" UTC", "Z").replace(" " , "T").as_str())
-        .expect("Failed to parse token expiry date.");
+    let expiry = match DateTime::parse_from_rfc3339(token_expiry.replace(" UTC", "Z").replace(" " , "T").as_str()) {
+        Ok(exp) => exp,
+        Err(_) => return false,  // Invalid expiry date format
+    };
 
     if expiry < Utc::now() {
         return false;
     }
     // check if token exists in database with user_id. don't check the validuntil field here
     // it seems to not work for some reason. 
-    let mut stmt = conn.prepare(
-        "SELECT token FROM Tokens WHERE token = ?1 AND user_id = ?2"
-    ).expect("Failed to prepare statement for token validation.");
+    let mut stmt = match conn.prepare("SELECT token FROM Tokens WHERE token = ?1 AND user_id = ?2") {
+        Ok(stmt) => stmt,
+        Err(_) => return false,  // Database error
+    };
 
 
-    let mut rows = stmt.query(params![token, user_id])
-        .expect("Failed to query token for validation.");
+    let mut rows = match stmt.query(params![token, user_id]) {
+        Ok(rows) => rows,
+        Err(_) => return false,  // Query error
+    };
 
     let mut count = 0;
-    while let Some(_) = rows.next().unwrap() {
+    while let Some(_) = rows.next().unwrap_or(None) {
         count += 1;
     }
 
