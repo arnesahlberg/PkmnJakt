@@ -12,6 +12,8 @@ class CallResultCode {
   static const int userNameTooShort = 7;
   static const int userNameTooLong = 8;
   static const int passwordTooShort = 9;
+  static const int userNotAdmin = 10;
+  static const int pokemonNotActive = 11;
 }
 
 class UIConstants {

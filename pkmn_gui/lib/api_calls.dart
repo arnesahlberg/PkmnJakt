@@ -321,6 +321,18 @@ class ApiService {
     }
   }
 
+  static Future<List<int>> getEnabledPokemonIds() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/enabled_pokemon_ids'));
+      if (response.statusCode != 200) return [];
+      final json = decodeUtf8Json(response);
+      final ids = json['ids'] as List<dynamic>? ?? [];
+      return ids.map((e) => e as int).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   static Future<bool> getDatamatrixLoginEnabled() async {
     try {
       final response = await http.get(
@@ -460,6 +472,23 @@ class AdminApiService {
       headers: ApiService._headers(token),
     );
     return response.statusCode == 200 && response.body == 'true';
+  }
+
+  static Future<Map<String, dynamic>> getAdminPokemonList(String token) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/admin/pokemon_list'),
+      headers: ApiService._headers(token),
+    );
+    return decodeUtf8Json(response);
+  }
+
+  static Future<Map<String, dynamic>> setPokemonActive(int pokemonId, bool active, String token) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/admin/set_pokemon_active'),
+      body: jsonEncode({'pokemon_id': pokemonId, 'active': active}),
+      headers: ApiService._headers(token),
+    );
+    return decodeUtf8Json(response);
   }
 
   static Future<Map<String, dynamic>> setDatamatrixLoginEnabled(bool enabled, String token) async {

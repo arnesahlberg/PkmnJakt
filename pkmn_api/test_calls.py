@@ -680,6 +680,71 @@ def run_tests():
         else:
             print(f"{Fore.RED}  ✗ Expected enabled: true but got: {data.get('enabled')}{Style.RESET_ALL}")
 
+    # 32. Test pokemon active/disabled endpoints
+    print(f"{Fore.YELLOW}\nTest 32a: GET /enabled_pokemon_ids (no auth, expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "enabled_pokemon_ids", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        assert "ids" in data, "Response missing 'ids' field"
+        print(f"  Enabled pokemon count: {len(data['ids'])}")
+
+    print(f"{Fore.YELLOW}Test 32b: GET /admin/pokemon_list as admin (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "admin/pokemon_list", None, tokens["admin"], expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        assert "pokemon" in data, "Response missing 'pokemon' field"
+        assert all("id" in p and "name" in p and "active" in p for p in data["pokemon"]), "Pokemon entries missing fields"
+        print(f"  Total pokemon in list: {len(data['pokemon'])}")
+
+    print(f"{Fore.YELLOW}Test 32c: GET /admin/pokemon_list without auth (expecting 401){Style.RESET_ALL}")
+    make_request("GET", "admin/pokemon_list", None, None, expected_status=401)
+
+    print(f"{Fore.YELLOW}Test 32d: POST /admin/set_pokemon_active disable pokemon 2 as admin (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "admin/set_pokemon_active", {"pokemon_id": 2, "active": False}, tokens["admin"], expected_status=200)
+
+    print(f"{Fore.YELLOW}Test 32e: GET /enabled_pokemon_ids — verify pokemon 2 is NOT in list{Style.RESET_ALL}")
+    response = make_request("GET", "enabled_pokemon_ids", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        assert 2 not in data["ids"], f"Pokemon 2 should be disabled but found in ids: {data['ids']}"
+        print(f"{Fore.GREEN}  ✓ Pokemon 2 not in enabled ids{Style.RESET_ALL}")
+
+    print(f"{Fore.YELLOW}Test 32f: GET /admin/pokemon_list — verify pokemon 2 shows active: false{Style.RESET_ALL}")
+    response = make_request("GET", "admin/pokemon_list", None, tokens["admin"], expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        pokemon2 = next((p for p in data["pokemon"] if p["id"] == 2), None)
+        assert pokemon2 is not None, "Pokemon 2 not found in list"
+        assert pokemon2["active"] == False, f"Expected active: false but got: {pokemon2['active']}"
+        print(f"{Fore.GREEN}  ✓ Pokemon 2 active: false{Style.RESET_ALL}")
+
+    print(f"{Fore.YELLOW}Test 32g: Try to catch disabled pokemon 2 (expecting 403 with result_code 11){Style.RESET_ALL}")
+    response = make_request("POST", "found_pokemon", {
+        "catch_code": "bf52b549-27f7-464c-929e-8764621ebfc7"
+    }, tokens["11111"], expected_status=403)
+    if response:
+        data = json.loads(response.text)
+        assert data.get("result_code") == 11, f"Expected result_code 11 but got: {data.get('result_code')}"
+        print(f"{Fore.GREEN}  ✓ result_code 11 (pokemon disabled){Style.RESET_ALL}")
+
+    print(f"{Fore.YELLOW}Test 32h: POST /admin/set_pokemon_active re-enable pokemon 2 (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "admin/set_pokemon_active", {"pokemon_id": 2, "active": True}, tokens["admin"], expected_status=200)
+
+    print(f"{Fore.YELLOW}Test 32i: GET /enabled_pokemon_ids — verify pokemon 2 is back in list{Style.RESET_ALL}")
+    response = make_request("GET", "enabled_pokemon_ids", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        assert 2 in data["ids"], f"Pokemon 2 should be enabled but not found in ids"
+        print(f"{Fore.GREEN}  ✓ Pokemon 2 back in enabled ids{Style.RESET_ALL}")
+
+    print(f"{Fore.YELLOW}Test 32j: Catch re-enabled pokemon 2 as user 22222 (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "found_pokemon", {
+        "catch_code": "bf52b549-27f7-464c-929e-8764621ebfc7"
+    }, tokens["22222"], expected_status=200)
+
+    print(f"{Fore.YELLOW}Test 32k: POST /admin/set_pokemon_active as non-admin (expecting 403){Style.RESET_ALL}")
+    make_request("POST", "admin/set_pokemon_active", {"pokemon_id": 2, "active": False}, tokens["22222"], expected_status=403)
+
     # Final: DELETE ALL USERS
     print(f"{Fore.YELLOW}\nTest 18: Deleting all users by looping{Style.RESET_ALL}")
     for user in users:

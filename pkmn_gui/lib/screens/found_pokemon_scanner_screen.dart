@@ -297,6 +297,19 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
 
           // Reset scanning after dialog is closed
           _scanned = false;
+        } else if (foundResponse['result_code'] == CallResultCode.pokemonNotActive) {
+          if (!mounted) return;
+          setState(() => _isProcessing = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Den här Pokémon är inte aktiverad i spelet. Prata med spelansvarig om detta verkar vara ett fel.",
+              ),
+              backgroundColor: AppColors.primaryRed,
+              duration: Duration(seconds: 5),
+            ),
+          );
+          _scanned = false;
         } else {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(

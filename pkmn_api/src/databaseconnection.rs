@@ -2,7 +2,7 @@
 use chrono::{Utc, Duration};
 use chrono_tz::Europe::Stockholm;
 use rusqlite::{params, Connection, Result};
-use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats, PokemonFoundCount};
+use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, UserTypeStats, TypeStats, PokemonFoundCount, PokemonAdminEntry};
 use crate::misc::{self, create_token};
 use crate::milestones::{MilestoneDefinition, get_count_milestone_for_count, get_type_milestone_for_type, get_pokemon_milestone};
 
@@ -585,13 +585,54 @@ pub fn user_pokedex(user_id: &str, conn: &Connection) -> Result<Vec<Pkmn>> {
     Ok(result)
 }
 
-// get count of pokemon caught by user (excluding MissingNo for milestones)
+// get count of pokemon caught by user (only active pokemon count toward milestones)
 pub fn user_pokemon_count_for_milestones(user_id: &str, conn: &Connection) -> Result<u32> {
     let mut stmt = conn.prepare(
-        "SELECT COUNT(DISTINCT pokemon_id) FROM FoundPokemon WHERE user_id = ?1 AND pokemon_id <= 151"
+        "SELECT COUNT(DISTINCT fp.pokemon_id) FROM FoundPokemon fp JOIN Pokemon p ON fp.pokemon_id = p.pokemon_id WHERE fp.user_id = ?1 AND p.active = 1"
     )?;
     let count: u32 = stmt.query_row(params![user_id], |row| row.get(0))?;
     Ok(count)
+}
+
+pub fn get_enabled_pokemon_ids(conn: &Connection) -> Result<Vec<u32>> {
+    let mut stmt = conn.prepare("SELECT pokemon_id FROM Pokemon WHERE active = 1 ORDER BY pokemon_id")?;
+    let ids = stmt.query_map([], |row| row.get(0))?
+        .collect::<Result<Vec<u32>>>()?;
+    Ok(ids)
+}
+
+pub fn get_all_pokemon_admin(conn: &Connection) -> Result<Vec<PokemonAdminEntry>> {
+    let mut stmt = conn.prepare("SELECT pokemon_id, name, active FROM Pokemon ORDER BY pokemon_id")?;
+    let rows = stmt.query_map([], |row| {
+        let active_int: i32 = row.get(2)?;
+        Ok(PokemonAdminEntry {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            active: active_int != 0,
+        })
+    })?;
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?);
+    }
+    Ok(result)
+}
+
+pub fn set_pokemon_active(pokemon_id: u32, active: bool, conn: &Connection) -> Result<()> {
+    conn.execute(
+        "UPDATE Pokemon SET active = ?1 WHERE pokemon_id = ?2",
+        params![active as i32, pokemon_id],
+    )?;
+    Ok(())
+}
+
+pub fn is_pokemon_active(pokemon_id: u32, conn: &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare("SELECT active FROM Pokemon WHERE pokemon_id = ?1")?;
+    match stmt.query_row(params![pokemon_id], |row| row.get::<_, i32>(0)) {
+        Ok(val) => Ok(val != 0),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(false),
+        Err(e) => Err(e),
+    }
 }
 
 // check if user has achieved a milestone by counting their pokemon

@@ -2,8 +2,9 @@ use actix_web::{web, HttpResponse, HttpRequest};
 use serde::{Deserialize, Serialize};
 use log::{info, warn, error, debug};
 use crate::misc::{self, validate_token};
-use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, PokemonFoundCount, 
-                  GameStatusResponse, GameStartStatusResponse, ServerTimeResponse, GameSummaryStatistics};
+use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, PokemonFoundCount,
+                  GameStatusResponse, GameStartStatusResponse, ServerTimeResponse, GameSummaryStatistics,
+                  EnabledPokemonIdsResponse, PokemonListResponse};
 use crate::milestones::MilestoneDefinition;
 use crate::databaseconnection;
 use chrono::{Utc, DateTime};
@@ -29,7 +30,8 @@ pub enum CallResultCode {
     UserNameTooLong = 8,
     PasswordToShort = 9,
     UserNotAdmin = 10,
-} 
+    PokemonNotActive = 11,
+}
 
 
 impl Serialize for CallResultCode {
@@ -595,6 +597,20 @@ pub async fn register_found_pokemon(req: HttpRequest, info: web::Json<FoundPokem
     }
     
     let pokemon = databaseconnection::get_pokemon_by_catch_code(&info.catch_code, &conn).unwrap();
+
+    if !databaseconnection::is_pokemon_active(pokemon.number, &conn).unwrap() {
+        warn!("Pokemon catch failed - pokemon not active: {} ({})", pokemon.name, pokemon.number);
+        let response = FoundPokemonResponse {
+            user_id: user_id.clone(),
+            pokemon_id: Some(pokemon.number),
+            message: "Pokemon is not active in the game".to_string(),
+            result_code: CallResultCode::PokemonNotActive,
+            milestone_reached: None,
+            milestones_achieved: Vec::new(),
+        };
+        return HttpResponse::Forbidden().json(response);
+    }
+
     let found_before =
         databaseconnection::check_if_you_found_pokemon_before(&user_id, &info.catch_code, &conn).unwrap();
     if found_before {
@@ -1515,6 +1531,84 @@ pub async fn get_game_summary_statistics(query: web::Query<GameSummaryQuery>) ->
     HttpResponse::Ok().json(response)
 }
 
+#[derive(Debug, Deserialize)]
+pub struct SetPokemonActiveRequest {
+    pub pokemon_id: u32,
+    pub active: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SetPokemonActiveResponse {
+    pub message: String,
+    pub result_code: CallResultCode,
+}
+
+pub async fn get_enabled_pokemon_ids() -> HttpResponse {
+    let conn = match databaseconnection::get_conn(get_env_dbpath()) {
+        Ok(c) => c,
+        Err(e) => {
+            error!("Failed to get database connection: {}", e);
+            return HttpResponse::InternalServerError().finish();
+        }
+    };
+    let ids = databaseconnection::get_enabled_pokemon_ids(&conn).unwrap_or_default();
+    HttpResponse::Ok().json(EnabledPokemonIdsResponse { ids })
+}
+
+pub async fn admin_get_pokemon_list(req: HttpRequest) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !is_admin {
+        return HttpResponse::Forbidden().finish();
+    }
+    let pokemon = databaseconnection::get_all_pokemon_admin(&conn).unwrap();
+    HttpResponse::Ok().json(PokemonListResponse { pokemon })
+}
+
+pub async fn admin_set_pokemon_active(req: HttpRequest, info: web::Json<SetPokemonActiveRequest>) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !is_admin {
+        return HttpResponse::Forbidden().json(SetPokemonActiveResponse {
+            message: "Only admin can change pokemon active status".to_string(),
+            result_code: CallResultCode::UserNotAdmin,
+        });
+    }
+    match databaseconnection::set_pokemon_active(info.pokemon_id, info.active, &conn) {
+        Ok(_) => HttpResponse::Ok().json(SetPokemonActiveResponse {
+            message: format!("Pokemon {} active set to {}", info.pokemon_id, info.active),
+            result_code: CallResultCode::Ok,
+        }),
+        Err(e) => {
+            error!("Failed to set pokemon active: {}", e);
+            HttpResponse::InternalServerError().json(SetPokemonActiveResponse {
+                message: "Failed to update pokemon active status".to_string(),
+                result_code: CallResultCode::Ok,
+            })
+        }
+    }
+}
+
 // registers all routes.
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.route("/login", web::post().to(login))
@@ -1560,6 +1654,9 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/statistics/game_summary", web::get().to(get_game_summary_statistics))
         .route("/settings/datamatrix_login_enabled", web::get().to(get_datamatrix_login_enabled))
         .route("/admin/set_setting", web::post().to(admin_set_setting))
+        .route("/enabled_pokemon_ids", web::get().to(get_enabled_pokemon_ids))
+        .route("/admin/pokemon_list", web::get().to(admin_get_pokemon_list))
+        .route("/admin/set_pokemon_active", web::post().to(admin_set_pokemon_active))
         ;
 }
 

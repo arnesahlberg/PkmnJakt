@@ -27,6 +27,11 @@ class _AdminScreenState extends State<AdminScreen> {
   final TextEditingController _adminIdController = TextEditingController();
   String _loginError = '';
 
+  List<dynamic> _allPokemon = [];
+  String _pokemonSearch = '';
+  bool _pokemonLoading = true;
+  final TextEditingController _pokemonSearchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +49,7 @@ class _AdminScreenState extends State<AdminScreen> {
   void dispose() {
     _searchController.dispose();
     _adminIdController.dispose();
+    _pokemonSearchController.dispose();
     super.dispose();
   }
 
@@ -61,6 +67,7 @@ class _AdminScreenState extends State<AdminScreen> {
       setState(() {
         _datamatrixEnabled = datamatrixEnabled;
       });
+      await _fetchPokemonList(token);
     }
     setState(() {
       _isLoading = false;
@@ -93,6 +100,19 @@ class _AdminScreenState extends State<AdminScreen> {
     }
   }
 
+  Future<void> _fetchPokemonList(String token) async {
+    setState(() => _pokemonLoading = true);
+    try {
+      final result = await AdminApiService.getAdminPokemonList(token);
+      setState(() {
+        _allPokemon = result['pokemon'] as List<dynamic>? ?? [];
+        _pokemonLoading = false;
+      });
+    } catch (e) {
+      setState(() => _pokemonLoading = false);
+    }
+  }
+
   void _onSearchChanged() {
     _searchQuery = _searchController.text.trim();
     _currentPage = 0;
@@ -116,7 +136,6 @@ class _AdminScreenState extends State<AdminScreen> {
     });
   }
 
-  // New method to handle admin login when not logged in
   Future<void> _handleAdminLogin() async {
     setState(() {
       _loginError = '';
@@ -137,16 +156,13 @@ class _AdminScreenState extends State<AdminScreen> {
         });
         return;
       }
-      // Prompt for password
       final password = await promptForPassword(context);
       if (password == null || password.isEmpty) return;
-      // Attempt login
       final loginResponse = await ApiService.login(adminId, password);
       if (loginResponse['result_code'] == 0 && loginResponse['token'] != null) {
         final name = loginResponse['name'] ?? "Admin";
         final encodedToken = loginResponse['token']['encoded_token'];
         final validUntil = loginResponse['token']['valid_until'];
-        // Use the login method to set cookies instead of shared preferences
         Provider.of<UserSession>(
           context,
           listen: false,
@@ -167,13 +183,228 @@ class _AdminScreenState extends State<AdminScreen> {
     }
   }
 
+  Widget _buildUsersTab(UserSession session) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: _searchController,
+            decoration: AppInputDecorations.defaultInputDecoration('Sök användare'),
+            style: AppTextStyles.bodyLarge,
+            onChanged: (value) => _onSearchChanged(),
+          ),
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _refreshData,
+            color: AppColors.primaryRed,
+            backgroundColor: AppColors.white,
+            child: ListView.builder(
+              itemCount: _users.length,
+              itemBuilder: (_, index) {
+                final user = _users[index];
+                final userId = user['user_id']?.toString() ?? 'okänd';
+                final userName = user['name']?.toString() ?? '';
+                final isAdmin = user['admin'] == true;
+                return Card(
+                  child: ListTile(
+                    title: Text(
+                      'Användar id: $userId',
+                      style: AppTextStyles.bodyLarge,
+                    ),
+                    subtitle: Text(
+                      'Namn: $userName${isAdmin ? " (Admin)" : ""}',
+                      style: AppTextStyles.bodyMedium,
+                    ),
+                    trailing: ElevatedButton(
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (context) => EditUserDialog(
+                          userId: userId,
+                          userName: userName,
+                          userIsAdmin: isAdmin,
+                          onUserUpdated: () async {
+                            final token = Provider.of<UserSession>(
+                              context,
+                              listen: false,
+                            ).token;
+                            if (token != null) await _fetchUsers(token);
+                          },
+                        ),
+                      ),
+                      style: AppButtonStyles.primaryButtonStyle,
+                      child: const Text('Redigera', style: AppTextStyles.buttonText),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            if (_currentPage > 0)
+              ElevatedButton(
+                onPressed: () async {
+                  setState(() => _currentPage--);
+                  final token = session.token;
+                  if (token != null) await _fetchUsers(token);
+                },
+                style: AppButtonStyles.primaryButtonStyle,
+                child: const Text('Previous', style: AppTextStyles.buttonText),
+              ),
+            if ((_currentPage + 1) * _pageSize < _totalUsers)
+              ElevatedButton(
+                onPressed: () async {
+                  setState(() => _currentPage++);
+                  final token = session.token;
+                  if (token != null) await _fetchUsers(token);
+                },
+                style: AppButtonStyles.primaryButtonStyle,
+                child: const Text('Next', style: AppTextStyles.buttonText),
+              ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            "Sida ${_currentPage + 1} / ${(_totalUsers / _pageSize).ceil()}",
+            style: AppTextStyles.bodyMedium,
+          ),
+        ),
+        Card(
+          margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          child: SwitchListTile(
+            title: const Text(
+              'DataMatrix-inloggning aktiverad',
+              style: AppTextStyles.bodyLarge,
+            ),
+            value: _datamatrixEnabled,
+            onChanged: (value) async {
+              final token = session.token;
+              if (token == null) return;
+              setState(() => _datamatrixEnabled = value);
+              try {
+                await AdminApiService.setDatamatrixLoginEnabled(value, token);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'DataMatrix-inloggning ${value ? "aktiverad" : "inaktiverad"}',
+                      ),
+                    ),
+                  );
+                }
+              } catch (e) {
+                setState(() => _datamatrixEnabled = !value);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Misslyckades att ändra inställning: $e')),
+                  );
+                }
+              }
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+      ],
+    );
+  }
+
+  Widget _buildPokemonTab(UserSession session) {
+    if (_pokemonLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryRed),
+        ),
+      );
+    }
+
+    final filtered = _pokemonSearch.isEmpty
+        ? _allPokemon
+        : _allPokemon.where((p) {
+            final name = (p['name'] as String? ?? '').toLowerCase();
+            final id = p['id']?.toString() ?? '';
+            return name.contains(_pokemonSearch.toLowerCase()) ||
+                id.contains(_pokemonSearch);
+          }).toList();
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: _pokemonSearchController,
+            decoration: AppInputDecorations.defaultInputDecoration('Sök Pokémon'),
+            style: AppTextStyles.bodyLarge,
+            onChanged: (value) {
+              setState(() => _pokemonSearch = value.trim());
+            },
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: filtered.length,
+            itemBuilder: (_, index) {
+              final pokemon = filtered[index];
+              final pokemonId = pokemon['id'] as int? ?? 0;
+              final pokemonName = pokemon['name'] as String? ?? '';
+              final isActive = pokemon['active'] as bool? ?? false;
+              return Card(
+                child: ListTile(
+                  title: Text(
+                    '#$pokemonId $pokemonName',
+                    style: AppTextStyles.bodyLarge,
+                  ),
+                  trailing: Switch(
+                    value: isActive,
+                    activeColor: AppColors.primaryRed,
+                    onChanged: (value) async {
+                      final token = session.token;
+                      if (token == null) return;
+                      setState(() {
+                        pokemon['active'] = value;
+                      });
+                      try {
+                        await AdminApiService.setPokemonActive(pokemonId, value, token);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '$pokemonName ${value ? "aktiverad" : "inaktiverad"}',
+                              ),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        setState(() {
+                          pokemon['active'] = !value;
+                        });
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Misslyckades att ändra status: $e')),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final session = Provider.of<UserSession>(context);
     if (_isLoading) {
-      return Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    // New branch: when not logged in show the login form
     if (session.token == null) {
       return Scaffold(
         appBar: const CommonAppBar(title: 'Admin-sida'),
@@ -193,9 +424,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   Expanded(
                     child: TextField(
                       controller: _adminIdController,
-                      decoration: AppInputDecorations.defaultInputDecoration(
-                        'Admin ID',
-                      ),
+                      decoration: AppInputDecorations.defaultInputDecoration('Admin ID'),
                       style: AppTextStyles.bodyLarge,
                     ),
                   ),
@@ -203,10 +432,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   ElevatedButton(
                     onPressed: _handleAdminLogin,
                     style: AppButtonStyles.primaryButtonStyle,
-                    child: const Text(
-                      'Logga in admin',
-                      style: AppTextStyles.buttonText,
-                    ),
+                    child: const Text('Logga in admin', style: AppTextStyles.buttonText),
                   ),
                 ],
               ),
@@ -220,20 +446,15 @@ class _AdminScreenState extends State<AdminScreen> {
                 ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed:
-                    () => Navigator.pushReplacementNamed(context, "/home"),
+                onPressed: () => Navigator.pushReplacementNamed(context, "/home"),
                 style: AppButtonStyles.primaryButtonStyle,
-                child: const Text(
-                  'Gå tillbaka',
-                  style: AppTextStyles.buttonText,
-                ),
+                child: const Text('Gå tillbaka', style: AppTextStyles.buttonText),
               ),
             ],
           ),
         ),
       );
     }
-    // Existing branch for logged in users
     if (!_isAdmin) {
       return Scaffold(
         appBar: const CommonAppBar(
@@ -251,168 +472,40 @@ class _AdminScreenState extends State<AdminScreen> {
               ),
               const SizedBox(height: UIConstants.separatingHeight),
               ElevatedButton(
-                onPressed:
-                    () => Navigator.pushReplacementNamed(context, "/home"),
+                onPressed: () => Navigator.pushReplacementNamed(context, "/home"),
                 style: AppButtonStyles.primaryButtonStyle,
-                child: const Text(
-                  'Gå tillbaka',
-                  style: AppTextStyles.buttonText,
-                ),
+                child: const Text('Gå tillbaka', style: AppTextStyles.buttonText),
               ),
             ],
           ),
         ),
       );
     }
-    return Scaffold(
-      appBar: CommonAppBar(title: 'Admin-sida'),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: AppInputDecorations.defaultInputDecoration(
-                'Sök användare',
-              ),
-              style: AppTextStyles.bodyLarge,
-              onChanged: (value) => _onSearchChanged(),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: const CommonAppBar(title: 'Admin-sida'),
+        body: Column(
+          children: [
+            const TabBar(
+              tabs: [
+                Tab(text: 'Användare'),
+                Tab(text: 'Pokémon'),
+              ],
+              labelColor: AppColors.primaryRed,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: AppColors.primaryRed,
             ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _refreshData,
-              color: AppColors.primaryRed,
-              backgroundColor: AppColors.white,
-              child: ListView.builder(
-                itemCount: _users.length,
-                itemBuilder: (_, index) {
-                  final user = _users[index];
-                  final userId = user['user_id']?.toString() ?? 'okänd';
-                  final userName = user['name']?.toString() ?? '';
-                  final isAdmin = user['admin'] == true;
-                  return Card(
-                    child: ListTile(
-                      title: Text(
-                        'Användar id: $userId',
-                        style: AppTextStyles.bodyLarge,
-                      ),
-                      subtitle: Text(
-                        'Namn: $userName${isAdmin ? " (Admin)" : ""}',
-                        style: AppTextStyles.bodyMedium,
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ElevatedButton(
-                            onPressed:
-                                () => showDialog(
-                                  context: context,
-                                  builder:
-                                      (context) => EditUserDialog(
-                                        userId: userId,
-                                        userName: userName,
-                                        userIsAdmin: isAdmin,
-                                        onUserUpdated: () async {
-                                          final token =
-                                              Provider.of<UserSession>(
-                                                context,
-                                                listen: false,
-                                              ).token;
-                                          if (token != null)
-                                            await _fetchUsers(token);
-                                        },
-                                      ),
-                                ),
-                            style: AppButtonStyles.primaryButtonStyle,
-                            child: const Text(
-                              'Redigera',
-                              style: AppTextStyles.buttonText,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _buildUsersTab(session),
+                  _buildPokemonTab(session),
+                ],
               ),
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              if (_currentPage > 0)
-                ElevatedButton(
-                  onPressed: () async {
-                    setState(() {
-                      _currentPage--;
-                    });
-                    final token = session.token;
-                    if (token != null) await _fetchUsers(token);
-                  },
-                  style: AppButtonStyles.primaryButtonStyle,
-                  child: const Text(
-                    'Previous',
-                    style: AppTextStyles.buttonText,
-                  ),
-                ),
-              if ((_currentPage + 1) * _pageSize < _totalUsers)
-                ElevatedButton(
-                  onPressed: () async {
-                    setState(() {
-                      _currentPage++;
-                    });
-                    final token = session.token;
-                    if (token != null) await _fetchUsers(token);
-                  },
-                  style: AppButtonStyles.primaryButtonStyle,
-                  child: const Text('Next', style: AppTextStyles.buttonText),
-                ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "Sida ${_currentPage + 1} / ${(_totalUsers / _pageSize).ceil()}",
-              style: AppTextStyles.bodyMedium,
-            ),
-          ),
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            child: SwitchListTile(
-              title: const Text(
-                'DataMatrix-inloggning aktiverad',
-                style: AppTextStyles.bodyLarge,
-              ),
-              value: _datamatrixEnabled,
-              onChanged: (value) async {
-                final token = session.token;
-                if (token == null) return;
-                setState(() => _datamatrixEnabled = value);
-                try {
-                  await AdminApiService.setDatamatrixLoginEnabled(value, token);
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'DataMatrix-inloggning ${value ? "aktiverad" : "inaktiverad"}',
-                        ),
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  setState(() => _datamatrixEnabled = !value);
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Misslyckades att ändra inställning: $e')),
-                    );
-                  }
-                }
-              },
-            ),
-          ),
-          const SizedBox(height: 10),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -32,17 +32,25 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   int _pokemonCount = 0;
   List<MilestoneDefinition> _comprehensiveMilestones = [];
   bool _isGameOver = false;
+  List<int> _enabledIds = [];
 
   Future<void> _loadData() async {
     final session = Provider.of<UserSession>(context, listen: false);
     try {
-      final result = await ApiService.viewFoundPokemon(10, session.token!);
+      final responses = await Future.wait([
+        ApiService.viewFoundPokemon(10, session.token!),
+        ApiService.getMyPokedex(session.token!),
+        ApiService.getEnabledPokemonIds(),
+      ]);
+      final result = responses[0] as Map<String, dynamic>;
+      final pokedexResult = responses[1] as Map<String, dynamic>;
+      final enabledIds = responses[2] as List<int>;
       final ranking = await ApiService.checkUserRanking(session.userId!);
-      final pokedexResult = await ApiService.getMyPokedex(session.token!);
 
-      // Count only Pokemon with ID <= 151
       final pokemonList = pokedexResult['pokedex'] as List<dynamic>? ?? [];
-      final count = pokemonList.where((p) => p['number'] <= 151).length;
+      final count = enabledIds.isNotEmpty
+          ? pokemonList.where((p) => enabledIds.contains(p['number'] as int)).length
+          : pokemonList.where((p) => (p['number'] as int) <= 151).length;
 
       // Fetch comprehensive milestones
       List<MilestoneDefinition> comprehensiveMilestones = [];
@@ -59,6 +67,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         _pokemonList = result['pokemon_found'] as List<dynamic>;
         _ranking = ranking;
         _pokemonCount = count;
+        _enabledIds = enabledIds;
         _comprehensiveMilestones = comprehensiveMilestones;
         _isLoading = false;
       });
@@ -106,6 +115,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       _isLoading = true;
       _isExtraLoading = true;
       _pokemonCount = 0;
+      _enabledIds = [];
       _comprehensiveMilestones = [];
     });
     await _loadData();
@@ -421,7 +431,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 ),
                                 const SizedBox(height: UIConstants.spacing8),
                                 Text(
-                                  _pokemonCount < 151
+                                  _pokemonCount < (_enabledIds.isNotEmpty ? _enabledIds.where((id) => id <= 151).length : 151)
                                       ? "Du har fångat $_pokemonCount Pokémon"
                                       : "Du har fångat alla $_pokemonCount Pokémon! 🎉",
                                   style: AppTextStyles.bodyLarge.copyWith(

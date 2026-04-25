@@ -166,3 +166,20 @@ pub struct GameSummaryStatistics {
     pub time_window_start: Option<DateTime<Utc>>,
     pub time_window_end: Option<DateTime<Utc>>,
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct EnabledPokemonIdsResponse {
+    pub ids: Vec<u32>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PokemonAdminEntry {
+    pub id: u32,
+    pub name: String,
+    pub active: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PokemonListResponse {
+    pub pokemon: Vec<PokemonAdminEntry>,
+}

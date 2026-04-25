@@ -17,17 +17,23 @@ class PokedexScreen extends StatefulWidget {
 class _PokedexScreenState extends State<PokedexScreen> {
   late Future<List<dynamic>> _pokedexFuture;
   bool _isLoading = true;
-  // Maximum number of standard Pokémon
   final int _maxStandardPokemon = 151;
-  bool _showOnlyCaught = true; // default to show only caught
+  bool _showOnlyCaught = true;
+  List<int> _enabledIds = [];
 
   Future<List<dynamic>> _fetchPokedex() async {
     final session = Provider.of<UserSession>(context, listen: false);
-    final result = await ApiService.getMyPokedex(session.token!);
+    final results = await Future.wait([
+      ApiService.getMyPokedex(session.token!),
+      ApiService.getEnabledPokemonIds(),
+    ]);
+    final pokedexResult = results[0] as Map<String, dynamic>;
+    final enabledIds = results[1] as List<int>;
     setState(() {
+      _enabledIds = enabledIds;
       _isLoading = false;
     });
-    return result['pokedex'] as List<dynamic>;
+    return pokedexResult['pokedex'] as List<dynamic>;
   }
 
   Future<void> _refreshPokedex() async {
@@ -62,31 +68,35 @@ class _PokedexScreenState extends State<PokedexScreen> {
     final List<Map<String, dynamic>> fullList = [];
 
     if (_showOnlyCaught) {
-      // Add only caught Pokémon, sorted by number
       fullList.addAll(caughtPokemon.map((p) => p as Map<String, dynamic>));
       fullList.sort(
         (a, b) => (a['number'] as int).compareTo(b['number'] as int),
       );
     } else {
-      // Add standard Pokémon (1-151) with placeholders if not caught
-      for (int i = 1; i <= _maxStandardPokemon; i++) {
-        if (caughtMap.containsKey(i)) {
-          fullList.add(caughtMap[i]!);
+      final standardIds = _enabledIds.isNotEmpty
+          ? _enabledIds.where((id) => id <= _maxStandardPokemon).toList()
+          : List.generate(_maxStandardPokemon, (i) => i + 1);
+
+      for (final id in standardIds) {
+        if (caughtMap.containsKey(id)) {
+          fullList.add(caughtMap[id]!);
         } else {
-          fullList.add({'number': i, 'caught': false, 'name': '???'});
+          fullList.add({'number': id, 'caught': false, 'name': '???'});
         }
       }
 
-      // Add special Pokémon (>151) only if caught
+      final specialEnabled = _enabledIds.where((id) => id > _maxStandardPokemon).toSet();
       for (var pokemon in caughtPokemon) {
-        if (pokemon['number'] > _maxStandardPokemon) {
-          // Ensure not to add duplicates if already added via caughtMap
-          if (!fullList.any((p) => p['number'] == pokemon['number'])) {
-            fullList.add(pokemon);
+        final num = pokemon['number'] as int;
+        if (num > _maxStandardPokemon) {
+          if (_enabledIds.isEmpty || specialEnabled.contains(num)) {
+            if (!fullList.any((p) => p['number'] == num)) {
+              fullList.add(pokemon);
+            }
           }
         }
       }
-      // Sort the full list by Pokémon number to ensure special Pokémon are in order
+
       fullList.sort(
         (a, b) => (a['number'] as int).compareTo(b['number'] as int),
       );
