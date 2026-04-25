@@ -28,6 +28,9 @@ CREATE TABLE IF NOT EXISTS Settings (
     setting_value TEXT NOT NULL
 );
 
+-- Default settings
+INSERT OR IGNORE INTO Settings (setting_id, setting_value) VALUES ('datamatrix_login_enabled', 'true');
+
 
 CREATE TABLE IF NOT EXISTS Pokemon (
     pokemon_id   INTEGER PRIMARY KEY,

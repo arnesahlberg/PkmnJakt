@@ -1337,6 +1337,69 @@ pub async fn admin_delete_user(req: HttpRequest, info: web::Json<AdminDeleteUser
     HttpResponse::Ok().body(worked.to_string())
 }
 
+#[derive(Debug, Serialize)]
+pub struct DatamatrixLoginEnabledResponse {
+    pub enabled: bool,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SetSettingRequest {
+    pub setting_id: String,
+    pub setting_value: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SetSettingResponse {
+    pub message: String,
+    pub result_code: CallResultCode,
+}
+
+pub async fn get_datamatrix_login_enabled() -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    let enabled = databaseconnection::get_setting_bool("datamatrix_login_enabled", true, &conn).unwrap_or(true);
+    HttpResponse::Ok().json(DatamatrixLoginEnabledResponse { enabled })
+}
+
+pub async fn admin_set_setting(req: HttpRequest, info: web::Json<SetSettingRequest>) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    if !misc::validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !is_admin {
+        return HttpResponse::Forbidden().json(SetSettingResponse {
+            message: "Only admin can change settings".to_string(),
+            result_code: CallResultCode::UserNotAdmin,
+        });
+    }
+    if info.setting_id != "datamatrix_login_enabled" {
+        return HttpResponse::BadRequest().json(SetSettingResponse {
+            message: format!("Unknown setting: {}", info.setting_id),
+            result_code: CallResultCode::Ok,
+        });
+    }
+    match databaseconnection::upsert_setting(&info.setting_id, &info.setting_value, &conn) {
+        Ok(_) => HttpResponse::Ok().json(SetSettingResponse {
+            message: format!("Setting {} updated to {}", info.setting_id, info.setting_value),
+            result_code: CallResultCode::Ok,
+        }),
+        Err(e) => {
+            error!("Failed to upsert setting: {}", e);
+            HttpResponse::InternalServerError().json(SetSettingResponse {
+                message: "Failed to update setting".to_string(),
+                result_code: CallResultCode::Ok,
+            })
+        }
+    }
+}
+
 // Game status endpoints (no authentication required)
 pub async fn is_game_over() -> HttpResponse {
     let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
@@ -1495,6 +1558,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/has_game_started", web::get().to(has_game_started))
         .route("/server_time", web::get().to(get_server_time))
         .route("/statistics/game_summary", web::get().to(get_game_summary_statistics))
+        .route("/settings/datamatrix_login_enabled", web::get().to(get_datamatrix_login_enabled))
+        .route("/admin/set_setting", web::post().to(admin_set_setting))
         ;
 }
 

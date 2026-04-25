@@ -16,6 +16,7 @@ class AdminScreen extends StatefulWidget {
 class _AdminScreenState extends State<AdminScreen> {
   bool _isAdmin = false;
   bool _isLoading = true;
+  bool _datamatrixEnabled = true;
   int _currentPage = 0;
   int _totalUsers = 0;
   List<dynamic> _users = [];
@@ -56,6 +57,10 @@ class _AdminScreenState extends State<AdminScreen> {
     if (isAdmin) {
       await _fetchTotalUsers(token);
       await _fetchUsers(token);
+      final datamatrixEnabled = await ApiService.getDatamatrixLoginEnabled();
+      setState(() {
+        _datamatrixEnabled = datamatrixEnabled;
+      });
     }
     setState(() {
       _isLoading = false;
@@ -370,6 +375,40 @@ class _AdminScreenState extends State<AdminScreen> {
             child: Text(
               "Sida ${_currentPage + 1} / ${(_totalUsers / _pageSize).ceil()}",
               style: AppTextStyles.bodyMedium,
+            ),
+          ),
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            child: SwitchListTile(
+              title: const Text(
+                'DataMatrix-inloggning aktiverad',
+                style: AppTextStyles.bodyLarge,
+              ),
+              value: _datamatrixEnabled,
+              onChanged: (value) async {
+                final token = session.token;
+                if (token == null) return;
+                setState(() => _datamatrixEnabled = value);
+                try {
+                  await AdminApiService.setDatamatrixLoginEnabled(value, token);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'DataMatrix-inloggning ${value ? "aktiverad" : "inaktiverad"}',
+                        ),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  setState(() => _datamatrixEnabled = !value);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Misslyckades att ändra inställning: $e')),
+                    );
+                  }
+                }
+              },
             ),
           ),
           const SizedBox(height: 10),

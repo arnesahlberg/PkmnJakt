@@ -622,6 +622,64 @@ def run_tests():
     print(f"{Fore.YELLOW}Test 30e4: View found Pokemon with negative limit (expecting 200){Style.RESET_ALL}")
     make_request("POST", "view_found_pokemon", {"n": -1}, tokens["admin"], expected_status=200)
 
+    # 31. Test settings endpoints
+    print(f"{Fore.YELLOW}\nTest 31a: GET /settings/datamatrix_login_enabled without auth (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "settings/datamatrix_login_enabled", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        print(f"  datamatrix_login_enabled: {data.get('enabled')}")
+
+    print(f"{Fore.YELLOW}Test 31b: Confirm default is true (expecting 200 with enabled: true){Style.RESET_ALL}")
+    response = make_request("GET", "settings/datamatrix_login_enabled", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        if data.get("enabled") == True:
+            print(f"{Fore.GREEN}  ✓ Default value is true{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}  ✗ Expected enabled: true but got: {data.get('enabled')}{Style.RESET_ALL}")
+
+    print(f"{Fore.YELLOW}Test 31c: POST /admin/set_setting as non-admin (expecting 403){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {
+        "setting_id": "datamatrix_login_enabled",
+        "setting_value": "false"
+    }, tokens["22222"], expected_status=403)
+
+    print(f"{Fore.YELLOW}Test 31d: POST /admin/set_setting with unknown setting_id (expecting 400){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {
+        "setting_id": "unknown_setting",
+        "setting_value": "true"
+    }, tokens["admin"], expected_status=400)
+
+    print(f"{Fore.YELLOW}Test 31e: POST /admin/set_setting disable datamatrix as admin (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {
+        "setting_id": "datamatrix_login_enabled",
+        "setting_value": "false"
+    }, tokens["admin"], expected_status=200)
+
+    print(f"{Fore.YELLOW}Test 31f: GET /settings/datamatrix_login_enabled after disabling (expecting 200 with enabled: false){Style.RESET_ALL}")
+    response = make_request("GET", "settings/datamatrix_login_enabled", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        if data.get("enabled") == False:
+            print(f"{Fore.GREEN}  ✓ Correctly disabled, enabled: false{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}  ✗ Expected enabled: false but got: {data.get('enabled')}{Style.RESET_ALL}")
+
+    print(f"{Fore.YELLOW}Test 31g: POST /admin/set_setting re-enable datamatrix as admin (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {
+        "setting_id": "datamatrix_login_enabled",
+        "setting_value": "true"
+    }, tokens["admin"], expected_status=200)
+
+    print(f"{Fore.YELLOW}Test 31h: GET /settings/datamatrix_login_enabled after re-enabling (expecting 200 with enabled: true){Style.RESET_ALL}")
+    response = make_request("GET", "settings/datamatrix_login_enabled", None, expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        if data.get("enabled") == True:
+            print(f"{Fore.GREEN}  ✓ Correctly re-enabled, enabled: true{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}  ✗ Expected enabled: true but got: {data.get('enabled')}{Style.RESET_ALL}")
+
     # Final: DELETE ALL USERS
     print(f"{Fore.YELLOW}\nTest 18: Deleting all users by looping{Style.RESET_ALL}")
     for user in users:

@@ -18,6 +18,5 @@ uploads
 **/*.log
 
 **/__pycache__
-
-
+*.md
 Deployment Ubuntu.md

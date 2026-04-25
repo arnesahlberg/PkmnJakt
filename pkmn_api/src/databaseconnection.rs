@@ -729,6 +729,23 @@ pub fn get_pokemon_found_counts(conn: &Connection) -> Result<Vec<PokemonFoundCou
     Ok(pokemon_counts)
 }
 
+pub fn get_setting_bool(key: &str, default: bool, conn: &Connection) -> Result<bool> {
+    let mut stmt = conn.prepare("SELECT setting_value FROM Settings WHERE setting_id = ?1")?;
+    match stmt.query_row(params![key], |row| row.get::<_, String>(0)) {
+        Ok(value) => Ok(value.to_lowercase() == "true"),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(default),
+        Err(e) => Err(e),
+    }
+}
+
+pub fn upsert_setting(key: &str, value: &str, conn: &Connection) -> Result<()> {
+    conn.execute(
+        "INSERT OR REPLACE INTO Settings (setting_id, setting_value) VALUES (?1, ?2)",
+        params![key, value],
+    )?;
+    Ok(())
+}
+
 pub fn get_setting(setting_id: &str, conn: &Connection) -> Result<Option<String>> {
     let mut stmt = conn.prepare("SELECT setting_value FROM Settings WHERE setting_id = ?1")?;
     match stmt.query_row(params![setting_id], |row| row.get::<_, String>(0)) {

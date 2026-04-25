@@ -321,6 +321,19 @@ class ApiService {
     }
   }
 
+  static Future<bool> getDatamatrixLoginEnabled() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/settings/datamatrix_login_enabled'),
+      );
+      if (response.statusCode != 200) return true;
+      final json = decodeUtf8Json(response);
+      return json['enabled'] as bool? ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
   // Get total Pokemon count by type (global statistics)
   static Future<Map<String, dynamic>> getTotalPokemonByType() async {
     final response = await http.get(
@@ -447,6 +460,18 @@ class AdminApiService {
       headers: ApiService._headers(token),
     );
     return response.statusCode == 200 && response.body == 'true';
+  }
+
+  static Future<Map<String, dynamic>> setDatamatrixLoginEnabled(bool enabled, String token) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/admin/set_setting'),
+      body: jsonEncode({
+        'setting_id': 'datamatrix_login_enabled',
+        'setting_value': enabled ? 'true' : 'false',
+      }),
+      headers: ApiService._headers(token),
+    );
+    return decodeUtf8Json(response);
   }
 
   // Game status endpoints (no authentication required)

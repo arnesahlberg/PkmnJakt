@@ -20,11 +20,15 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> {
   Future<Map<String, dynamic>>? _statsFuture;
   bool _isLoading = false;
+  bool _datamatrixEnabled = true;
 
   @override
   void initState() {
     super.initState();
     _statsFuture = _fetchStats();
+    ApiService.getDatamatrixLoginEnabled().then((value) {
+      if (mounted) setState(() => _datamatrixEnabled = value);
+    });
   }
 
   Future<Map<String, dynamic>> _fetchStats() async {
@@ -135,19 +139,30 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         const SizedBox(
                                           height: UIConstants.spacing24,
                                         ),
-                                        PokedexButton(
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder:
-                                                    (context) =>
-                                                        const QRScannerScreen(),
-                                              ),
-                                            );
-                                          },
-                                          child: const Text('Scanna Bandet'),
-                                        ),
+                                        if (_datamatrixEnabled)
+                                          PokedexButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) =>
+                                                          const QRScannerScreen(),
+                                                ),
+                                              );
+                                            },
+                                            child: const Text('Scanna Bandet'),
+                                          )
+                                        else
+                                          PokedexButton(
+                                            onPressed: () {
+                                              Navigator.pushNamed(
+                                                context,
+                                                '/manual_login',
+                                              );
+                                            },
+                                            child: const Text('Logga in'),
+                                          ),
                                       ],
                                     ),
                           ),
