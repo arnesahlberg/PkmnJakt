@@ -12,6 +12,10 @@ class CallResultCode {
   static const int userNameTooShort = 7;
   static const int userNameTooLong = 8;
   static const int passwordTooShort = 9;
+  static const int userNotAdmin = 10;
+  static const int userIdTooShort = 11;
+  static const int userIdTooLong = 12;
+  static const int userIdInvalidFormat = 13;
 }
 
 class UIConstants {

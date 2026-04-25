@@ -12,6 +12,8 @@ use chrono_tz::Europe::Berlin;
 pub const USER_NAME_MIN_LENGTH: usize = 3;
 pub const USER_NAME_MAX_LENGTH: usize = 40;
 pub const PASSWORD_MIN_LENGTH: usize = 4;
+pub const USER_ID_MIN_LENGTH: usize = 3;
+pub const USER_ID_MAX_LENGTH: usize = 25;
 
 pub const AUHTORIZATION_HEADER_LABEL : &str = "Authorization";
 
@@ -29,6 +31,9 @@ pub enum CallResultCode {
     UserNameTooLong = 8,
     PasswordToShort = 9,
     UserNotAdmin = 10,
+    UserIdTooShort = 11,
+    UserIdTooLong = 12,
+    UserIdInvalidFormat = 13,
 } 
 
 
@@ -146,6 +151,44 @@ pub async fn create_user(info: web::Json<CreateUserRequest>) -> HttpResponse {
         }
     };
     
+    // check if user_id is too short or long
+    if info.id.len() < USER_ID_MIN_LENGTH {
+        warn!("User creation failed - ID too short: {} (length: {})", info.id, info.id.len());
+        let response = LoginResponse {
+            id: info.id.clone(),
+            name: None,
+            token: None,
+            message: format!("User ID too short. Min length is {}", USER_ID_MIN_LENGTH),
+            result_code: CallResultCode::UserIdTooShort,
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+
+    if info.id.len() > USER_ID_MAX_LENGTH {
+        warn!("User creation failed - ID too long: {} (length: {})", info.id, info.id.len());
+        let response = LoginResponse {
+            id: info.id.clone(),
+            name: None,
+            token: None,
+            message: format!("User ID too long. Max length is {}", USER_ID_MAX_LENGTH),
+            result_code: CallResultCode::UserIdTooLong,
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+
+    // check if user_id is alphanumeric
+    if !info.id.chars().all(|c| c.is_ascii_alphanumeric()) {
+        warn!("User creation failed - ID contains invalid characters: {}", info.id);
+        let response = LoginResponse {
+            id: info.id.clone(),
+            name: None,
+            token: None,
+            message: "User ID must contain only letters and numbers".to_string(),
+            result_code: CallResultCode::UserIdInvalidFormat,
+        };
+        return HttpResponse::BadRequest().json(response);
+    }
+
     let user_exists = databaseconnection::user_id_exists(&info.id, &conn).unwrap();
     if user_exists {
         warn!("User creation failed - user already exists: {}", info.id);
@@ -1404,6 +1447,26 @@ pub async fn get_server_time() -> HttpResponse {
     HttpResponse::Ok().json(response)
 }
 
+#[derive(Debug, Serialize)]
+pub struct UseCustomLoginResponse {
+    pub use_custom_login: bool,
+}
+
+pub async fn get_use_custom_login() -> HttpResponse {
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    
+    let custom_login_str = databaseconnection::get_setting("custom_login", &conn).unwrap();
+    let use_custom_login = custom_login_str
+        .map(|s| s.to_lowercase() == "true")
+        .unwrap_or(false);
+    
+    let response = UseCustomLoginResponse {
+        use_custom_login,
+    };
+    
+    HttpResponse::Ok().json(response)
+}
+
 #[derive(Debug, Deserialize)]
 pub struct GameSummaryQuery {
     pub datetime0: Option<String>,
@@ -1494,6 +1557,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/is_game_over", web::get().to(is_game_over))
         .route("/has_game_started", web::get().to(has_game_started))
         .route("/server_time", web::get().to(get_server_time))
+        .route("/settings/use_custom_login", web::get().to(get_use_custom_login))
         .route("/statistics/game_summary", web::get().to(get_game_summary_statistics))
         ;
 }

@@ -490,6 +490,21 @@ class AdminApiService {
     }
   }
 
+  // Check if custom login is enabled
+  static Future<bool> getUseCustomLogin() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/settings/use_custom_login'),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      return json['use_custom_login'] ?? false;
+    } else {
+      // Default to false if the endpoint fails
+      return false;
+    }
+  }
+
   // Get game summary statistics
   static Future<Map<String, dynamic>> getGameSummaryStatistics({
     String? datetime0,

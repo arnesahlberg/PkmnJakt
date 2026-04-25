@@ -21,14 +21,30 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
     final idCode = _idController.text.trim();
     if (idCode.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Ange ID numret fårn ditt deltagarband")),
+        const SnackBar(content: Text("Ange ditt användar-ID")),
       );
       return;
     }
-    // Basic validation: if code is too long, it might be invalid.
-    if (idCode.length > 10) {
+    
+    // Validate length
+    if (idCode.length < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Det angivna numret verkar felaktig")),
+        const SnackBar(content: Text("ID måste vara minst 3 tecken långt")),
+      );
+      return;
+    }
+    
+    if (idCode.length > 25) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("ID får inte vara längre än 25 tecken")),
+      );
+      return;
+    }
+    
+    // Validate alphanumeric
+    if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(idCode)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("ID får endast innehålla bokstäver och siffror")),
       );
       return;
     }
@@ -103,10 +119,32 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
           password,
         );
         if (createResult['result_code'] != CallResultCode.ok) {
-          final errorMsg =
-              (createResult['result_code'] == CallResultCode.userAlreadyExists)
-                  ? "Användaren finns redan"
-                  : "Error: ${createResult['result_code']}";
+          String errorMsg;
+          switch (createResult['result_code']) {
+            case CallResultCode.userAlreadyExists:
+              errorMsg = "Användaren finns redan";
+              break;
+            case CallResultCode.userIdTooShort:
+              errorMsg = "Användar-ID är för kort (minst 3 tecken)";
+              break;
+            case CallResultCode.userIdTooLong:
+              errorMsg = "Användar-ID är för långt (max 25 tecken)";
+              break;
+            case CallResultCode.userIdInvalidFormat:
+              errorMsg = "Användar-ID får endast innehålla bokstäver och siffror";
+              break;
+            case CallResultCode.userNameTooShort:
+              errorMsg = "Namnet är för kort";
+              break;
+            case CallResultCode.userNameTooLong:
+              errorMsg = "Namnet är för långt";
+              break;
+            case CallResultCode.passwordTooShort:
+              errorMsg = "Lösenordet är för kort";
+              break;
+            default:
+              errorMsg = "Error: ${createResult['result_code']}";
+          }
           if (!mounted) return;
           ScaffoldMessenger.of(
             context,
@@ -160,7 +198,7 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
                 TextField(
                   controller: _idController,
                   decoration: AppInputDecorations.defaultInputDecoration(
-                    'Ange numret från ditt deltagarband',
+                    'Ange ditt användar-ID (3-25 tecken, endast bokstäver och siffror)',
                   ),
                   style: AppTextStyles.bodyLarge,
                 ),

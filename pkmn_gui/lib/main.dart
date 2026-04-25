@@ -9,6 +9,7 @@ import 'screens/welcome_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/highscore_page.dart';
 import 'screens/game_statistics_screen.dart';
+import 'screens/manual_login_screen.dart';
 import 'constants.dart';
 
 // ------------------------------
@@ -166,6 +167,7 @@ class MyApp extends StatelessWidget {
         '/highscore': (_) => const HighscorePage(),
         '/pokemon_found': (_) => const AdminPokemonFoundScreen(),
         '/game_statistics': (_) => const GameStatisticsScreen(),
+        '/manual-login': (_) => const ManualLoginScreen(),
       },
     );
   }

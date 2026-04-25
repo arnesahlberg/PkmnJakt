@@ -8,6 +8,7 @@ import '../widgets/pokedex_button.dart';
 import '../widgets/highscore_list.dart';
 import '../widgets/game_status_banner.dart';
 import "login_scanner_screen.dart";
+import "manual_login_screen.dart";
 import '../main.dart'; // for UserSession
 import '../api_calls.dart'; // for fetching statistics
 
@@ -20,11 +21,22 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> {
   Future<Map<String, dynamic>>? _statsFuture;
   bool _isLoading = false;
+  bool _useCustomLogin = false;
 
   @override
   void initState() {
     super.initState();
     _statsFuture = _fetchStats();
+    _checkCustomLogin();
+  }
+
+  Future<void> _checkCustomLogin() async {
+    final useCustomLogin = await ApiService.getUseCustomLogin();
+    if (mounted) {
+      setState(() {
+        _useCustomLogin = useCustomLogin;
+      });
+    }
   }
 
   Future<Map<String, dynamic>> _fetchStats() async {
@@ -135,19 +147,52 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         const SizedBox(
                                           height: UIConstants.spacing24,
                                         ),
-                                        PokedexButton(
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder:
-                                                    (context) =>
-                                                        const QRScannerScreen(),
+                                        if (_useCustomLogin) ...[
+                                          Column(
+                                            children: [
+                                              PokedexButton(
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder:
+                                                          (context) =>
+                                                              const QRScannerScreen(),
+                                                    ),
+                                                  );
+                                                },
+                                                child: const Text('Scanna Bandet'),
                                               ),
-                                            );
-                                          },
-                                          child: const Text('Scanna Bandet'),
-                                        ),
+                                              const SizedBox(height: UIConstants.spacing12),
+                                              PokedexButton(
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder:
+                                                          (context) =>
+                                                              const ManualLoginScreen(),
+                                                    ),
+                                                  );
+                                                },
+                                                child: const Text('Manuell inloggning'),
+                                              ),
+                                            ],
+                                          ),
+                                        ] else
+                                          PokedexButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) =>
+                                                          const QRScannerScreen(),
+                                                ),
+                                              );
+                                            },
+                                            child: const Text('Scanna Bandet'),
+                                          ),
                                       ],
                                     ),
                           ),
