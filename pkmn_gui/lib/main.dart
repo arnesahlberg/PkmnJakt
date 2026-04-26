@@ -121,7 +121,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Stensund Pokemon-Jakt 2025!',
+      title: 'Lerdala Pokemon-Jakt 2025!',
       theme: ThemeData(
         fontFamily: 'PixelFont',
         colorScheme: ColorScheme(

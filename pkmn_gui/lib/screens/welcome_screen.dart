@@ -55,7 +55,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return DateFormat('yyyy-MM-dd HH:mm').format(dateTime);
   }
 
-
   @override
   Widget build(BuildContext context) {
     final session = Provider.of<UserSession>(context);
@@ -120,7 +119,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                           style: AppTextStyles.titleMedium,
                                         ),
                                         const Text(
-                                          'Stensund Pokemon-Jakt 2025!',
+                                          'Lerdala Pokemon-Jakt 2025!',
                                           style: AppTextStyles.titleLarge,
                                           textAlign: TextAlign.center,
                                         ),
@@ -128,8 +127,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                           height: UIConstants.spacing24,
                                         ),
                                         const Text(
-                                          'Detta är en pokémonjakt du kan delta i om du är med på Frisksportlägret! '
-                                          'Lite överallt på Stensund finns pokémon gömda. Kan du hitta alla 151?\n\n'
+                                          'Detta är en pokémonjakt du kan delta i när du besöker Lerdala! '
+                                          'Lite överallt på området finns pokémon gömda. Kan du hitta alla 151?\n\n'
                                           'Du kan fånga pokémon via telefonen. Först loggar du in genom att klicka på knappen nedan '
                                           'och klicka på "scanna bandet" (ditt deltagarband du fick vid mottagningen).\n\n'
                                           'Det finns också en daglig pokémonjakt som du kan delta analogt med lappar du hämtar i info.',
