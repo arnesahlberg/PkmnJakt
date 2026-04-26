@@ -101,6 +101,13 @@ pub struct PokemonFoundCount {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct PokemonAdminEntry {
+    pub id: u32,
+    pub name: String,
+    pub active: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct GameStatusResponse {
     pub is_game_over: bool,
     pub current_time: DateTime<Utc>,

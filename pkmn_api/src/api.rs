@@ -3,7 +3,8 @@ use serde::{Deserialize, Serialize};
 use log::{info, warn, error, debug};
 use crate::misc::{self, validate_token};
 use crate::model::{FoundPkmn, Pkmn, Token, User, UserScore, PokemonFoundCount,
-                  GameStatusResponse, GameStartStatusResponse, ServerTimeResponse, GameSummaryStatistics};
+                  GameStatusResponse, GameStartStatusResponse, ServerTimeResponse, GameSummaryStatistics,
+                  PokemonAdminEntry};
 use crate::milestones::MilestoneDefinition;
 use crate::databaseconnection;
 use chrono::{Utc, DateTime};
@@ -1556,13 +1557,6 @@ pub struct SetAllPokemonActiveResponse {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct EnabledPokemonIdsResponse {
     pub ids: Vec<u32>,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct PokemonAdminEntry {
-    pub id: u32,
-    pub name: String,
-    pub active: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
