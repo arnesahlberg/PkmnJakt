@@ -6,7 +6,7 @@ window.addEventListener('load', function() {
   // Loading messages to cycle through
   var loadingMessages = [
     "Laddar Pokémon...",
-    "Synkar med lägerledningen...",
+    "Synkar med styrelsen...",
     "Kompenserar för väder...",
     "Läser Pokémon-stadgarna...",
     "Letar efter Pokébollar i bollförrådet...",
@@ -40,8 +40,6 @@ window.addEventListener('load', function() {
     "Samlar statistik om spelet...",
     "Byter ut trasiga kritor...",
     "Letar buggar...",
-    "Förbereder nästa års Pokémonjakt...",
-    "Tackar deltagare..."
   ];
   
   // Function to cycle through loading messages randomly

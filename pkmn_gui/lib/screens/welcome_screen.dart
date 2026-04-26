@@ -21,6 +21,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Future<Map<String, dynamic>>? _statsFuture;
   bool _isLoading = false;
   bool _datamatrixEnabled = true;
+  int _activePokemonCount = 151; // default to 151
 
   @override
   void initState() {
@@ -28,6 +29,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     _statsFuture = _fetchStats();
     ApiService.getDatamatrixLoginEnabled().then((value) {
       if (mounted) setState(() => _datamatrixEnabled = value);
+    });
+    ApiService.getEnabledPokemonIds().then((ids) {
+      // fetch enabled
+      if (mounted) setState(() => _activePokemonCount = ids.length);
     });
   }
 
@@ -126,12 +131,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         const SizedBox(
                                           height: UIConstants.spacing24,
                                         ),
-                                        const Text(
+                                        Text(
                                           'Detta är en pokémonjakt du kan delta i när du besöker Lerdala! '
-                                          'Lite överallt på området finns pokémon gömda. Kan du hitta alla 151?\n\n'
-                                          'Du kan fånga pokémon via telefonen. Först loggar du in genom att klicka på knappen nedan '
-                                          'och klicka på "scanna bandet" (ditt deltagarband du fick vid mottagningen).\n\n'
-                                          'Det finns också en daglig pokémonjakt som du kan delta analogt med lappar du hämtar i info.',
+                                          'Lite överallt på området finns pokémon gömda. Kan du hitta alla $_activePokemonCount?\n\n'
+                                          '${_datamatrixEnabled ? 'Du kan fånga pokémon via telefonen. Först loggar du in genom att klicka på knappen nedan och klicka på "scanna bandet" (ditt deltagarband du fick vid mottagningen).' : 'Du kan fånga pokémon via telefonen. Logga in eller registrera dig med ett användarnamn genom att klicka på knappen nedan.'}\n\n'
+                                          'Det finns också en analog pokémonjakt som du kan delta i med lappar du hämtar vid förrådet.',
                                           style: AppTextStyles.bodyLarge,
                                           textAlign: TextAlign.center,
                                         ),
