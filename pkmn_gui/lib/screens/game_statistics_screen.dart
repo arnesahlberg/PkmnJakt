@@ -37,8 +37,8 @@ class _GameStatisticsScreenState extends State<GameStatisticsScreen> {
         AdminApiService.isGameOver(),
       ]);
 
-      final stats = results[0] as Map<String, dynamic>;
-      final gameStatusResponse = results[1] as Map<String, dynamic>;
+      final stats = results[0];
+      final gameStatusResponse = results[1];
 
       if (mounted) {
         setState(() {

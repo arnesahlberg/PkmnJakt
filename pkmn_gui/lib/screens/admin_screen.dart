@@ -30,7 +30,8 @@ class _AdminScreenState extends State<AdminScreen> {
   List<dynamic> _allPokemon = [];
   String _pokemonSearch = '';
   bool _pokemonLoading = true;
-  final TextEditingController _pokemonSearchController = TextEditingController();
+  final TextEditingController _pokemonSearchController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -190,7 +191,9 @@ class _AdminScreenState extends State<AdminScreen> {
           padding: const EdgeInsets.all(8.0),
           child: TextField(
             controller: _searchController,
-            decoration: AppInputDecorations.defaultInputDecoration('Sök användare'),
+            decoration: AppInputDecorations.defaultInputDecoration(
+              'Sök användare',
+            ),
             style: AppTextStyles.bodyLarge,
             onChanged: (value) => _onSearchChanged(),
           ),
@@ -208,6 +211,7 @@ class _AdminScreenState extends State<AdminScreen> {
                 final userName = user['name']?.toString() ?? '';
                 final isAdmin = user['admin'] == true;
                 return Card(
+                  color: Colors.white,
                   child: ListTile(
                     title: Text(
                       'Användar id: $userId',
@@ -218,23 +222,29 @@ class _AdminScreenState extends State<AdminScreen> {
                       style: AppTextStyles.bodyMedium,
                     ),
                     trailing: ElevatedButton(
-                      onPressed: () => showDialog(
-                        context: context,
-                        builder: (context) => EditUserDialog(
-                          userId: userId,
-                          userName: userName,
-                          userIsAdmin: isAdmin,
-                          onUserUpdated: () async {
-                            final token = Provider.of<UserSession>(
-                              context,
-                              listen: false,
-                            ).token;
-                            if (token != null) await _fetchUsers(token);
-                          },
-                        ),
-                      ),
+                      onPressed:
+                          () => showDialog(
+                            context: context,
+                            builder:
+                                (context) => EditUserDialog(
+                                  userId: userId,
+                                  userName: userName,
+                                  userIsAdmin: isAdmin,
+                                  onUserUpdated: () async {
+                                    final token =
+                                        Provider.of<UserSession>(
+                                          context,
+                                          listen: false,
+                                        ).token;
+                                    if (token != null) await _fetchUsers(token);
+                                  },
+                                ),
+                          ),
                       style: AppButtonStyles.primaryButtonStyle,
-                      child: const Text('Redigera', style: AppTextStyles.buttonText),
+                      child: const Text(
+                        'Redigera',
+                        style: AppTextStyles.buttonText,
+                      ),
                     ),
                   ),
                 );
@@ -274,14 +284,25 @@ class _AdminScreenState extends State<AdminScreen> {
             style: AppTextStyles.bodyMedium,
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildSpelinstallningarTab(UserSession session) {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
         Card(
-          margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          color: Colors.white,
           child: SwitchListTile(
             title: const Text(
-              'DataMatrix-inloggning aktiverad',
+              'Logga in med kamera och DataMatrix',
               style: AppTextStyles.bodyLarge,
             ),
             value: _datamatrixEnabled,
+            activeThumbColor: AppColors.primaryRed,
+            inactiveThumbColor: Colors.grey,
+            inactiveTrackColor: Colors.grey.shade300,
             onChanged: (value) async {
               final token = session.token;
               if (token == null) return;
@@ -301,14 +322,15 @@ class _AdminScreenState extends State<AdminScreen> {
                 setState(() => _datamatrixEnabled = !value);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Misslyckades att ändra inställning: $e')),
+                    SnackBar(
+                      content: Text('Misslyckades att ändra inställning: $e'),
+                    ),
                   );
                 }
               }
             },
           ),
         ),
-        const SizedBox(height: 10),
       ],
     );
   }
@@ -322,22 +344,151 @@ class _AdminScreenState extends State<AdminScreen> {
       );
     }
 
-    final filtered = _pokemonSearch.isEmpty
-        ? _allPokemon
-        : _allPokemon.where((p) {
-            final name = (p['name'] as String? ?? '').toLowerCase();
-            final id = p['id']?.toString() ?? '';
-            return name.contains(_pokemonSearch.toLowerCase()) ||
-                id.contains(_pokemonSearch);
-          }).toList();
+    final filtered =
+        _pokemonSearch.isEmpty
+            ? _allPokemon
+            : _allPokemon.where((p) {
+              final name = (p['name'] as String? ?? '').toLowerCase();
+              final id = p['id']?.toString() ?? '';
+              return name.contains(_pokemonSearch.toLowerCase()) ||
+                  id.contains(_pokemonSearch);
+            }).toList();
 
     return Column(
       children: [
         Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final token = session.token;
+                    if (token == null) return;
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder:
+                          (ctx) => AlertDialog(
+                            title: const Text('Aktivera alla Pokémon'),
+                            content: const Text(
+                              'Vill du verkligen aktivera alla Pokémon?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Avbryt'),
+                              ),
+                              ElevatedButton(
+                                style: AppButtonStyles.primaryButtonStyle,
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text(
+                                  'Aktivera',
+                                  style: AppTextStyles.buttonText,
+                                ),
+                              ),
+                            ],
+                          ),
+                    );
+                    if (confirmed != true) return;
+                    try {
+                      await AdminApiService.setAllPokemonActive(true, token);
+                      await _fetchPokemonList(token);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Alla Pokémon aktiverade'),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Misslyckades: $e')),
+                        );
+                      }
+                    }
+                  },
+                  style: AppButtonStyles.primaryButtonStyle,
+                  child: const Text(
+                    'Aktivera alla',
+                    style: AppTextStyles.buttonText,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final token = session.token;
+                    if (token == null) return;
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder:
+                          (ctx) => AlertDialog(
+                            title: const Text('Inaktivera alla Pokémon'),
+                            content: const Text(
+                              'Vill du verkligen inaktivera alla Pokémon? Detta är svårt att ångra.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Avbryt'),
+                              ),
+                              ElevatedButton(
+                                style: AppButtonStyles.primaryButtonStyle,
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text(
+                                  'Inaktivera',
+                                  style: AppTextStyles.buttonText,
+                                ),
+                              ),
+                            ],
+                          ),
+                    );
+                    if (confirmed != true) return;
+                    try {
+                      await AdminApiService.setAllPokemonActive(false, token);
+                      await _fetchPokemonList(token);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Alla Pokémon inaktiverade'),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Misslyckades: $e')),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade600,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        UIConstants.borderRadius8,
+                      ),
+                    ),
+                  ),
+                  child: const Text(
+                    'Inaktivera alla',
+                    style: AppTextStyles.buttonText,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextField(
             controller: _pokemonSearchController,
-            decoration: AppInputDecorations.defaultInputDecoration('Sök Pokémon'),
+            decoration: AppInputDecorations.defaultInputDecoration(
+              'Sök Pokémon',
+            ),
             style: AppTextStyles.bodyLarge,
             onChanged: (value) {
               setState(() => _pokemonSearch = value.trim());
@@ -353,6 +504,7 @@ class _AdminScreenState extends State<AdminScreen> {
               final pokemonName = pokemon['name'] as String? ?? '';
               final isActive = pokemon['active'] as bool? ?? false;
               return Card(
+                color: Colors.white,
                 child: ListTile(
                   title: Text(
                     '#$pokemonId $pokemonName',
@@ -361,6 +513,8 @@ class _AdminScreenState extends State<AdminScreen> {
                   trailing: Switch(
                     value: isActive,
                     activeColor: AppColors.primaryRed,
+                    inactiveThumbColor: Colors.grey,
+                    inactiveTrackColor: Colors.grey.shade300,
                     onChanged: (value) async {
                       final token = session.token;
                       if (token == null) return;
@@ -368,7 +522,11 @@ class _AdminScreenState extends State<AdminScreen> {
                         pokemon['active'] = value;
                       });
                       try {
-                        await AdminApiService.setPokemonActive(pokemonId, value, token);
+                        await AdminApiService.setPokemonActive(
+                          pokemonId,
+                          value,
+                          token,
+                        );
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -384,7 +542,11 @@ class _AdminScreenState extends State<AdminScreen> {
                         });
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Misslyckades att ändra status: $e')),
+                            SnackBar(
+                              content: Text(
+                                'Misslyckades att ändra status: $e',
+                              ),
+                            ),
                           );
                         }
                       }
@@ -424,7 +586,9 @@ class _AdminScreenState extends State<AdminScreen> {
                   Expanded(
                     child: TextField(
                       controller: _adminIdController,
-                      decoration: AppInputDecorations.defaultInputDecoration('Admin ID'),
+                      decoration: AppInputDecorations.defaultInputDecoration(
+                        'Admin ID',
+                      ),
                       style: AppTextStyles.bodyLarge,
                     ),
                   ),
@@ -432,7 +596,10 @@ class _AdminScreenState extends State<AdminScreen> {
                   ElevatedButton(
                     onPressed: _handleAdminLogin,
                     style: AppButtonStyles.primaryButtonStyle,
-                    child: const Text('Logga in admin', style: AppTextStyles.buttonText),
+                    child: const Text(
+                      'Logga in admin',
+                      style: AppTextStyles.buttonText,
+                    ),
                   ),
                 ],
               ),
@@ -446,9 +613,13 @@ class _AdminScreenState extends State<AdminScreen> {
                 ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () => Navigator.pushReplacementNamed(context, "/home"),
+                onPressed:
+                    () => Navigator.pushReplacementNamed(context, "/home"),
                 style: AppButtonStyles.primaryButtonStyle,
-                child: const Text('Gå tillbaka', style: AppTextStyles.buttonText),
+                child: const Text(
+                  'Gå tillbaka',
+                  style: AppTextStyles.buttonText,
+                ),
               ),
             ],
           ),
@@ -472,9 +643,13 @@ class _AdminScreenState extends State<AdminScreen> {
               ),
               const SizedBox(height: UIConstants.separatingHeight),
               ElevatedButton(
-                onPressed: () => Navigator.pushReplacementNamed(context, "/home"),
+                onPressed:
+                    () => Navigator.pushReplacementNamed(context, "/home"),
                 style: AppButtonStyles.primaryButtonStyle,
-                child: const Text('Gå tillbaka', style: AppTextStyles.buttonText),
+                child: const Text(
+                  'Gå tillbaka',
+                  style: AppTextStyles.buttonText,
+                ),
               ),
             ],
           ),
@@ -482,7 +657,7 @@ class _AdminScreenState extends State<AdminScreen> {
       );
     }
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: const CommonAppBar(title: 'Admin-sida'),
         body: Column(
@@ -490,6 +665,7 @@ class _AdminScreenState extends State<AdminScreen> {
             const TabBar(
               tabs: [
                 Tab(text: 'Användare'),
+                Tab(text: 'Spelinställningar'),
                 Tab(text: 'Pokémon'),
               ],
               labelColor: AppColors.primaryRed,
@@ -500,6 +676,7 @@ class _AdminScreenState extends State<AdminScreen> {
               child: TabBarView(
                 children: [
                   _buildUsersTab(session),
+                  _buildSpelinstallningarTab(session),
                   _buildPokemonTab(session),
                 ],
               ),

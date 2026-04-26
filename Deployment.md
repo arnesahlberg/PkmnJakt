@@ -121,8 +121,8 @@ After=network.target
 ExecStart=/path/to/PkmnJakt/pkmn_api/target/release/pkmn_api
 WorkingDirectory=/path/to/PkmnJakt/pkmn_api
 Restart=always
-User=arnesahlberg
-Group=arnesahlberg
+User=username 
+Group=username
 Environment="DATABASE_PATH=/path/to/PkmnJakt/Database/base.db"
 Environment="PORT=5401"
 Environment="EXPOSE_IP=127.0.0.1"

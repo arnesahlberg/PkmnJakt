@@ -11,7 +11,6 @@ import 'package:intl/intl.dart';
 import '../api_calls.dart';
 import '../utils/auth_utils.dart';
 import 'found_pokemon_scanner_screen.dart';
-import 'user_statistics_screen.dart';
 import '../widgets/milestone_badge.dart';
 import '../models/milestone.dart';
 import '../screens/comprehensive_milestone_screen.dart';
@@ -48,17 +47,27 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       final ranking = await ApiService.checkUserRanking(session.userId!);
 
       final pokemonList = pokedexResult['pokedex'] as List<dynamic>? ?? [];
-      final count = enabledIds.isNotEmpty
-          ? pokemonList.where((p) => enabledIds.contains(p['number'] as int)).length
-          : pokemonList.where((p) => (p['number'] as int) <= 151).length;
+      final count =
+          enabledIds.isNotEmpty
+              ? pokemonList
+                  .where((p) => enabledIds.contains(p['number'] as int))
+                  .length
+              : pokemonList.where((p) => (p['number'] as int) <= 151).length;
 
       // Fetch comprehensive milestones
       List<MilestoneDefinition> comprehensiveMilestones = [];
       try {
-        final milestoneData = await ApiService.getUserMilestoneDefinitions(session.userId!);
-        comprehensiveMilestones = milestoneData
-            .map((data) => MilestoneDefinition.fromJson(data as Map<String, dynamic>))
-            .toList();
+        final milestoneData = await ApiService.getUserMilestoneDefinitions(
+          session.userId!,
+        );
+        comprehensiveMilestones =
+            milestoneData
+                .map(
+                  (data) => MilestoneDefinition.fromJson(
+                    data as Map<String, dynamic>,
+                  ),
+                )
+                .toList();
       } catch (e) {
         // Silently fail - milestones are optional
       }
@@ -128,18 +137,18 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     return formatter.format(dateTime);
   }
 
-
   void _navigateToMilestones() {
     final session = Provider.of<UserSession>(context, listen: false);
-    
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ComprehensiveMilestoneScreen(
-          milestones: _comprehensiveMilestones,
-          currentPokemonCount: _pokemonCount,
-          userName: session.userName ?? 'Unknown',
-        ),
+        builder:
+            (context) => ComprehensiveMilestoneScreen(
+              milestones: _comprehensiveMilestones,
+              currentPokemonCount: _pokemonCount,
+              userName: session.userName ?? 'Unknown',
+            ),
       ),
     );
   }
@@ -431,7 +440,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 ),
                                 const SizedBox(height: UIConstants.spacing8),
                                 Text(
-                                  _pokemonCount < (_enabledIds.isNotEmpty ? _enabledIds.where((id) => id <= 151).length : 151)
+                                  _pokemonCount <
+                                          (_enabledIds.isNotEmpty
+                                              ? _enabledIds
+                                                  .where((id) => id <= 151)
+                                                  .length
+                                              : 151)
                                       ? "Du har fångat $_pokemonCount Pokémon"
                                       : "Du har fångat alla $_pokemonCount Pokémon! 🎉",
                                   style: AppTextStyles.bodyLarge.copyWith(
@@ -443,7 +457,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 const SizedBox(height: UIConstants.spacing8),
                                 MilestoneSummary(
                                   milestones: const [],
-                                  comprehensiveMilestones: _comprehensiveMilestones,
+                                  comprehensiveMilestones:
+                                      _comprehensiveMilestones,
                                   currentPokemonCount: _pokemonCount,
                                   onViewAll: _navigateToMilestones,
                                 ),
@@ -565,11 +580,15 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                     itemBuilder: (context, index) {
                                       final pokemon = _pokemonList[index];
                                       return Container(
-                                        margin: const EdgeInsets.only(right: 16),
+                                        margin: const EdgeInsets.only(
+                                          right: 16,
+                                        ),
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           color: Colors.white,
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                           border: Border.all(
                                             color: const Color(0xFF992109),
                                             width: 2,
@@ -585,7 +604,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                                 border: Border.all(
-                                                  color: const Color(0xFF992109),
+                                                  color: const Color(
+                                                    0xFF992109,
+                                                  ),
                                                   width: 1,
                                                 ),
                                               ),
@@ -598,14 +619,18 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                                     'assets/images/pkmn/${pokemon['number']}.jpg',
                                                     fit: BoxFit.contain,
                                                     errorBuilder:
-                                                        (context, error, stackTrace) =>
-                                                            Container(
-                                                              color: Colors.white,
-                                                              child: const Icon(
-                                                                Icons.image_outlined,
-                                                                size: 48,
-                                                              ),
-                                                            ),
+                                                        (
+                                                          context,
+                                                          error,
+                                                          stackTrace,
+                                                        ) => Container(
+                                                          color: Colors.white,
+                                                          child: const Icon(
+                                                            Icons
+                                                                .image_outlined,
+                                                            size: 48,
+                                                          ),
+                                                        ),
                                                   ),
                                                 ),
                                               ),
@@ -626,7 +651,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                               ),
                                             ),
                                             Text(
-                                              _formatTime(pokemon['time_found']),
+                                              _formatTime(
+                                                pokemon['time_found'],
+                                              ),
                                               style: const TextStyle(
                                                 fontSize: 12,
                                               ),
@@ -672,85 +699,99 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                       itemCount: _allPokemonList.length,
                                       itemBuilder: (context, index) {
                                         final pokemon = _allPokemonList[index];
-                                        final userId = pokemon['found_by_user']['user_id'].toString();
-                                        
+                                        final userId =
+                                            pokemon['found_by_user']['user_id']
+                                                .toString();
+
                                         return Container(
-                                            margin: const EdgeInsets.only(right: 16),
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(8),
-                                              border: Border.all(
-                                                color: const Color(0xFF992109),
-                                                width: 2,
-                                              ),
+                                          margin: const EdgeInsets.only(
+                                            right: 16,
+                                          ),
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                              8,
                                             ),
-                                            child: Column(
-                                              children: [
-                                                Container(
-                                                  width: 80,
-                                                  height: 80,
-                                                  decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: const Color(0xFF992109),
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                width: 80,
+                                                height: 80,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  border: Border.all(
+                                                    color: const Color(
+                                                      0xFF992109,
+                                                    ),
+                                                    width: 1,
+                                                  ),
+                                                ),
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(7),
+                                                  child: Container(
                                                     color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(8),
-                                                    border: Border.all(
-                                                      color: const Color(0xFF992109),
-                                                      width: 1,
-                                                    ),
-                                                  ),
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(7),
-                                                    child: Container(
-                                                      color: Colors.white,
-                                                      child: Image.asset(
-                                                        'assets/images/pkmn/${pokemon['number']}.jpg',
-                                                        fit: BoxFit.contain,
-                                                        errorBuilder:
-                                                            (context, error, stackTrace) =>
-                                                                Container(
-                                                                  color: Colors.white,
-                                                                  child: const Icon(
-                                                                    Icons.image_outlined,
-                                                                    size: 48,
-                                                                  ),
-                                                                ),
-                                                      ),
+                                                    child: Image.asset(
+                                                      'assets/images/pkmn/${pokemon['number']}.jpg',
+                                                      fit: BoxFit.contain,
+                                                      errorBuilder:
+                                                          (
+                                                            context,
+                                                            error,
+                                                            stackTrace,
+                                                          ) => Container(
+                                                            color: Colors.white,
+                                                            child: const Icon(
+                                                              Icons
+                                                                  .image_outlined,
+                                                              size: 48,
+                                                            ),
+                                                          ),
                                                     ),
                                                   ),
                                                 ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  "${pokemon['name']}",
-                                                  style: const TextStyle(
-                                                    fontFamily: 'PixelFont',
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                "${pokemon['name']}",
+                                                style: const TextStyle(
+                                                  fontFamily: 'PixelFont',
+                                                  fontWeight: FontWeight.bold,
                                                 ),
-                                                Text(
-                                                  "Nr. ${pokemon['number']}",
-                                                  style: const TextStyle(
-                                                    fontFamily: 'PixelFont',
-                                                    fontSize: 12,
-                                                  ),
+                                              ),
+                                              Text(
+                                                "Nr. ${pokemon['number']}",
+                                                style: const TextStyle(
+                                                  fontFamily: 'PixelFont',
+                                                  fontSize: 12,
                                                 ),
-                                                Text(
-                                                  "${pokemon['found_by_user']['name']}",
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                  ),
-                                                  overflow: TextOverflow.ellipsis,
+                                              ),
+                                              Text(
+                                                "${pokemon['found_by_user']['name']}",
+                                                style: const TextStyle(
+                                                  fontSize: 12,
                                                 ),
-                                                Text(
-                                                  _formatTime(pokemon['time_found']),
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                  ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              Text(
+                                                _formatTime(
+                                                  pokemon['time_found'],
                                                 ),
-                                              ],
-                                            ),
-                                          );
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
                                       },
                                     ),
                                   ),

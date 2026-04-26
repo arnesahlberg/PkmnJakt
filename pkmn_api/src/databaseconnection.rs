@@ -626,6 +626,14 @@ pub fn set_pokemon_active(pokemon_id: u32, active: bool, conn: &Connection) -> R
     Ok(())
 }
 
+pub fn set_all_pokemon_active(active: bool, conn: &Connection) -> Result<()> {
+    conn.execute(
+        "UPDATE Pokemon SET active = ?1",
+        params![active as i32],
+    )?;
+    Ok(())
+}
+
 pub fn is_pokemon_active(pokemon_id: u32, conn: &Connection) -> Result<bool> {
     let mut stmt = conn.prepare("SELECT active FROM Pokemon WHERE pokemon_id = ?1")?;
     match stmt.query_row(params![pokemon_id], |row| row.get::<_, i32>(0)) {
