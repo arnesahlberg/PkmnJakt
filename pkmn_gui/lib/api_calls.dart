@@ -143,6 +143,15 @@ class ApiService {
       body: jsonEncode({'catch_code': catchCode}),
       headers: _headers(token),
     );
+    // The backend returns HTTP 400 (invalid token / pokemon not found) and
+    // HTTP 403 (pokemon not active) with a structured JSON body containing
+    // a result_code. Parse those bodies instead of throwing so the caller
+    // can show the appropriate UI.
+    if (response.statusCode == 400 || response.statusCode == 403) {
+      final decodedString = utf8.decode(response.bodyBytes);
+      final decoded = jsonDecode(decodedString);
+      if (decoded is Map<String, dynamic>) return decoded;
+    }
     return decodeUtf8Json(response);
   }
 
