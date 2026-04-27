@@ -403,9 +403,9 @@ class _AdminScreenState extends State<AdminScreen> {
           SnackBar(
             content: Text(
               validationError,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.primaryRed),
             ),
-            backgroundColor: AppColors.primaryRed,
+            backgroundColor: Colors.white,
           ),
         );
       }
@@ -424,9 +424,9 @@ class _AdminScreenState extends State<AdminScreen> {
           SnackBar(
             content: Text(
               'Sparat: ${_formatGameTime(picked)}',
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.primaryRed),
             ),
-            backgroundColor: AppColors.primaryRed,
+            backgroundColor: Colors.white,
           ),
         );
       }
@@ -444,9 +444,9 @@ class _AdminScreenState extends State<AdminScreen> {
         SnackBar(
           content: Text(
             displayError,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: AppColors.primaryRed),
           ),
-          backgroundColor: AppColors.primaryRed,
+          backgroundColor: Colors.white,
         ),
       );
       // Reset UI state since save failed
@@ -497,9 +497,9 @@ class _AdminScreenState extends State<AdminScreen> {
                     SnackBar(
                       content: Text(
                         'Misslyckades att ändra inställning: $e',
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: AppColors.primaryRed),
                       ),
-                      backgroundColor: AppColors.primaryRed,
+                      backgroundColor: Colors.white,
                     ),
                   );
                 }
@@ -568,9 +568,11 @@ class _AdminScreenState extends State<AdminScreen> {
                                   const SnackBar(
                                     content: Text(
                                       'Speldata återställt.',
-                                      style: TextStyle(color: Colors.white),
+                                      style: TextStyle(
+                                        color: AppColors.primaryRed,
+                                      ),
                                     ),
-                                    backgroundColor: AppColors.primaryRed,
+                                    backgroundColor: Colors.white,
                                   ),
                                 );
                               }
@@ -761,9 +763,11 @@ class _AdminScreenState extends State<AdminScreen> {
                           SnackBar(
                             content: Text(
                               'Misslyckades: $e',
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(
+                                color: AppColors.primaryRed,
+                              ),
                             ),
-                            backgroundColor: AppColors.primaryRed,
+                            backgroundColor: Colors.white,
                           ),
                         );
                       }
@@ -823,9 +827,11 @@ class _AdminScreenState extends State<AdminScreen> {
                           SnackBar(
                             content: Text(
                               'Misslyckades: $e',
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(
+                                color: AppColors.primaryRed,
+                              ),
                             ),
-                            backgroundColor: AppColors.primaryRed,
+                            backgroundColor: Colors.white,
                           ),
                         );
                       }
