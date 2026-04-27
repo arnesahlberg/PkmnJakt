@@ -745,6 +745,71 @@ def run_tests():
     print(f"{Fore.YELLOW}Test 32k: POST /admin/set_pokemon_active as non-admin (expecting 403){Style.RESET_ALL}")
     make_request("POST", "admin/set_pokemon_active", {"pokemon_id": 2, "active": False}, tokens["22222"], expected_status=403)
 
+    # 33. Game time validation tests
+    print(f"\n{Fore.YELLOW}Test 33 setup: Clear any leftover game times before validation tests{Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {"setting_id": "game_start_time", "setting_value": ""}, tokens["admin"], expected_status=200, silent=True)
+    make_request("POST", "admin/set_setting", {"setting_id": "game_end_time", "setting_value": ""}, tokens["admin"], expected_status=200, silent=True)
+
+    print(f"{Fore.YELLOW}Test 33a: Set game_start_time to a valid value (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {
+        "setting_id": "game_start_time",
+        "setting_value": "2030-06-01 10:00:00"
+    }, tokens["admin"], expected_status=200)
+
+    print(f"{Fore.YELLOW}Test 33b: Set game_end_time AFTER start time (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {
+        "setting_id": "game_end_time",
+        "setting_value": "2030-06-01 18:00:00"
+    }, tokens["admin"], expected_status=200)
+
+    print(f"{Fore.YELLOW}Test 33c: Set game_end_time BEFORE start time (expecting 400){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {
+        "setting_id": "game_end_time",
+        "setting_value": "2030-06-01 09:00:00"
+    }, tokens["admin"], expected_status=400)
+
+    print(f"{Fore.YELLOW}Test 33d: Set game_end_time EQUAL to start time (expecting 400){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {
+        "setting_id": "game_end_time",
+        "setting_value": "2030-06-01 10:00:00"
+    }, tokens["admin"], expected_status=400)
+
+    print(f"{Fore.YELLOW}Test 33e: Set game_start_time AFTER current end time (expecting 400){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {
+        "setting_id": "game_start_time",
+        "setting_value": "2030-06-01 19:00:00"
+    }, tokens["admin"], expected_status=400)
+
+    print(f"{Fore.YELLOW}Test 33f: Set game_start_time with invalid format (expecting 400){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {
+        "setting_id": "game_start_time",
+        "setting_value": "not-a-date"
+    }, tokens["admin"], expected_status=400)
+
+    print(f"{Fore.YELLOW}Test 33g: Clear game_end_time with empty string (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {
+        "setting_id": "game_end_time",
+        "setting_value": ""
+    }, tokens["admin"], expected_status=200)
+
+    print(f"{Fore.YELLOW}Test 33h: Set game_start_time AFTER cleared end time — no other time set, should succeed (expecting 200){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {
+        "setting_id": "game_start_time",
+        "setting_value": "2030-06-01 19:00:00"
+    }, tokens["admin"], expected_status=200)
+
+    print(f"{Fore.YELLOW}Test 33i: Verify GET /admin/game_times returns updated values (expecting 200){Style.RESET_ALL}")
+    response = make_request("GET", "admin/game_times", None, tokens["admin"], expected_status=200)
+    if response:
+        data = json.loads(response.text)
+        assert data.get("game_start_time") == "2030-06-01 19:00:00", f"Unexpected start time: {data.get('game_start_time')}"
+        assert data.get("game_end_time") is None or data.get("game_end_time") == "", f"Expected end time to be cleared, got: {data.get('game_end_time')}"
+        print(f"{Fore.GREEN}  ✓ game_times reflects correct state{Style.RESET_ALL}")
+
+    print(f"{Fore.YELLOW}Test 33j: Clear both game times (cleanup){Style.RESET_ALL}")
+    make_request("POST", "admin/set_setting", {"setting_id": "game_start_time", "setting_value": ""}, tokens["admin"], expected_status=200, silent=True)
+    make_request("POST", "admin/set_setting", {"setting_id": "game_end_time", "setting_value": ""}, tokens["admin"], expected_status=200, silent=True)
+
     # Final: DELETE ALL USERS
     print(f"{Fore.YELLOW}\nTest 18: Deleting all users by looping{Style.RESET_ALL}")
     for user in users:

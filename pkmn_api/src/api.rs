@@ -1406,6 +1406,53 @@ pub async fn admin_set_setting(req: HttpRequest, info: web::Json<SetSettingReque
             result_code: CallResultCode::Ok,
         });
     }
+
+    // When setting a game time, validate that start < end (if both will be set).
+    if info.setting_id == "game_start_time" || info.setting_id == "game_end_time" {
+        // Allow clearing a value (empty string).
+        if !info.setting_value.is_empty() {
+            let parse_time = |s: &str| -> Option<i64> {
+                DateTime::parse_from_str(&format!("{} +02:00", s), "%Y-%m-%d %H:%M:%S %z")
+                    .ok()
+                    .map(|dt| dt.timestamp())
+            };
+            let new_ts = match parse_time(&info.setting_value) {
+                Some(ts) => ts,
+                None => {
+                    return HttpResponse::BadRequest().json(SetSettingResponse {
+                        message: format!(
+                            "Invalid time format for {}: expected YYYY-MM-DD HH:MM:SS",
+                            info.setting_id
+                        ),
+                        result_code: CallResultCode::Ok,
+                    });
+                }
+            };
+            let other_key = if info.setting_id == "game_start_time" {
+                "game_end_time"
+            } else {
+                "game_start_time"
+            };
+            if let Some(other_str) = databaseconnection::get_setting(other_key, &conn).unwrap_or(None) {
+                if !other_str.is_empty() {
+                    if let Some(other_ts) = parse_time(&other_str) {
+                        let (start_ts, end_ts) = if info.setting_id == "game_start_time" {
+                            (new_ts, other_ts)
+                        } else {
+                            (other_ts, new_ts)
+                        };
+                        if end_ts <= start_ts {
+                            return HttpResponse::BadRequest().json(SetSettingResponse {
+                                message: "game_end_time must be later than game_start_time".to_string(),
+                                result_code: CallResultCode::Ok,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     match databaseconnection::upsert_setting(&info.setting_id, &info.setting_value, &conn) {
         Ok(_) => HttpResponse::Ok().json(SetSettingResponse {
             message: format!("Setting {} updated to {}", info.setting_id, info.setting_value),

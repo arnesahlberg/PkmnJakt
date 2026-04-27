@@ -394,7 +394,7 @@ class _AdminScreenState extends State<AdminScreen> {
           color: Colors.white,
           child: SwitchListTile(
             title: const Text(
-              'Logga in med kamera och DataMatrix',
+              'Logga in med kamera och DataMatrix (som på t.ex. Riksläger med id-kod på band)',
               style: AppTextStyles.bodyLarge,
             ),
             value: _datamatrixEnabled,
