@@ -1395,7 +1395,12 @@ pub async fn admin_set_setting(req: HttpRequest, info: web::Json<SetSettingReque
             result_code: CallResultCode::UserNotAdmin,
         });
     }
-    if info.setting_id != "datamatrix_login_enabled" {
+    const ALLOWED_SETTINGS: &[&str] = &[
+        "datamatrix_login_enabled",
+        "game_start_time",
+        "game_end_time",
+    ];
+    if !ALLOWED_SETTINGS.contains(&info.setting_id.as_str()) {
         return HttpResponse::BadRequest().json(SetSettingResponse {
             message: format!("Unknown setting: {}", info.setting_id),
             result_code: CallResultCode::Ok,
@@ -1414,6 +1419,63 @@ pub async fn admin_set_setting(req: HttpRequest, info: web::Json<SetSettingReque
             })
         }
     }
+}
+
+// Reset all game data (admin only)
+pub async fn admin_reset_game_data(req: HttpRequest) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !is_admin {
+        return HttpResponse::Forbidden().finish();
+    }
+    match databaseconnection::delete_all_found_pokemon(&conn) {
+        Ok(_) => {
+            info!("Admin {} reset all game data (deleted all FoundPokemon)", user_id);
+            HttpResponse::Ok().body("true")
+        }
+        Err(e) => {
+            error!("Failed to reset game data: {}", e);
+            HttpResponse::InternalServerError().finish()
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+pub struct GameTimesResponse {
+    pub game_start_time: Option<String>,
+    pub game_end_time: Option<String>,
+}
+
+// Get current game_start_time and game_end_time settings (admin only)
+pub async fn admin_get_game_times(req: HttpRequest) -> HttpResponse {
+    let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("");
+    let user_id = match misc::get_user_id_from_token(token) {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::Unauthorized().finish(),
+    };
+    let conn = databaseconnection::get_conn(get_env_dbpath()).unwrap();
+    if !validate_token(&user_id, token, &conn) {
+        return HttpResponse::Unauthorized().finish();
+    }
+    let is_admin = databaseconnection::user_is_admin(&user_id, &conn).unwrap();
+    if !is_admin {
+        return HttpResponse::Forbidden().finish();
+    }
+    let game_start_time = databaseconnection::get_setting("game_start_time", &conn).unwrap_or(None);
+    let game_end_time = databaseconnection::get_setting("game_end_time", &conn).unwrap_or(None);
+    HttpResponse::Ok().json(GameTimesResponse { game_start_time, game_end_time })
 }
 
 // Game status endpoints (no authentication required)
@@ -1713,6 +1775,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .route("/admin/pokemon_list", web::get().to(admin_get_pokemon_list))
         .route("/admin/set_pokemon_active", web::post().to(admin_set_pokemon_active))
         .route("/admin/set_all_pokemon_active", web::post().to(admin_set_all_pokemon_active))
+        .route("/admin/reset_game_data", web::post().to(admin_reset_game_data))
+        .route("/admin/game_times", web::get().to(admin_get_game_times))
         ;
 }
 

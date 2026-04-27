@@ -16,6 +16,12 @@ class CallResultCode {
   static const int pokemonNotActive = 11;
 }
 
+class SettingKeys {
+  static const String datamatrixLoginEnabled = 'datamatrix_login_enabled';
+  static const String gameStartTime = 'game_start_time';
+  static const String gameEndTime = 'game_end_time';
+}
+
 class UIConstants {
   static const double pokedexImageSize = 64;
   static const double separatingHeight = 20;

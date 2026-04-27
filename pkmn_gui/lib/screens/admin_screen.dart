@@ -3,6 +3,7 @@ import 'package:pkmn_gui/api_calls.dart';
 import 'package:pkmn_gui/constants.dart';
 import 'package:pkmn_gui/widgets/edit_user_popup.dart';
 import 'package:pkmn_gui/widgets/login_popup.dart';
+import 'package:pkmn_gui/widgets/reset_game_popup.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import 'package:pkmn_gui/widgets/common_app_bar.dart';
@@ -17,6 +18,9 @@ class _AdminScreenState extends State<AdminScreen> {
   bool _isAdmin = false;
   bool _isLoading = true;
   bool _datamatrixEnabled = true;
+  DateTime? _gameStartTime;
+  DateTime? _gameEndTime;
+  bool _gameTimesLoading = true;
   int _currentPage = 0;
   int _totalUsers = 0;
   List<dynamic> _users = [];
@@ -69,10 +73,42 @@ class _AdminScreenState extends State<AdminScreen> {
         _datamatrixEnabled = datamatrixEnabled;
       });
       await _fetchPokemonList(token);
+      await _fetchGameTimes(token);
     }
     setState(() {
       _isLoading = false;
     });
+  }
+
+  Future<void> _fetchGameTimes(String token) async {
+    try {
+      final result = await AdminApiService.getGameTimes(token);
+      setState(() {
+        _gameStartTime = _parseGameTime(result['game_start_time'] as String?);
+        _gameEndTime = _parseGameTime(result['game_end_time'] as String?);
+        _gameTimesLoading = false;
+      });
+    } catch (e) {
+      setState(() => _gameTimesLoading = false);
+    }
+  }
+
+  DateTime? _parseGameTime(String? s) {
+    if (s == null) return null;
+    try {
+      return DateTime.parse(s.replaceAll(' ', 'T'));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _formatGameTime(DateTime dt) {
+    final y = dt.year.toString().padLeft(4, '0');
+    final mo = dt.month.toString().padLeft(2, '0');
+    final d = dt.day.toString().padLeft(2, '0');
+    final h = dt.hour.toString().padLeft(2, '0');
+    final mi = dt.minute.toString().padLeft(2, '0');
+    return '$y-$mo-$d $h:$mi:00';
   }
 
   Future<void> _fetchTotalUsers(String token) async {
@@ -288,6 +324,68 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
+  Future<void> _pickGameTime({
+    required Future<void> Function(String value, String token) save,
+    required DateTime? current,
+    required void Function(DateTime) onPicked,
+    required String token,
+  }) async {
+    final now = DateTime.now();
+    final initialDate = current ?? now;
+    final date = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+      builder:
+          (ctx, child) => Theme(
+            data: Theme.of(ctx).copyWith(
+              colorScheme: const ColorScheme.light(
+                primary: AppColors.primaryRed,
+              ),
+            ),
+            child: child!,
+          ),
+    );
+    if (date == null || !mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initialDate),
+      builder:
+          (ctx, child) => Theme(
+            data: Theme.of(ctx).copyWith(
+              colorScheme: const ColorScheme.light(
+                primary: AppColors.primaryRed,
+              ),
+            ),
+            child: child!,
+          ),
+    );
+    if (time == null || !mounted) return;
+    final picked = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+    onPicked(picked);
+    try {
+      await save(_formatGameTime(picked), token);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sparat: ${_formatGameTime(picked)}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Misslyckades att spara: $e')));
+      }
+    }
+  }
+
   Widget _buildSpelinstallningarTab(UserSession session) {
     return ListView(
       padding: const EdgeInsets.all(16.0),
@@ -331,8 +429,183 @@ class _AdminScreenState extends State<AdminScreen> {
             },
           ),
         ),
+        const SizedBox(height: 16),
+        // Game timing section
+        const Padding(
+          padding: EdgeInsets.only(bottom: 8),
+          child: Text('Speltider', style: AppTextStyles.titleMedium),
+        ),
+        if (_gameTimesLoading)
+          const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryRed),
+            ),
+          )
+        else
+          ..._buildGameTimeCards(session),
+        const SizedBox(height: 24),
+        // Reset game data section
+        const Divider(),
+        const SizedBox(height: 8),
+        const Padding(
+          padding: EdgeInsets.only(bottom: 8),
+          child: Text(
+            'Farlig zon',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+            ),
+          ),
+        ),
+        Card(
+          color: Colors.red.shade50,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Återställ all speldata',
+                  style: AppTextStyles.bodyLarge,
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Raderar alla fångade Pokémon för samtliga användare. Milstolpar återställs automatiskt. Kan inte ångras.',
+                  style: AppTextStyles.bodyMedium,
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final token = session.token;
+                    if (token == null) return;
+                    showDialog(
+                      context: context,
+                      builder:
+                          (_) => ResetGamePopup(
+                            token: token,
+                            onReset: () {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Speldata återställt.'),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade700,
+                    foregroundColor: Colors.white,
+                  ),
+                  icon: const Icon(Icons.warning_amber_rounded),
+                  label: const Text('Återställ speldata'),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
+  }
+
+  List<Widget> _buildGameTimeCards(UserSession session) {
+    final token = session.token;
+    return [
+      Card(
+        color: Colors.white,
+        child: ListTile(
+          title: const Text('Spelstart', style: AppTextStyles.bodyLarge),
+          subtitle: Text(
+            _gameStartTime != null
+                ? _formatGameTime(_gameStartTime!)
+                : 'Ej inställd',
+            style: AppTextStyles.bodyMedium,
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.edit_calendar,
+                  color: AppColors.primaryRed,
+                ),
+                tooltip: 'Ändra spelstart',
+                onPressed:
+                    token == null
+                        ? null
+                        : () => _pickGameTime(
+                          save: AdminApiService.setGameStartTime,
+                          current: _gameStartTime,
+                          onPicked: (dt) => setState(() => _gameStartTime = dt),
+                          token: token,
+                        ),
+              ),
+              if (_gameStartTime != null)
+                IconButton(
+                  icon: const Icon(Icons.clear, color: Colors.grey),
+                  tooltip: 'Ta bort spelstart',
+                  onPressed:
+                      token == null
+                          ? null
+                          : () async {
+                            await AdminApiService.setGameStartTime('', token);
+                            setState(() => _gameStartTime = null);
+                          },
+                ),
+            ],
+          ),
+        ),
+      ),
+      const SizedBox(height: 8),
+      Card(
+        color: Colors.white,
+        child: ListTile(
+          title: const Text('Spelslut', style: AppTextStyles.bodyLarge),
+          subtitle: Text(
+            _gameEndTime != null
+                ? _formatGameTime(_gameEndTime!)
+                : 'Ej inställd',
+            style: AppTextStyles.bodyMedium,
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.edit_calendar,
+                  color: AppColors.primaryRed,
+                ),
+                tooltip: 'Ändra spelslut',
+                onPressed:
+                    token == null
+                        ? null
+                        : () => _pickGameTime(
+                          save: AdminApiService.setGameEndTime,
+                          current: _gameEndTime,
+                          onPicked: (dt) => setState(() => _gameEndTime = dt),
+                          token: token,
+                        ),
+              ),
+              if (_gameEndTime != null)
+                IconButton(
+                  icon: const Icon(Icons.clear, color: Colors.grey),
+                  tooltip: 'Ta bort spelslut',
+                  onPressed:
+                      token == null
+                          ? null
+                          : () async {
+                            await AdminApiService.setGameEndTime('', token);
+                            setState(() => _gameEndTime = null);
+                          },
+                ),
+            ],
+          ),
+        ),
+      ),
+    ];
   }
 
   Widget _buildPokemonTab(UserSession session) {

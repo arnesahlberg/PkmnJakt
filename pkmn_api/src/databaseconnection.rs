@@ -804,6 +804,11 @@ pub fn get_setting(setting_id: &str, conn: &Connection) -> Result<Option<String>
     }
 }
 
+pub fn delete_all_found_pokemon(conn: &Connection) -> Result<()> {
+    conn.execute("DELETE FROM FoundPokemon", [])?;
+    Ok(())
+}
+
 pub fn count_users_with_pokemon_threshold(threshold: u32, conn: &Connection) -> Result<u32> {
     let mut stmt = conn.prepare(
         "SELECT COUNT(DISTINCT user_id) FROM FoundPokemon 

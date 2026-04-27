@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:pkmn_gui/constants.dart';
 
 Map<String, dynamic> decodeUtf8Json(http.Response response) {
   if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -519,19 +520,58 @@ class AdminApiService {
     return decodeUtf8Json(response);
   }
 
-  static Future<Map<String, dynamic>> setDatamatrixLoginEnabled(
-    bool enabled,
+  static Future<Map<String, dynamic>> setSetting(
+    String key,
+    String value,
     String token,
   ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/admin/set_setting'),
-      body: jsonEncode({
-        'setting_id': 'datamatrix_login_enabled',
-        'setting_value': enabled ? 'true' : 'false',
-      }),
+      body: jsonEncode({'setting_id': key, 'setting_value': value}),
       headers: ApiService._headers(token),
     );
     return decodeUtf8Json(response);
+  }
+
+  static Future<Map<String, dynamic>> setDatamatrixLoginEnabled(
+    bool enabled,
+    String token,
+  ) async {
+    return setSetting(
+      SettingKeys.datamatrixLoginEnabled,
+      enabled ? 'true' : 'false',
+      token,
+    );
+  }
+
+  static Future<bool> resetGameData(String token) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/admin/reset_game_data'),
+      headers: ApiService._headers(token),
+    );
+    return response.statusCode == 200;
+  }
+
+  static Future<Map<String, dynamic>> getGameTimes(String token) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/admin/game_times'),
+      headers: ApiService._headers(token),
+    );
+    return decodeUtf8Json(response);
+  }
+
+  static Future<Map<String, dynamic>> setGameStartTime(
+    String value,
+    String token,
+  ) async {
+    return setSetting(SettingKeys.gameStartTime, value, token);
+  }
+
+  static Future<Map<String, dynamic>> setGameEndTime(
+    String value,
+    String token,
+  ) async {
+    return setSetting(SettingKeys.gameEndTime, value, token);
   }
 
   // Game status endpoints (no authentication required)
