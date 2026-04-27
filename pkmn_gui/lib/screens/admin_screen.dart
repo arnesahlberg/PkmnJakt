@@ -325,18 +325,29 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   Future<void> _pickGameTime({
-    required Future<void> Function(String value, String token) save,
+    required bool isStartTime,
     required DateTime? current,
     required void Function(DateTime) onPicked,
     required String token,
   }) async {
     final now = DateTime.now();
     final initialDate = current ?? now;
+
+    // Constrain date picker based on other time
+    DateTime firstDate = DateTime(2020);
+    DateTime lastDate = DateTime(2100);
+
+    if (isStartTime && _gameEndTime != null) {
+      lastDate = _gameEndTime!;
+    } else if (!isStartTime && _gameStartTime != null) {
+      firstDate = _gameStartTime!;
+    }
+
     final date = await showDatePicker(
       context: context,
       initialDate: initialDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
+      firstDate: firstDate,
+      lastDate: lastDate,
       builder:
           (ctx, child) => Theme(
             data: Theme.of(ctx).copyWith(
@@ -348,6 +359,7 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
     );
     if (date == null || !mounted) return;
+
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(initialDate),
@@ -362,6 +374,7 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
     );
     if (time == null || !mounted) return;
+
     final picked = DateTime(
       date.year,
       date.month,
@@ -369,20 +382,81 @@ class _AdminScreenState extends State<AdminScreen> {
       time.hour,
       time.minute,
     );
-    onPicked(picked);
-    try {
-      await save(_formatGameTime(picked), token);
+
+    // Validate times locally before saving
+    String? validationError;
+    if (isStartTime &&
+        _gameEndTime != null &&
+        (picked.isAfter(_gameEndTime!) ||
+            picked.isAtSameMomentAs(_gameEndTime!))) {
+      validationError = 'Spelstart måste vara före spelslut';
+    } else if (!isStartTime &&
+        _gameStartTime != null &&
+        (picked.isBefore(_gameStartTime!) ||
+            picked.isAtSameMomentAs(_gameStartTime!))) {
+      validationError = 'Spelslut måste vara efter spelstart';
+    }
+
+    if (validationError != null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sparat: ${_formatGameTime(picked)}')),
+          SnackBar(
+            content: Text(
+              validationError,
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: AppColors.primaryRed,
+          ),
         );
       }
-    } catch (e) {
+      return;
+    }
+
+    onPicked(picked);
+    try {
+      final saveMethod =
+          isStartTime
+              ? AdminApiService.setGameStartTime
+              : AdminApiService.setGameEndTime;
+      await saveMethod(_formatGameTime(picked), token);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Misslyckades att spara: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Sparat: ${_formatGameTime(picked)}',
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: AppColors.primaryRed,
+          ),
+        );
       }
+    } on Exception catch (e) {
+      if (!mounted) return;
+      final errorMsg = e.toString();
+      String displayError = 'Misslyckades att spara';
+      if (errorMsg.contains('400')) {
+        displayError =
+            'Tiderna är ogiltiga: Spelslut måste vara senare än spelstart';
+      } else if (errorMsg.contains('HTTP')) {
+        displayError = 'Serverfel: ${errorMsg.replaceAll('Exception: ', '')}';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            displayError,
+            style: const TextStyle(color: Colors.white),
+          ),
+          backgroundColor: AppColors.primaryRed,
+        ),
+      );
+      // Reset UI state since save failed
+      setState(() {
+        if (isStartTime) {
+          _gameStartTime = current;
+        } else {
+          _gameEndTime = current;
+        }
+      });
     }
   }
 
@@ -394,7 +468,7 @@ class _AdminScreenState extends State<AdminScreen> {
           color: Colors.white,
           child: SwitchListTile(
             title: const Text(
-              'Logga in med kamera och DataMatrix (som på t.ex. Riksläger med id-kod på band)',
+              'Logga in med kamera och DataMatrix',
               style: AppTextStyles.bodyLarge,
             ),
             value: _datamatrixEnabled,
@@ -411,7 +485,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'DataMatrix-inloggning ${value ? "aktiverad" : "inaktiverad"}',
+                        'Kamera-inloggning ${value ? "aktiverad" : "inaktiverad"}',
                       ),
                     ),
                   );
@@ -421,7 +495,11 @@ class _AdminScreenState extends State<AdminScreen> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Misslyckades att ändra inställning: $e'),
+                      content: Text(
+                        'Misslyckades att ändra inställning: $e',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: AppColors.primaryRed,
                     ),
                   );
                 }
@@ -488,7 +566,11 @@ class _AdminScreenState extends State<AdminScreen> {
                               if (mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Speldata återställt.'),
+                                    content: Text(
+                                      'Speldata återställt.',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    backgroundColor: AppColors.primaryRed,
                                   ),
                                 );
                               }
@@ -537,7 +619,7 @@ class _AdminScreenState extends State<AdminScreen> {
                     token == null
                         ? null
                         : () => _pickGameTime(
-                          save: AdminApiService.setGameStartTime,
+                          isStartTime: true,
                           current: _gameStartTime,
                           onPicked: (dt) => setState(() => _gameStartTime = dt),
                           token: token,
@@ -583,7 +665,7 @@ class _AdminScreenState extends State<AdminScreen> {
                     token == null
                         ? null
                         : () => _pickGameTime(
-                          save: AdminApiService.setGameEndTime,
+                          isStartTime: false,
                           current: _gameEndTime,
                           onPicked: (dt) => setState(() => _gameEndTime = dt),
                           token: token,
@@ -676,7 +758,13 @@ class _AdminScreenState extends State<AdminScreen> {
                     } catch (e) {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Misslyckades: $e')),
+                          SnackBar(
+                            content: Text(
+                              'Misslyckades: $e',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor: AppColors.primaryRed,
+                          ),
                         );
                       }
                     }
@@ -732,7 +820,13 @@ class _AdminScreenState extends State<AdminScreen> {
                     } catch (e) {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Misslyckades: $e')),
+                          SnackBar(
+                            content: Text(
+                              'Misslyckades: $e',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor: AppColors.primaryRed,
+                          ),
                         );
                       }
                     }
@@ -818,7 +912,9 @@ class _AdminScreenState extends State<AdminScreen> {
                             SnackBar(
                               content: Text(
                                 'Misslyckades att ändra status: $e',
+                                style: const TextStyle(color: Colors.white),
                               ),
+                              backgroundColor: AppColors.primaryRed,
                             ),
                           );
                         }
