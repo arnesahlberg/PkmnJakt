@@ -24,6 +24,11 @@ with open("pkmn.csv", newline='', encoding="utf-8") as csvfile:
         number = row["Nr"].strip()
         name = row["Name"].strip()
         
+        # if picture exists in Pictures folder, skip downloading
+        if os.path.exists(os.path.join("Pictures", f"{number}.avif")):
+            print(f"Picture for {name} already exists in Pictures folder, skipping download.")
+            continue
+
         # First source - Pokemon DB
         url_name = get_url_name(name)
         url = f"https://img.pokemondb.net/artwork/avif/{url_name}.avif"
@@ -37,6 +42,10 @@ with open("pkmn.csv", newline='', encoding="utf-8") as csvfile:
             print(f"Failed to download {name} ({url}) to Pictures folder: {e}")
         
         # Second source - GitHub HQ images
+        if os.path.exists(os.path.join("PicturesHQ", f"{number}.png")):
+            print(f"Picture for {name} already exists in PicturesHQ folder, skipping download.")
+            continue
+
         padded_number = pad_number(number)
         github_url = f"https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/imagesHQ/{padded_number}.png"
         try:

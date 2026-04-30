@@ -6,6 +6,11 @@ def convert_avif_to_jpg(root_dir):
     for subdir, _, files in os.walk(root_dir):
         for file in files:
             if file.lower().endswith('.avif'):
+                # if jpg already exists, skip conversion
+                jpg_path = os.path.splitext(os.path.join(subdir, file))[0] + '.jpg'
+                if os.path.exists(jpg_path):
+                    print(f"JPEG already exists for {file}, skipping conversion.")
+                    continue
                 avif_path = os.path.join(subdir, file)
                 jpg_path = os.path.splitext(avif_path)[0] + '.jpg'
                 try:
