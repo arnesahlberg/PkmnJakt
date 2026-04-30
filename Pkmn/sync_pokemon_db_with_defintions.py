@@ -266,7 +266,7 @@ def sync_pokemon(
 			cursor.execute(
 				"""
 				INSERT INTO Pokemon (pokemon_id, name, description, height, active)
-				VALUES (?, ?, ?, ?, 1)
+				VALUES (?, ?, ?, ?, 0)
 				""",
 				(definition.pokemon_id, definition.name, definition.description, definition.height),
 			)

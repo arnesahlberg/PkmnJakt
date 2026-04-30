@@ -73,11 +73,14 @@ INSERT INTO PokemonTypes (type_name) VALUES
     ('Gift'),       -- Poison
     ('Mark'),       -- Ground
     ('Flyg'),       -- Flying
-    ('Psykisk'),      -- Psychic
+    ('Psykisk'),    -- Psychic
     ('Insekt'),     -- Bug
     ('Sten'),       -- Rock
     ('Spöke'),      -- Ghost
-    ('Drake');      -- Dragon
+    ('Drake'),      -- Dragon
+    ('Mörker'),     -- Dark
+    ('Stål'),       -- Steel
+    ('Fe');         -- Fairy
 
 -- VIEW pokemon with types
 CREATE VIEW IF NOT EXISTS ViewPokemonWithTypes AS

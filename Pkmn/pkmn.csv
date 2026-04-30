@@ -150,5 +150,104 @@ Nr,Name,Info,Height (m)
 149,Dragonite,"Har en intelligens som motsvarar en människas och ett gott hjärta. Den guidar förlista skepp till säkerhet och kan flyga runt jorden på 16 timmar.",2.2
 150,Mewtwo,"Skapades genom genmanipulation av Mews DNA. Trots sin otroliga psykiska kraft, gav forskarna den inte ett medkännande hjärta.",2.0
 151,Mew,"En mytisk Pokémon som sägs vara förfadern till alla Pokémon, eftersom den bär på den genetiska koden för dem alla. Kan göra sig osynlig.",0.4
+152,Chikorita,"En av Johtosregionens start-Pokémon. Bladet på dess huvud avger en söt doft som lugnar motståndarnas sinnen och lindrar fientlighet.",0.9
+153,Bayleef,"En väldoftande Pokémon vars halsband av blad innehåller en stimulerande doft. Den är robust och envis i strid.",1.2
+154,Meganium,"Pollenet från dess blomma kan återuppliva döende växter. Dess andedräkt har en läkande kraft som lugnar alla i närheten.",1.8
+155,Cyndaquil,"En av Johtosregionens start-Pokémon. Tänder sina ryggflammar när den hotas, men är annars blyg och undviker konflikter.",0.5
+156,Quilava,"Värmer upp sin kropp före strid och håller fiendens attacker borta med intensiv hetta. Dess smidiga kropp gör den svår att träffa.",0.9
+157,Typhlosion,"Gnider ihop sin päls för att bränna upp allt med explosiva flammor. Döljer sig i hettans flimmer för att komma nära fienden oupptäckt.",1.75
+158,Totodile,"En av Johtosregionens start-Pokémon. Extremt energisk och kan bita sönder vad som helst med sina kraftfulla käkar – ibland biter den sin tränare av misstag.",0.6
+159,Croconaw,"Kan inte lossna när den väl har bitit tag. Om en tand faller ut växer en ny ut omedelbart. Den har alltid 48 tänder.",1.1
+160,Feraligatr,"Kraftigt byggd med en massiv kropp, men rör sig snabbt och smidigt i vattnet. Biter fast sina byten med huggtänderna och skakar dem sönder.",2.3
+161,Sentret,"Håller alltid vakt på sin omgivning och sover aldrig djupt. Om fara uppstår ger den ifrån sig ett högt rop för att varna hela flocken.",0.8
+162,Furret,"Extremt snabb och kan ta sig igenom smala utrymmen. Den sover i långa kedjor med sina ungar för att hålla dem varma.",1.8
+163,Hoothoot,"Håller alltid balansen på ett ben. Har ett inre organ som känner av jordens rotation och kan ange exakt tid till sekunden.",0.7
+164,Noctowl,"Kan vrida på huvudet 180 grader. Dess ögon förstärker svagt ljus tiofaldet, vilket gör att den ser perfekt i mörkret.",1.6
+165,Ledyba,"Utsöndrar en vätska från lederna som fungerar som ett kommunikationsmedel. Rör sig sällan ensam och samlas i stora svärmar för värme.",1.0
+166,Ledian,"Använder stjärnornas ljus som energikälla och flyger ut nattetid för att samla det. Mönstren på ryggen förändras beroende på vilka stjärnor den är född under.",1.4
+167,Spinarak,"Väntar tålmodigt i sin väv i timmar utan att röra sig. Använder trådarna som ett sensornätverk för att känna av vibrationer.",0.5
+168,Ariados,"Fäster en tråd vid bytet för att alltid kunna spåra det. Det är oklart vilken ände av kroppen som egentligen är framsidan.",1.1
+169,Crobat,"Har vuxit ett extra par vingar som gör det till en av de snabbaste flygande Pokémon. Flyger så tyst att offret inte märker det förrän det är för sent.",1.8
+170,Chinchou,"Laddar upp elektricitet via de lysande antenner som sticker upp från ryggen. Används av djuphavsvarelser som lockbete i mörket.",0.5
+171,Lanturn,"Kallas 'Djupets lampa'. Lyser upp det becksvarta djuphavet och lockar till sig byten med sina antenner. Kan avfyra bländande elektriska strålar.",1.2
+172,Pichu,"Den minsta formen av Pikachu-familjen. Kan inte lagra elektricitet effektivt och stöts ibland av sin egen urladdning.",0.3
+173,Cleffa,"En stjärnformad Pokémon som sägs komma från rymden. Syns ofta under meteorregn och leker glatt i grupper.",0.3
+174,Igglybuff,"Den späda babyformen av Jigglypuff. Studsar omedvetet på sin mjuka, gummiliknande kropp och kan inte sluta röra sig.",0.3
+175,Togepi,"Innehåller en lycklig energi inne i sitt ägg. Sägs ge lycka till de som behandlar det med kärlek.",0.3
+176,Togetic,"Flyger runt för att hitta snälla hjärtan och välsignar dem med lycka. Om det möts av grymhet drar det sig undan och ger inte ifrån sig lyckokraft.",0.6
+177,Natu,"Kan inte flyga eftersom vingarna inte är fullt utvecklade. Hoppar istället och stirrar intensivt på omgivningen, som om det absorberar information psykiskt.",0.2
+178,Xatu,"Står orörligt i timmar och betraktar solen. Sägs kunna se framtida händelser med ögat som ser framåt och det förflutna med det som ser bakåt.",1.5
+179,Mareep,"Lagrar statisk elektricitet i sin fleece. Ju mer den lagrar, desto mer fluffig och lysande blir ullen. Beröring riskerar en stöt.",0.6
+180,Flaaffy,"Pälsen har blivit glesare för att bättre leda elektricitet. Den blottade huden skyddar mot urladdningar från den egna kroppen.",0.8
+181,Ampharos,"Lyskulan på svansen lyser så starkt att den kan synas miltals bort och användes förr som fyr för fiskebåtar.",1.4
+182,Bellossom,"Uppstår när en Gloom exponeras för en Solsten. Kronbladen avgör kvaliteten på den dans den utför vid soluppgången.",0.4
+183,Marill,"Dess runda, oljefyllda svans fungerar som flytboj när den simmar i snabba strömmar. Kan äta vattenväxter som är giftiga för andra.",0.4
+184,Azumarill,"Kan höra under vattenytan tack vare sina långa öron som är utformade för att inte ta in vatten.",0.8
+185,Sudowoodo,"Ser ut som ett träd men är egentligen en Sten-typ. Undviker vatten och håller aldrig gröna löv – det avslöjar att den inte är ett riktigt träd.",1.2
+186,Politoed,"Höga öronformar indikerar status bland Politoed-gruppen. Det är ledarens kraxande som lockar samman Poliwag till ett stim.",1.1
+187,Hoppip,"Så lätt att den blåser iväg i starka vindar. Håller ihop med sina artfränder för att inte separeras och kan förutsäga vindens riktning.",0.4
+188,Skiploom,"Blomman på toppen öppnar sig när temperaturen överstiger 18 grader. Nyttjar vinden för att flytta sig till soligare platser.",0.6
+189,Jumpluff,"Rider på sydliga vindar och sprider sporer till jordens alla hörn. Kan styra sin flykt i motvind med sina pompomliknande bollar.",0.8
+190,Aipom,"Dess svanshand är mer fingerfärdig än de riktiga händerna och den förlitar sig nästan uteslutande på den. Klättrar snabbt i träd.",0.8
+191,Sunkern,"Den svagaste Pokémon som finns registrerad baserat på basstatus. Faller ner från himlen om morgonen och lever av dagg.",0.3
+192,Sunflora,"Rör sig snabbt mot solen under dagen men slutar röra sig helt vid solnedgången. Omvandlar solljus till energi för att växa.",0.8
+193,Yanma,"Kan se 360 grader utan att vända på huvudet. Vingslagens tryckvågor kan krossa fönsterrutor.",1.2
+194,Wooper,"Vandrar på land nattetid för att söka mat. Huden täcks då av ett slemskikt som skyddar mot kyla och gift.",0.4
+195,Quagsire,"Extremt sorglöst och bekymmersfritt – vandrar utan mål och stöter ihop med båtar längs flodbankarna utan att bry sig.",1.4
+196,Espeon,"En av Eevees möjliga utvecklingar, uppnådd genom stark kärlek och dagljus. Förutser fiendens rörelser med sina psykiska krafter och svarar på dem i förväg.",0.9
+197,Umbreon,"En av Eevees möjliga utvecklingar, uppnådd genom stark kärlek och månljus. Ringarna på kroppen lyser i mörkret och den avger ett svagt gift från porerna.",1.0
+198,Murkrow,"Betraktas i många kulturer som en olycksfågel och undviks. Samlar glänsande saker åt sin ledare och kan locka fram otur.",0.5
+199,Slowking,"Biten av en Shellder i huvudet istället för svansen – vilket ger oöverträffad intelligens. Grubblande och meditativt, bearbetar ständigt djupa tankar.",2.0
+200,Misdreavus,"Nappar folks hår och skriker högt för att skrämma dem, sedan matar den sig av den rädsla den skapar. Älskar att spöka.",0.7
+201,Unown,"En Pokémon vars form liknar bokstäverna i alfabetet. Inget enstaka Unown har stor psykisk kraft, men en grupp av dem kan bli väldig.",0.5
+202,Wobbuffet,"Försvarar sig alltid men attackerar aldrig på eget initiativ. Den verkliga kroppen är svansen – ryggsidan bluffar fiender.",1.3
+203,Girafarig,"Det lilla huvudet i svansen har också en liten hjärna och biter reflektivt vid angrepp. De två hjärnorna kan ibland ha motstridiga tankar.",1.5
+204,Pineco,"Hänger orörlig i trädgrenar och väntar på att insekter ska flyga förbi. Om den störs exploderar den kraftfullt som försvar.",0.6
+205,Forretress,"Döljer hela sin kropp inuti sitt järnhårda skal. Ingen har sett insidan. Kan skjuta ut skärvor av skalet som projektiler.",1.2
+206,Dunsparce,"Gräver underjordiska labyrinter med sin spetsiga svans och lever ensam i mörkret. Svår att fånga i vilt tillstånd.",1.5
+207,Gligar,"Flyger tyst i mörkret, greppar tag i fiendens ansikte och sticker med sin giftiga svans. Håller fast med kloarna tills offret ger upp.",1.1
+208,Steelix,"Har grävt ihop sig djupare än någon Onix och dess kropp har omvandlats till hårt stål av trycket. Kan krossa bergsten med sin kropp.",9.2
+209,Snubbull,"Ser skrämmande ut men är egentligen blyg och känslig. Populär som sällskapsdjur trots – eller kanske tack vare – sitt otäcka utseende.",0.6
+210,Granbull,"Huggtänderna är för tunga att hålla upp. Extremt tapper om det uppmuntras, men annars fegt.",1.4
+211,Qwilfish,"Drar in vatten för att blåsa upp sig och spruta ut vassa, giftiga pilar. Giftet är så starkt att ett stick kan slå ut ett stort Pokémon.",0.5
+212,Scizor,"Viftningar med vingarna reglerar kroppstemperaturen. Klorna ser ut som ögon för att skrämma fienden – de är faktiskt inte ögon.",1.8
+213,Shuckle,"Lagrar bär i sina skal tills de förvandlas till en mycket stark juice. Har extremt hög försvar men lägsta möjliga anfall och hastighet.",0.6
+214,Heracross,"En ädel och stark Pokémon som tränar konstant för att finslipa sina horn. Använder det stora hornet för att kasta fiender.",1.5
+215,Sneasel,"En slug och grym Pokémon som krossar ägg ur bon med sina klor. Samarbetar i grupp för att övervälda starkare fiender.",0.9
+216,Teddiursa,"Slickar alltid på sin tass som är nedsmetad med honung som den samlar. Hur söt den ser ut matchar hur läckert honungen smakar.",0.6
+217,Ursaring,"Kan hitta mat enbart med luktsinnet. Vandrar i skogen och river loss bark för att äta insekter och frukt under den.",1.8
+218,Slugma,"Kroppen består av flytande magma. Stannar aldrig stilla för att inte stelna. Lever i vulkaniska klippsprickor.",0.7
+219,Magcargo,"Kärnan inuti skalet håller en temperatur på 18 000 grader. Skalet är stelnad magma och spricker lätt.",0.8
+220,Swinub,"Söker efter mat under snön med sin lilla nos. Har ett akut luktsinne och kan dofta sin favoritsvamp under tjock is.",0.4
+221,Piloswine,"Täckt av ett tjockt lager päls som skyddar mot extrem kyla. Ser inte bra men kompenserar med ett ultrakänsligt luktsinne.",1.1
+222,Corsola,"Grenarna i korallkroppen kan brytas av men växer snabbt tillbaka. Trivs i varma, klara hav men drabbas hårt av havsförorening.",0.6
+223,Remoraid,"Skjuter vattenstrålar med kirurgisk precision upp till 100 meters avstånd. Lever ofta symbiotiskt under buken på Mantine.",0.6
+224,Octillery,"Klänger fast vid klipphyllor med sugkopparna och attackerar från ett fast fäste. Kan täcka fiender i bläck för att desorganisera dem.",0.9
+225,Delibird,"Bär alltid mat i sin säckformade svans och delar med sig av det till de som behöver. Sägs ha räddat klättrare i bergen.",0.9
+226,Mantine,"Simmar elegant och hoppar ut ur vattnet i långa hopp. Remoraid lever ofta symbiotiskt på den och plockar bort parasiter.",2.1
+227,Skarmory,"Vingarna av stål är extremt tunna och vassa. Trots att de skadas regelbundet under strider lagar de sig automatiskt över natten.",1.7
+228,Houndour,"Kommunicerar med artfränder via unika rop och koordinerar anfall. Har en instinkt som gör det extremt envist på jakt.",0.6
+229,Houndoom,"Bränslet för den svarta elden bildas av ämnen som finns naturligt i kroppen. Biten av Houndoom lämnar en sveda som aldrig försvinner.",1.4
+230,Kingdra,"Sover i havsgravar på tusentals meters djup. Stiger upp när det vaknar och skapar ruskigt stora virvlar.",1.8
+231,Phanpy,"Använder sin långa nos som dusch vid vattenpölar. Kan kasta tunga stenar med snabeln utan ansträngning.",0.5
+232,Donphan,"Rullar ihop sig till en boll och kör in i fiender med stor kraft. Ringlens storlek avgör social status i flocken.",1.1
+233,Porygon2,"En uppgraderad version av Porygon med förbättrad AI. Den nya algoritmen gav den oförutsägbara beteenden som inte var programmerade.",0.6
+234,Stantler,"Gevären avger ett svagt psykisk fält som distorderar synen hos dem som tittar på dem. Har använts för att framkalla hallucinationer.",1.4
+235,Smeargle,"Målar märken med sin svansspets för att markera revir. Det finns 5 000 dokumenterade svansmärken, och varje Smeargle har ett unikt.",1.2
+236,Tyrogue,"Hängivet till sin träning och kan inte acceptera att förlora. Beroende på träningsbalansen utvecklas det till en av tre former.",0.7
+237,Hitmontop,"Roterar på sin huvudknopp och attackerar med cirkelrörelser som en snurra. Utövar en kampstil känd som capoeira.",1.4
+238,Smoochum,"Rör ständigt på sina läppar för att minnas smaken av saker den har rört. Snubblar ofta eftersom den ser ner för att kolla sin spegelbild.",0.4
+239,Elekid,"Snurrar armarna för att generera elektricitet. Att stuckas av en Elekid ger en väldigt kraftig stöt.",0.6
+240,Magby,"Kroppstemperaturen varierar beroende på hälsotillståndet. Blåa lågor vid andedräkten är ett tecken på frisk hälsa.",0.7
+241,Miltank,"Producerar 20 liter mjölk om dagen. Mjölken är extremt nyttig och ges ofta till sjuka Pokémon och människor.",1.2
+242,Blissey,"Äggstommen på magen är fylld med en extraordinärt nyttig äggula som helbrägdaför sjukdomar. Kan känna av en persons sinnesstämning.",1.5
+243,Raikou,"En av de tre Johtoslegenderna. Åska är inneslutet i de stormmoln som täcker ryggen. Suger in åska och kastar ut blixt.",1.9
+244,Entei,"En av de tre Johtoslegenderna. Varje gång den skäller sägs en vulkan utbryta. Representerar solen och värmen i jordens kärna.",2.1
+245,Suicune,"En av de tre Johtoslegenderna. Kan rena förorenat vatten och rider på nordanvinden. Söker hela tiden upp och renar smutsiga sjöar.",2.0
+246,Larvitar,"Föds under jord och äter sig upp från inuti ett berg. Kan inte möta sin mor förrän det ätit upp hela berget.",0.6
+247,Pupitar,"Producerar gas inuti sitt skal som fungerar som ett rörelsesystem. Kan röra sig i alla riktningar och krockar kraftfullt med allt.",1.2
+248,Tyranitar,"Kan riva ner berg och begrava städer. Så våldsamt att omgivningen alltid förändras. Inget i närheten är säkert.",2.0
+249,Lugia,"Havets väktare. Har så stor kraft att ett vingslag kan skapa tredagars stormar. Gömmer sig djupt i havet av hänsyn till allt levande.",5.2
+250,Ho-oh,"Solens väktare. Sägs skapa regnbågar i himlen när det flyger. Den som ser Ho-oh lovas evig lycka.",3.8
 721,Volcanion,"Mytisk ång-Pokémon av de motsägelsefulla typerna eld och vatten.",1.7
 312798312, MISSINGNO., RI�%&/m�J�J��t��$@�ERROR����MISSINGiy�裟��%&/m�J�JNONEXISTENTPKMN�%&/m�J�J, -97

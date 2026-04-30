@@ -10,7 +10,7 @@ def get_url_name(name):
             return "nidoran-m"
     return name.lower().replace(".", "").replace("'", "").replace(" ", "-")
 
-def pad_number(number, length=3):
+def pad_number(number, length=4):
     """Pad a number string with leading zeros to reach specified length."""
     return number.zfill(length)
 
