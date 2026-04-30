@@ -17,7 +17,7 @@ class PokedexScreen extends StatefulWidget {
 class _PokedexScreenState extends State<PokedexScreen> {
   late Future<List<dynamic>> _pokedexFuture;
   bool _isLoading = true;
-  final int _maxStandardPokemon = 151;
+  final int _maxStandardPokemon = 1000;
   bool _showOnlyCaught = true;
   List<int> _enabledIds = [];
 
@@ -73,9 +73,10 @@ class _PokedexScreenState extends State<PokedexScreen> {
         (a, b) => (a['number'] as int).compareTo(b['number'] as int),
       );
     } else {
-      final standardIds = _enabledIds.isNotEmpty
-          ? _enabledIds.where((id) => id <= _maxStandardPokemon).toList()
-          : List.generate(_maxStandardPokemon, (i) => i + 1);
+      final standardIds =
+          _enabledIds.isNotEmpty
+              ? _enabledIds.where((id) => id <= _maxStandardPokemon).toList()
+              : List.generate(_maxStandardPokemon, (i) => i + 1);
 
       for (final id in standardIds) {
         if (caughtMap.containsKey(id)) {
@@ -85,7 +86,8 @@ class _PokedexScreenState extends State<PokedexScreen> {
         }
       }
 
-      final specialEnabled = _enabledIds.where((id) => id > _maxStandardPokemon).toSet();
+      final specialEnabled =
+          _enabledIds.where((id) => id > _maxStandardPokemon).toSet();
       for (var pokemon in caughtPokemon) {
         final num = pokemon['number'] as int;
         if (num > _maxStandardPokemon) {
@@ -121,110 +123,110 @@ class _PokedexScreenState extends State<PokedexScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                    Text(
-                      pokemon['name'],
-                      style: const TextStyle(
-                        fontFamily: 'PixelFontTitle',
-                        fontSize: 22,
-                        color: AppColors.primaryRed,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      "Nr. ${pokemon['number']}",
-                      style: TextStyle(
-                        fontFamily: 'PixelFont',
-                        fontSize: 16,
-                        color: Colors.grey.shade700,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Container(
-                      width: 180,
-                      height: 180,
-                      padding: const EdgeInsets.all(UIConstants.padding16),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(
-                          UIConstants.borderRadius16,
-                        ),
-                        border: Border.all(
-                          color: AppColors.secondaryRed,
-                          width: UIConstants.borderWidth2,
-                        ),
-                      ),
-                      child: Image.asset(
-                        'assets/images/pkmn/${pokemon['number']}.jpg',
-                        fit: BoxFit.contain,
-                        errorBuilder:
-                            (context, error, stackTrace) =>
-                                const Icon(Icons.image_outlined, size: 80),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    if (pokemon['description'] != null)
                       Text(
-                        pokemon['description'],
-                        style: TextStyle(
-                          fontFamily: 'PixelFont',
-                          fontSize: 16,
-                          color: Colors.grey.shade800,
+                        pokemon['name'],
+                        style: const TextStyle(
+                          fontFamily: 'PixelFontTitle',
+                          fontSize: 22,
+                          color: AppColors.primaryRed,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                    const SizedBox(height: 16),
-                    if (pokemon['height'] != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryRed.withAlpha(
-                            (0.1 * 255).toInt(),
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          "Höjd: ${pokemon['height']} m",
-                          style: const TextStyle(
-                            fontFamily: 'PixelFont',
-                            fontSize: 14,
-                            color: Color(0xFF992109),
-                          ),
-                        ),
-                      ),
-                    const SizedBox(height: 16),
-                    if (pokemon['types'] != null)
-                      TypeBadgeList(
-                        types: List<String>.from(pokemon['types']),
-                        fontSize: 14,
-                      ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryRed,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            UIConstants.borderRadius8,
-                          ),
-                        ),
-                      ),
-                      child: const Text(
-                        "Stäng",
+                      Text(
+                        "Nr. ${pokemon['number']}",
                         style: TextStyle(
                           fontFamily: 'PixelFont',
-                          color: Colors.white,
+                          fontSize: 16,
+                          color: Colors.grey.shade700,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 24),
+                      Container(
+                        width: 180,
+                        height: 180,
+                        padding: const EdgeInsets.all(UIConstants.padding16),
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(
+                            UIConstants.borderRadius16,
+                          ),
+                          border: Border.all(
+                            color: AppColors.secondaryRed,
+                            width: UIConstants.borderWidth2,
+                          ),
+                        ),
+                        child: Image.asset(
+                          'assets/images/pkmn/${pokemon['number']}.jpg',
+                          fit: BoxFit.contain,
+                          errorBuilder:
+                              (context, error, stackTrace) =>
+                                  const Icon(Icons.image_outlined, size: 80),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      if (pokemon['description'] != null)
+                        Text(
+                          pokemon['description'],
+                          style: TextStyle(
+                            fontFamily: 'PixelFont',
+                            fontSize: 16,
+                            color: Colors.grey.shade800,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      const SizedBox(height: 16),
+                      if (pokemon['height'] != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryRed.withAlpha(
+                              (0.1 * 255).toInt(),
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            "Höjd: ${pokemon['height']} m",
+                            style: const TextStyle(
+                              fontFamily: 'PixelFont',
+                              fontSize: 14,
+                              color: Color(0xFF992109),
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 16),
+                      if (pokemon['types'] != null)
+                        TypeBadgeList(
+                          types: List<String>.from(pokemon['types']),
+                          fontSize: 14,
+                        ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryRed,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              UIConstants.borderRadius8,
+                            ),
+                          ),
+                        ),
+                        child: const Text(
+                          "Stäng",
+                          style: TextStyle(
+                            fontFamily: 'PixelFont',
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
     );
   }
 
@@ -431,7 +433,9 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                                                 error,
                                                                 stackTrace,
                                                               ) => Container(
-                                                                color: Colors.white,
+                                                                color:
+                                                                    Colors
+                                                                        .white,
                                                                 child: const Icon(
                                                                   Icons
                                                                       .image_outlined,
@@ -443,7 +447,8 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                                           color: Colors.white,
                                                           child: const Center(
                                                             child: Icon(
-                                                              Icons.question_mark,
+                                                              Icons
+                                                                  .question_mark,
                                                               size: 48,
                                                               color:
                                                                   AppColors
