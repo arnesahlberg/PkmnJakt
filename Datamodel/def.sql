@@ -188,10 +188,10 @@ SELECT
 FROM FoundPokemon
 JOIN Users ON FoundPokemon.user_id = Users.user_id
 WHERE UserID != 'admin' -- exclude admin user
-  AND FoundPokemon.pokemon_id <= 151 -- exclude Pokemon with ID > 151 (like Missingno)
+    AND FoundPokemon.pokemon_id <= 1000 -- exclude non-standard Pokemon with high sentinel IDs (like MissingNo)
 GROUP BY Users.name;
 
--- view number of pokemon found by user (excluding MissingNo for milestones)
+-- view number of pokemon found by user (excluding high sentinel IDs like MissingNo for milestones)
 CREATE VIEW IF NOT EXISTS ViewNumPokemonFoundForMilestones AS
 SELECT 
     Users.user_id AS UserID,
@@ -202,7 +202,7 @@ SELECT
 FROM FoundPokemon
 JOIN Users ON FoundPokemon.user_id = Users.user_id
 WHERE UserID != 'admin' -- exclude admin user
-  AND FoundPokemon.pokemon_id <= 151 -- only count original 151 Pokemon (excludes MissingNo with ID 312798312)
+    AND FoundPokemon.pokemon_id <= 1000 -- count standard Pokemon while excluding MissingNo with ID 312798312
 GROUP BY Users.name;
 
 -- Top finders
