@@ -44,6 +44,13 @@ class ApiService {
       body: jsonEncode({'id': id, 'password': password}),
       headers: _headers(),
     );
+    // Special cases: Backend returns 401 (wrong password) and 404 (user not found) with a
+    // structured JSON body containing result_code. Parse those instead of throwing.
+    if (response.statusCode == 401 || response.statusCode == 404) {
+      final decodedString = utf8.decode(response.bodyBytes);
+      final decoded = jsonDecode(decodedString);
+      if (decoded is Map<String, dynamic>) return decoded;
+    }
     return decodeUtf8Json(response);
   }
 
