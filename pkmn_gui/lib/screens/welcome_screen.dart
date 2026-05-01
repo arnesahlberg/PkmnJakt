@@ -21,6 +21,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Future<Map<String, dynamic>>? _statsFuture;
   bool _isLoading = false;
   bool _datamatrixEnabled = true;
+  bool _settingsLoaded = false;
   int _activePokemonCount = 151; // default to 151
 
   @override
@@ -28,7 +29,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     super.initState();
     _statsFuture = _fetchStats();
     ApiService.getDatamatrixLoginEnabled().then((value) {
-      if (mounted) setState(() => _datamatrixEnabled = value);
+      if (mounted)
+        setState(() {
+          _datamatrixEnabled = value;
+          _settingsLoaded = true;
+        });
     });
     ApiService.getEnabledPokemonIds().then((ids) {
       // fetch enabled
@@ -142,7 +147,19 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         const SizedBox(
                                           height: UIConstants.spacing24,
                                         ),
-                                        if (_datamatrixEnabled)
+                                        if (!_settingsLoaded)
+                                          const SizedBox(
+                                            height: 48,
+                                            child: Center(
+                                              child: CircularProgressIndicator(
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(AppColors.primaryRed),
+                                              ),
+                                            ),
+                                          )
+                                        else if (_datamatrixEnabled)
                                           PokedexButton(
                                             onPressed: () {
                                               Navigator.push(

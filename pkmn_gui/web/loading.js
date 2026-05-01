@@ -30,15 +30,12 @@ window.addEventListener('load', function() {
     "Hämtar borttappade Pokébollar...",
     "Jagar rymda Pokémon...",
     "Putsar Pokébollar...",
-    "Syncar med övriga programpunkter...",
     "Stretchar lite...",
     "Ser till att Pokémon som är släkt finns nära varandra...",
     "Ser till att kraftigare Pokémon är mer gömda ...",
     "Felsöker datacentret...",
-    "Sammanfattar veckan...",
     "Ladda highscorelistan...",
     "Samlar statistik om spelet...",
-    "Byter ut trasiga kritor...",
     "Letar buggar...",
   ];
   
