@@ -23,17 +23,24 @@ class _PokedexScreenState extends State<PokedexScreen> {
 
   Future<List<dynamic>> _fetchPokedex() async {
     final session = Provider.of<UserSession>(context, listen: false);
-    final results = await Future.wait([
-      ApiService.getMyPokedex(session.token!),
-      ApiService.getEnabledPokemonIds(),
-    ]);
-    final pokedexResult = results[0] as Map<String, dynamic>;
-    final enabledIds = results[1] as List<int>;
-    setState(() {
-      _enabledIds = enabledIds;
-      _isLoading = false;
-    });
-    return pokedexResult['pokedex'] as List<dynamic>;
+    try {
+      final results = await Future.wait([
+        ApiService.getMyPokedex(session.token!),
+        ApiService.getEnabledPokemonIds(),
+      ]);
+      final pokedexResult = results[0] as Map<String, dynamic>;
+      final enabledIds = results[1] as List<int>;
+      setState(() {
+        _enabledIds = enabledIds;
+        _isLoading = false;
+      });
+      return pokedexResult['pokedex'] as List<dynamic>;
+    } catch (e) {
+      if (mounted && isBackendUnavailableError(e)) {
+        Navigator.pushReplacementNamed(context, '/backend_unavailable');
+      }
+      rethrow;
+    }
   }
 
   Future<void> _refreshPokedex() async {

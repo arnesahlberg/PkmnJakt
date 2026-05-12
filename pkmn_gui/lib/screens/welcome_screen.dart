@@ -8,6 +8,7 @@ import '../widgets/pokedex_button.dart';
 import '../widgets/highscore_list.dart';
 import '../widgets/game_status_banner.dart';
 import "login_scanner_screen.dart";
+import 'backend_unavailable_screen.dart';
 import '../main.dart'; // for UserSession
 import '../api_calls.dart'; // for fetching statistics
 
@@ -22,39 +23,68 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   bool _isLoading = false;
   bool _datamatrixEnabled = true;
   bool _settingsLoaded = false;
+  bool _backendUnavailable = false;
   int _activePokemonCount = 151; // default to 151
 
   @override
   void initState() {
     super.initState();
+    _loadInitialData();
+  }
+
+  void _loadInitialData() {
     _statsFuture = _fetchStats();
-    ApiService.getDatamatrixLoginEnabled().then((value) {
-      if (mounted)
-        setState(() {
-          _datamatrixEnabled = value;
-          _settingsLoaded = true;
-        });
-    });
-    ApiService.getEnabledPokemonIds().then((ids) {
-      // fetch enabled
-      if (mounted) setState(() => _activePokemonCount = ids.length);
+    _loadSettingsAndPokemonCount();
+  }
+
+  Future<void> _loadSettingsAndPokemonCount() async {
+    try {
+      final datamatrixEnabled = await ApiService.getDatamatrixLoginEnabled(
+        fallbackOnError: false,
+      );
+      final enabledIds = await ApiService.getEnabledPokemonIds(
+        fallbackOnError: false,
+      );
+      if (!mounted) return;
+      setState(() {
+        _datamatrixEnabled = datamatrixEnabled;
+        _settingsLoaded = true;
+        _activePokemonCount = enabledIds.length;
+      });
+    } catch (e) {
+      _handleBackendError(e);
+    }
+  }
+
+  void _handleBackendError(Object error) {
+    if (!isBackendUnavailableError(error) || !mounted) return;
+    setState(() {
+      _backendUnavailable = true;
+      _settingsLoaded = true;
+      _isLoading = false;
     });
   }
 
   Future<Map<String, dynamic>> _fetchStats() async {
-    final recentResult = await ApiService.getStatisticsLatestPokemonFound();
-    final highscoreResult = await ApiService.getStatisticsHighscore();
-    return {
-      'recent': recentResult['found_pokemon'] as List<dynamic>,
-      'highscores': highscoreResult['user_scores'] as List<dynamic>,
-    };
+    try {
+      final recentResult = await ApiService.getStatisticsLatestPokemonFound();
+      final highscoreResult = await ApiService.getStatisticsHighscore();
+      return {
+        'recent': recentResult['found_pokemon'] as List<dynamic>,
+        'highscores': highscoreResult['user_scores'] as List<dynamic>,
+      };
+    } catch (e) {
+      _handleBackendError(e);
+      rethrow;
+    }
   }
 
   Future<void> _refreshData() async {
     setState(() {
       _isLoading = true;
+      _backendUnavailable = false;
     });
-    _statsFuture = _fetchStats();
+    _loadInitialData();
     setState(() {
       _isLoading = false;
     });
@@ -67,6 +97,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_backendUnavailable) return const BackendUnavailableScreen();
+
     final session = Provider.of<UserSession>(context);
     return Scaffold(
       appBar: const CommonAppBar(title: 'Pokémonjakt', showBackButton: false),

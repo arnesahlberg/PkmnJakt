@@ -83,6 +83,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (!mounted) return;
+      if (isBackendUnavailableError(e)) {
+        Navigator.pushReplacementNamed(context, '/backend_unavailable');
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -107,6 +111,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     } catch (e) {
       setState(() => _isExtraLoading = false);
       if (!mounted) return;
+      if (isBackendUnavailableError(e)) {
+        Navigator.pushReplacementNamed(context, '/backend_unavailable');
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

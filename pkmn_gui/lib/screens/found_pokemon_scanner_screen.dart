@@ -351,6 +351,12 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
           );
 
           _scanned = false;
+        } else if (foundResponse['result_code'] ==
+            CallResultCode.invalidToken) {
+          if (!mounted) return;
+          Provider.of<UserSession>(context, listen: false).logout();
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+          return;
         } else {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -544,6 +550,10 @@ class _FoundPokemonScannerScreenState extends State<FoundPokemonScannerScreen>
       );
     } catch (e) {
       if (!mounted) return;
+      if (isBackendUnavailableError(e)) {
+        Navigator.pushReplacementNamed(context, '/backend_unavailable');
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Fel: $e", style: const TextStyle(color: Colors.white)),

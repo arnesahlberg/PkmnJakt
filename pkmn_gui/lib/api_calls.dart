@@ -1,10 +1,71 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:pkmn_gui/constants.dart';
 
+enum ApiExceptionType {
+  backendUnavailable,
+  unauthorized,
+  http,
+  invalidResponse,
+}
+
+class ApiException implements Exception {
+  final ApiExceptionType type;
+  final String message;
+  final int? statusCode;
+
+  const ApiException(this.type, this.message, {this.statusCode});
+
+  factory ApiException.backendUnavailable([String? details]) => ApiException(
+    ApiExceptionType.backendUnavailable,
+    details == null || details.isEmpty
+        ? 'Servern nås inte just nu'
+        : 'Servern nås inte just nu: $details',
+  );
+
+  factory ApiException.unauthorized([String? details]) => ApiException(
+    ApiExceptionType.unauthorized,
+    details == null || details.isEmpty ? 'Sessionen är inte giltig' : details,
+    statusCode: 401,
+  );
+
+  bool get isBackendUnavailable => type == ApiExceptionType.backendUnavailable;
+  bool get isUnauthorized => type == ApiExceptionType.unauthorized;
+
+  @override
+  String toString() => message;
+}
+
+bool isBackendUnavailableError(Object error) =>
+    error is ApiException && error.isBackendUnavailable;
+
+bool isUnauthorizedApiError(Object error) =>
+    error is ApiException && error.isUnauthorized;
+
+Map<String, dynamic>? _decodeJsonMapOrNull(http.Response response) {
+  try {
+    final decodedString = utf8.decode(response.bodyBytes);
+    final decoded = jsonDecode(decodedString);
+    return decoded is Map<String, dynamic> ? decoded : null;
+  } catch (_) {
+    return null;
+  }
+}
+
 Map<String, dynamic> decodeUtf8Json(http.Response response) {
   if (response.statusCode < 200 || response.statusCode >= 300) {
-    throw Exception('HTTP ${response.statusCode}');
+    if (response.statusCode == 401) {
+      throw ApiException.unauthorized();
+    }
+    if (response.statusCode >= 500) {
+      throw ApiException.backendUnavailable('HTTP ${response.statusCode}');
+    }
+    throw ApiException(
+      ApiExceptionType.http,
+      'HTTP ${response.statusCode}',
+      statusCode: response.statusCode,
+    );
   }
   final decodedString = utf8.decode(response.bodyBytes);
   final decoded = jsonDecode(decodedString);
@@ -19,11 +80,30 @@ Map<String, dynamic> decodeUtf8Json(http.Response response) {
 
 class ApiService {
   static const String baseUrl = String.fromEnvironment('API_URL');
+  static const Duration _requestTimeout = Duration(seconds: 10);
 
   static Map<String, String> _headers([String? token]) => {
     "Content-Type": "application/json",
     if (token != null) "Authorization": token,
   };
+
+  static Future<http.Response> _send(Future<http.Response> request) async {
+    try {
+      final response = await request.timeout(_requestTimeout);
+      if (response.statusCode >= 500) {
+        throw ApiException.backendUnavailable('HTTP ${response.statusCode}');
+      }
+      return response;
+    } on TimeoutException {
+      throw ApiException.backendUnavailable();
+    } on http.ClientException catch (e) {
+      throw ApiException.backendUnavailable(e.message);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException.backendUnavailable(e.toString());
+    }
+  }
 
   // login
   // look for response on the form:
@@ -39,10 +119,12 @@ class ApiService {
   //   "result_code": 0
   // }
   static Future<Map<String, dynamic>> login(String id, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/login'),
-      body: jsonEncode({'id': id, 'password': password}),
-      headers: _headers(),
+    final response = await _send(
+      http.post(
+        Uri.parse('$baseUrl/login'),
+        body: jsonEncode({'id': id, 'password': password}),
+        headers: _headers(),
+      ),
     );
     // Special cases: Backend returns 401 (wrong password) and 404 (user not found) with a
     // structured JSON body containing result_code. Parse those instead of throwing.
@@ -57,13 +139,17 @@ class ApiService {
   // check if user exists
   // look for response on the form:
   static Future<bool> checkUserExists(String id) async {
-    final response = await http.get(Uri.parse('$baseUrl/user_exists/$id'));
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/user_exists/$id')),
+    );
     final json = decodeUtf8Json(response);
     return json['exists'];
   }
 
   static Future<int> checkUserRanking(String id) async {
-    final response = await http.get(Uri.parse('$baseUrl/user_ranking/$id'));
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/user_ranking/$id')),
+    );
     return int.parse(response.body);
   }
 
@@ -85,10 +171,12 @@ class ApiService {
     String name,
     String password,
   ) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/create_user'),
-      body: jsonEncode({'id': id, 'name': name, 'password': password}),
-      headers: _headers(),
+    final response = await _send(
+      http.post(
+        Uri.parse('$baseUrl/create_user'),
+        body: jsonEncode({'id': id, 'name': name, 'password': password}),
+        headers: _headers(),
+      ),
     );
     return decodeUtf8Json(response);
   }
@@ -97,11 +185,13 @@ class ApiService {
     String name,
     String token,
   ) async {
-    final response = await http.post(
-      // changed from patch to post to avoid cors error
-      Uri.parse('$baseUrl/set_user_name'),
-      body: jsonEncode({'name': name}),
-      headers: _headers(token),
+    final response = await _send(
+      http.post(
+        // changed from patch to post to avoid cors error
+        Uri.parse('$baseUrl/set_user_name'),
+        body: jsonEncode({'name': name}),
+        headers: _headers(token),
+      ),
     );
     return decodeUtf8Json(response);
   }
@@ -111,13 +201,15 @@ class ApiService {
     String newPassword,
     String token,
   ) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/set_password'),
-      body: jsonEncode({
-        'old_password': oldPassword,
-        'new_password': newPassword,
-      }),
-      headers: _headers(token),
+    final response = await _send(
+      http.post(
+        Uri.parse('$baseUrl/set_password'),
+        body: jsonEncode({
+          'old_password': oldPassword,
+          'new_password': newPassword,
+        }),
+        headers: _headers(token),
+      ),
     );
     return decodeUtf8Json(response);
   }
@@ -126,39 +218,51 @@ class ApiService {
     String password,
     String token,
   ) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/validate_password'),
-      body: jsonEncode({'password': password}),
-      headers: _headers(token),
+    final response = await _send(
+      http.post(
+        Uri.parse('$baseUrl/validate_password'),
+        body: jsonEncode({'password': password}),
+        headers: _headers(token),
+      ),
     );
     return decodeUtf8Json(response);
   }
 
   static Future<bool> validateToken(String token) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/validate_token'),
-      headers: _headers(token),
+    final response = await _send(
+      http.post(Uri.parse('$baseUrl/validate_token'), headers: _headers(token)),
     );
-    return response.statusCode == 200;
+    if (response.statusCode == 200) return true;
+    if (response.statusCode == 401 || response.statusCode == 403) return false;
+    if (response.statusCode >= 500) {
+      throw ApiException.backendUnavailable('HTTP ${response.statusCode}');
+    }
+    return false;
   }
 
   static Future<Map<String, dynamic>> foundPokemon(
     String catchCode,
     String token,
   ) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/found_pokemon'),
-      body: jsonEncode({'catch_code': catchCode}),
-      headers: _headers(token),
+    final response = await _send(
+      http.post(
+        Uri.parse('$baseUrl/found_pokemon'),
+        body: jsonEncode({'catch_code': catchCode}),
+        headers: _headers(token),
+      ),
     );
     // The backend returns HTTP 400 (invalid token / pokemon not found) and
     // HTTP 403 (pokemon not active) with a structured JSON body containing
     // a result_code. Parse those bodies instead of throwing so the caller
     // can show the appropriate UI.
-    if (response.statusCode == 400 || response.statusCode == 403) {
-      final decodedString = utf8.decode(response.bodyBytes);
-      final decoded = jsonDecode(decodedString);
-      if (decoded is Map<String, dynamic>) return decoded;
+    if (response.statusCode == 400 ||
+        response.statusCode == 401 ||
+        response.statusCode == 403) {
+      final decoded = _decodeJsonMapOrNull(response);
+      if (decoded != null) return decoded;
+      if (response.statusCode == 401) {
+        return {'result_code': CallResultCode.invalidToken};
+      }
     }
     return decodeUtf8Json(response);
   }
@@ -167,29 +271,35 @@ class ApiService {
     int n,
     String token,
   ) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/view_found_pokemon'),
-      body: jsonEncode({'n': n}),
-      headers: _headers(token),
+    final response = await _send(
+      http.post(
+        Uri.parse('$baseUrl/view_found_pokemon'),
+        body: jsonEncode({'n': n}),
+        headers: _headers(token),
+      ),
     );
     return decodeUtf8Json(response);
   }
 
   //Get statistics (no Authorization required)
   static Future<Map<String, dynamic>> getStatisticsHighscore() async {
-    final response = await http.get(Uri.parse('$baseUrl/statistics_highscore'));
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/statistics_highscore')),
+    );
     return decodeUtf8Json(response);
   }
 
   static Future<Map<String, dynamic>> getStatisticsLatestPokemonFound() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/statistics_latest_pokemon_found'),
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/statistics_latest_pokemon_found')),
     );
     return decodeUtf8Json(response);
   }
 
   static Future<Map<String, dynamic>> getPokemonFoundCounts() async {
-    final response = await http.get(Uri.parse('$baseUrl/pokemon_found_counts'));
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/pokemon_found_counts')),
+    );
     return decodeUtf8Json(response);
   }
 
@@ -202,14 +312,15 @@ class ApiService {
     height: f32,
   */
   static Future<Map<String, dynamic>> getPokemon(String id) async {
-    final response = await http.get(Uri.parse('$baseUrl/get_pokemon/$id'));
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/get_pokemon/$id')),
+    );
     return decodeUtf8Json(response);
   }
 
   static Future<Map<String, dynamic>> getMyPokedex(String token) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/my_pokedex'),
-      headers: _headers(token),
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/my_pokedex'), headers: _headers(token)),
     );
     return decodeUtf8Json(response);
   }
@@ -228,12 +339,14 @@ class ApiService {
   //     result_code: CallResultCode,
   //   }
   static Future<Map<String, dynamic>> getUser(String id) async {
-    final response = await http.get(Uri.parse('$baseUrl/get_user/$id'));
+    final response = await _send(http.get(Uri.parse('$baseUrl/get_user/$id')));
     return decodeUtf8Json(response);
   }
 
   static Future<List<dynamic>> getUserPokedex(String userId) async {
-    final response = await http.get(Uri.parse('$baseUrl/user_pokedex/$userId'));
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/user_pokedex/$userId')),
+    );
     if (response.statusCode != 200) {
       throw Exception('Failed to load user pokedex: ${response.statusCode}');
     }
@@ -246,8 +359,8 @@ class ApiService {
   }
 
   static Future<List<int>> getUserMilestones(String userId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/user_milestones/$userId'),
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/user_milestones/$userId')),
     );
     if (response.statusCode != 200) {
       throw Exception('Failed to load user milestones: ${response.statusCode}');
@@ -260,8 +373,8 @@ class ApiService {
   static Future<List<dynamic>> getUserMilestoneDefinitions(
     String userId,
   ) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/user_milestone_definitions/$userId'),
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/user_milestone_definitions/$userId')),
     );
     if (response.statusCode != 200) {
       throw Exception(
@@ -278,8 +391,8 @@ class ApiService {
     required int page,
     int perPage = 20,
   }) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/highscores?page=$page&per_page=$perPage'),
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/highscores?page=$page&per_page=$perPage')),
     );
     if (response.statusCode != 200) {
       throw Exception('Failed to load highscores: ${response.statusCode}');
@@ -294,9 +407,11 @@ class ApiService {
     int perPage = 20,
   }) async {
     final encodedSearch = Uri.encodeQueryComponent(search);
-    final response = await http.get(
-      Uri.parse(
-        '$baseUrl/highscores/search?search=$encodedSearch&page=$page&per_page=$perPage',
+    final response = await _send(
+      http.get(
+        Uri.parse(
+          '$baseUrl/highscores/search?search=$encodedSearch&page=$page&per_page=$perPage',
+        ),
       ),
     );
     if (response.statusCode != 200) {
@@ -309,8 +424,8 @@ class ApiService {
   static Future<Map<String, dynamic>> getUserPokemonByType(
     String userId,
   ) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/user_pokemon_by_type/$userId'),
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/user_pokemon_by_type/$userId')),
     );
     if (response.statusCode != 200) {
       throw Exception(
@@ -339,37 +454,43 @@ class ApiService {
     }
   }
 
-  static Future<List<int>> getEnabledPokemonIds() async {
+  static Future<List<int>> getEnabledPokemonIds({
+    bool fallbackOnError = true,
+  }) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/enabled_pokemon_ids'),
+      final response = await _send(
+        http.get(Uri.parse('$baseUrl/enabled_pokemon_ids')),
       );
       if (response.statusCode != 200) return [];
       final json = decodeUtf8Json(response);
       final ids = json['ids'] as List<dynamic>? ?? [];
       return ids.map((e) => e as int).toList();
-    } catch (_) {
+    } catch (e) {
+      if (!fallbackOnError) rethrow;
       return [];
     }
   }
 
-  static Future<bool> getDatamatrixLoginEnabled() async {
+  static Future<bool> getDatamatrixLoginEnabled({
+    bool fallbackOnError = true,
+  }) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/settings/datamatrix_login_enabled'),
+      final response = await _send(
+        http.get(Uri.parse('$baseUrl/settings/datamatrix_login_enabled')),
       );
       if (response.statusCode != 200) return true;
       final json = decodeUtf8Json(response);
       return json['enabled'] as bool? ?? true;
-    } catch (_) {
+    } catch (e) {
+      if (!fallbackOnError) rethrow;
       return true;
     }
   }
 
   // Get total Pokemon count by type (global statistics)
   static Future<Map<String, dynamic>> getTotalPokemonByType() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/total_pokemon_by_type'),
+    final response = await _send(
+      http.get(Uri.parse('$baseUrl/total_pokemon_by_type')),
     );
     if (response.statusCode != 200) {
       throw Exception(

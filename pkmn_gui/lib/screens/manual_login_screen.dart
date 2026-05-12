@@ -196,6 +196,11 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
         ).login(userId, displayName, encodedToken, validUntil);
         Navigator.pushReplacementNamed(context, '/home');
       } catch (e) {
+        if (!mounted) return;
+        if (isBackendUnavailableError(e)) {
+          Navigator.pushReplacementNamed(context, '/backend_unavailable');
+          return;
+        }
         setState(() => _errorMessage = 'Fel: $e');
       } finally {
         if (mounted) setState(() => _isProcessing = false);
@@ -236,6 +241,11 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
         ).login(userId, name, encodedToken, validUntil);
         Navigator.pushReplacementNamed(context, '/home');
       } catch (e) {
+        if (!mounted) return;
+        if (isBackendUnavailableError(e)) {
+          Navigator.pushReplacementNamed(context, '/backend_unavailable');
+          return;
+        }
         setState(() => _errorMessage = 'Fel: $e');
       } finally {
         if (mounted) setState(() => _isProcessing = false);
