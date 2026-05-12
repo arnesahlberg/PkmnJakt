@@ -370,9 +370,8 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
                       ),
 
                     // Submit
-                    ElevatedButton(
-                      style: AppButtonStyles.buttonStyleWide,
-                      onPressed: _isProcessing ? null : _submit,
+                    PokedexButton(
+                      onPressed: _isProcessing ? () {} : _submit,
                       child: Text(_isSignUp! ? 'Skapa konto' : 'Logga in'),
                     ),
                     const SizedBox(height: 24),
