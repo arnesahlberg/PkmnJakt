@@ -618,6 +618,67 @@ pub fn get_all_pokemon_admin(conn: &Connection) -> Result<Vec<PokemonAdminEntry>
     Ok(result)
 }
 
+pub fn get_pokemon_admin_paginated(limit: u32, offset: u32, conn: &Connection) -> Result<Vec<PokemonAdminEntry>> {
+    let mut stmt = conn.prepare(
+        "SELECT pokemon_id, name, active FROM Pokemon ORDER BY pokemon_id LIMIT ?1 OFFSET ?2",
+    )?;
+    let rows = stmt.query_map(params![limit, offset], |row| {
+        let active_int: i32 = row.get(2)?;
+        Ok(PokemonAdminEntry {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            active: active_int != 0,
+        })
+    })?;
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?);
+    }
+    Ok(result)
+}
+
+pub fn get_pokemon_admin_count(conn: &Connection) -> Result<u32> {
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM Pokemon")?;
+    let count: u32 = stmt.query_row([], |row| row.get(0))?;
+    Ok(count)
+}
+
+pub fn get_pokemon_admin_filtered(
+    filter: &str,
+    limit: u32,
+    offset: u32,
+    conn: &Connection,
+) -> Result<Vec<PokemonAdminEntry>> {
+    let pattern = format!("%{}%", filter);
+    let mut stmt = conn.prepare(
+        "SELECT pokemon_id, name, active FROM Pokemon \
+         WHERE name LIKE ?1 OR CAST(pokemon_id AS TEXT) LIKE ?1 \
+         ORDER BY pokemon_id LIMIT ?2 OFFSET ?3",
+    )?;
+    let rows = stmt.query_map(params![pattern, limit, offset], |row| {
+        let active_int: i32 = row.get(2)?;
+        Ok(PokemonAdminEntry {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            active: active_int != 0,
+        })
+    })?;
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row?);
+    }
+    Ok(result)
+}
+
+pub fn get_pokemon_admin_filtered_count(filter: &str, conn: &Connection) -> Result<u32> {
+    let pattern = format!("%{}%", filter);
+    let mut stmt = conn.prepare(
+        "SELECT COUNT(*) FROM Pokemon WHERE name LIKE ?1 OR CAST(pokemon_id AS TEXT) LIKE ?1",
+    )?;
+    let count: u32 = stmt.query_row(params![pattern], |row| row.get(0))?;
+    Ok(count)
+}
+
 pub fn set_pokemon_active(pokemon_id: u32, active: bool, conn: &Connection) -> Result<()> {
     conn.execute(
         "UPDATE Pokemon SET active = ?1 WHERE pokemon_id = ?2",

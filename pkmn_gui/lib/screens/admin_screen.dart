@@ -36,6 +36,9 @@ class _AdminScreenState extends State<AdminScreen> {
   bool _pokemonLoading = true;
   final TextEditingController _pokemonSearchController =
       TextEditingController();
+  int _pokemonCurrentPage = 1;
+  int _pokemonTotalPages = 1;
+  static const int _pokemonPerPage = 100;
 
   @override
   void initState() {
@@ -138,11 +141,16 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   Future<void> _fetchPokemonList(String token) async {
-    setState(() => _pokemonLoading = true);
     try {
-      final result = await AdminApiService.getAdminPokemonList(token);
+      final result = await AdminApiService.getAdminPokemonList(
+        token,
+        page: _pokemonCurrentPage,
+        perPage: _pokemonPerPage,
+        search: _pokemonSearch.isNotEmpty ? _pokemonSearch : null,
+      );
       setState(() {
         _allPokemon = result['pokemon'] as List<dynamic>? ?? [];
+        _pokemonTotalPages = result['total_pages'] as int? ?? 1;
         _pokemonLoading = false;
       });
     } catch (e) {
@@ -701,16 +709,6 @@ class _AdminScreenState extends State<AdminScreen> {
       );
     }
 
-    final filtered =
-        _pokemonSearch.isEmpty
-            ? _allPokemon
-            : _allPokemon.where((p) {
-              final name = (p['name'] as String? ?? '').toLowerCase();
-              final id = p['id']?.toString() ?? '';
-              return name.contains(_pokemonSearch.toLowerCase()) ||
-                  id.contains(_pokemonSearch);
-            }).toList();
-
     return Column(
       children: [
         Padding(
@@ -864,15 +862,18 @@ class _AdminScreenState extends State<AdminScreen> {
             ),
             style: AppTextStyles.bodyLarge,
             onChanged: (value) {
-              setState(() => _pokemonSearch = value.trim());
+              _pokemonSearch = _pokemonSearchController.text.trim();
+              _pokemonCurrentPage = 1;
+              final token = session.token;
+              if (token != null) _fetchPokemonList(token);
             },
           ),
         ),
         Expanded(
           child: ListView.builder(
-            itemCount: filtered.length,
+            itemCount: _allPokemon.length,
             itemBuilder: (_, index) {
-              final pokemon = filtered[index];
+              final pokemon = _allPokemon[index];
               final pokemonId = pokemon['id'] as int? ?? 0;
               final pokemonName = pokemon['name'] as String? ?? '';
               final isActive = pokemon['active'] as bool? ?? false;
@@ -930,6 +931,39 @@ class _AdminScreenState extends State<AdminScreen> {
                 ),
               );
             },
+          ),
+        ),
+        // Pagination controls
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            if (_pokemonCurrentPage > 1)
+              ElevatedButton(
+                onPressed: () async {
+                  setState(() => _pokemonCurrentPage--);
+                  final token = session.token;
+                  if (token != null) await _fetchPokemonList(token);
+                },
+                style: AppButtonStyles.primaryButtonStyle,
+                child: const Text('Previous', style: AppTextStyles.buttonText),
+              ),
+            if (_pokemonCurrentPage < _pokemonTotalPages)
+              ElevatedButton(
+                onPressed: () async {
+                  setState(() => _pokemonCurrentPage++);
+                  final token = session.token;
+                  if (token != null) await _fetchPokemonList(token);
+                },
+                style: AppButtonStyles.primaryButtonStyle,
+                child: const Text('Next', style: AppTextStyles.buttonText),
+              ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            "Sida $_pokemonCurrentPage / $_pokemonTotalPages",
+            style: AppTextStyles.bodyMedium,
           ),
         ),
       ],

@@ -615,11 +615,23 @@ class AdminApiService {
     return response.statusCode == 200 && response.body == 'true';
   }
 
-  static Future<Map<String, dynamic>> getAdminPokemonList(String token) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/admin/pokemon_list'),
-      headers: ApiService._headers(token),
-    );
+  static Future<Map<String, dynamic>> getAdminPokemonList(
+    String token, {
+    int page = 1,
+    int perPage = 100,
+    String? search,
+  }) async {
+    final params = <String, String>{
+      'page': page.toString(),
+      'per_page': perPage.toString(),
+    };
+    if (search != null && search.isNotEmpty) {
+      params['search'] = search;
+    }
+    final uri = Uri.parse(
+      '$baseUrl/admin/pokemon_list',
+    ).replace(queryParameters: params);
+    final response = await http.get(uri, headers: ApiService._headers(token));
     return decodeUtf8Json(response);
   }
 

@@ -1668,9 +1668,20 @@ pub struct EnabledPokemonIdsResponse {
     pub ids: Vec<u32>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
+pub struct AdminPokemonListQuery {
+    pub page: Option<i32>,
+    pub per_page: Option<u32>,
+    pub search: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
 pub struct PokemonListResponse {
     pub pokemon: Vec<PokemonAdminEntry>,
+    pub total_count: u32,
+    pub page: u32,
+    pub per_page: u32,
+    pub total_pages: u32,
 }
 
 pub async fn get_enabled_pokemon_ids() -> HttpResponse {
@@ -1685,7 +1696,10 @@ pub async fn get_enabled_pokemon_ids() -> HttpResponse {
     HttpResponse::Ok().json(EnabledPokemonIdsResponse { ids })
 }
 
-pub async fn admin_get_pokemon_list(req: HttpRequest) -> HttpResponse {
+pub async fn admin_get_pokemon_list(
+    req: HttpRequest,
+    query: web::Query<AdminPokemonListQuery>,
+) -> HttpResponse {
     let token = req.headers().get(AUHTORIZATION_HEADER_LABEL)
         .and_then(|hv| hv.to_str().ok())
         .unwrap_or("");
@@ -1701,8 +1715,36 @@ pub async fn admin_get_pokemon_list(req: HttpRequest) -> HttpResponse {
     if !is_admin {
         return HttpResponse::Forbidden().finish();
     }
-    let pokemon = databaseconnection::get_all_pokemon_admin(&conn).unwrap();
-    HttpResponse::Ok().json(PokemonListResponse { pokemon })
+
+    let per_page = query.per_page.unwrap_or(100).min(200); // Max 200 per page
+
+    let has_search = query.search.as_ref().map_or(false, |s| !s.trim().is_empty());
+    let (total_count, pokemon) = if has_search {
+        let search = query.search.as_ref().unwrap().trim();
+        let count = databaseconnection::get_pokemon_admin_filtered_count(search, &conn).unwrap();
+        let total_pages = if count == 0 { 1 } else { (count + per_page - 1) / per_page };
+        let page = query.page.unwrap_or(1).max(1).min(total_pages as i32) as u32;
+        let offset = (page - 1) * per_page;
+        let list = databaseconnection::get_pokemon_admin_filtered(search, per_page, offset, &conn).unwrap();
+        (count, list)
+    } else {
+        let count = databaseconnection::get_pokemon_admin_count(&conn).unwrap();
+        let total_pages = if count == 0 { 1 } else { (count + per_page - 1) / per_page };
+        let page = query.page.unwrap_or(1).max(1).min(total_pages as i32) as u32;
+        let offset = (page - 1) * per_page;
+        let list = databaseconnection::get_pokemon_admin_paginated(per_page, offset, &conn).unwrap();
+        (count, list)
+    };
+
+    let total_pages = if total_count == 0 { 1 } else { (total_count + per_page - 1) / per_page };
+    let page = query.page.unwrap_or(1).max(1).min(total_pages as i32) as u32;
+    HttpResponse::Ok().json(PokemonListResponse {
+        pokemon,
+        total_count,
+        page,
+        per_page,
+        total_pages,
+    })
 }
 
 pub async fn admin_set_pokemon_active(req: HttpRequest, info: web::Json<SetPokemonActiveRequest>) -> HttpResponse {
