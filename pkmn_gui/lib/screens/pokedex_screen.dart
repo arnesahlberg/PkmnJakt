@@ -6,6 +6,7 @@ import '../api_calls.dart';
 import '../main.dart';
 import '../utils/auth_utils.dart';
 import '../constants.dart';
+import '../widgets/pokedex_button.dart';
 import '../widgets/type_badge.dart';
 
 class PokedexScreen extends StatefulWidget {
@@ -210,7 +211,8 @@ class _PokedexScreenState extends State<PokedexScreen> {
                           fontSize: 14,
                         ),
                       const SizedBox(height: 24),
-                      ElevatedButton(
+                      // button to close (pokedex-button type)
+                      /* ElevatedButton( // replaced
                         onPressed: () => Navigator.pop(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryRed,
@@ -220,6 +222,16 @@ class _PokedexScreenState extends State<PokedexScreen> {
                             ),
                           ),
                         ),
+                        child: const Text(
+                          "Stäng",
+                          style: TextStyle(
+                            fontFamily: 'PixelFont',
+                            color: Colors.white,
+                          ),
+                        ),
+                      ), */
+                      PokedexButton(
+                        onPressed: () => Navigator.pop(context),
                         child: const Text(
                           "Stäng",
                           style: TextStyle(
