@@ -188,6 +188,11 @@ class _QRScannerScreenState extends State<QRScannerScreen>
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, '/home');
       } catch (e) {
+        if (!mounted) return;
+        if (isBackendUnavailableError(e)) {
+          Navigator.pushReplacementNamed(context, '/backend_unavailable');
+          return;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -198,12 +203,12 @@ class _QRScannerScreenState extends State<QRScannerScreen>
           ),
         );
       } finally {
-        setState(() {
-          _isProcessing = false;
-        });
-        // Only reset _scanned if still mounted and if we didn't successfully login
-        // (successful login navigates away from this screen)
         if (mounted) {
+          setState(() {
+            _isProcessing = false;
+          });
+          // Only reset _scanned if still mounted and if we didn't successfully login
+          // (successful login navigates away from this screen)
           Future.delayed(const Duration(seconds: 1), () {
             if (mounted) {
               setState(() {

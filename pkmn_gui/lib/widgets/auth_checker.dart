@@ -23,8 +23,24 @@ class AuthChecker extends StatelessWidget {
     return FutureBuilder<bool>(
       future: ApiService.validateToken(session.token!),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          if (isBackendUnavailableError(snapshot.error!)) {
+            Future.microtask(() {
+              Navigator.pushReplacementNamed(context, '/backend_unavailable');
+            });
+            return Container();
+          }
+          session.logout();
+          Future.microtask(() {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+            );
+          });
+          return Container();
         }
         if (snapshot.data != true) {
           session.logout();

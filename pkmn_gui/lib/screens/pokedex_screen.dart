@@ -6,6 +6,7 @@ import '../api_calls.dart';
 import '../main.dart';
 import '../utils/auth_utils.dart';
 import '../constants.dart';
+import '../widgets/pokedex_button.dart';
 import '../widgets/type_badge.dart';
 
 class PokedexScreen extends StatefulWidget {
@@ -23,17 +24,24 @@ class _PokedexScreenState extends State<PokedexScreen> {
 
   Future<List<dynamic>> _fetchPokedex() async {
     final session = Provider.of<UserSession>(context, listen: false);
-    final results = await Future.wait([
-      ApiService.getMyPokedex(session.token!),
-      ApiService.getEnabledPokemonIds(),
-    ]);
-    final pokedexResult = results[0] as Map<String, dynamic>;
-    final enabledIds = results[1] as List<int>;
-    setState(() {
-      _enabledIds = enabledIds;
-      _isLoading = false;
-    });
-    return pokedexResult['pokedex'] as List<dynamic>;
+    try {
+      final results = await Future.wait([
+        ApiService.getMyPokedex(session.token!),
+        ApiService.getEnabledPokemonIds(),
+      ]);
+      final pokedexResult = results[0] as Map<String, dynamic>;
+      final enabledIds = results[1] as List<int>;
+      setState(() {
+        _enabledIds = enabledIds;
+        _isLoading = false;
+      });
+      return pokedexResult['pokedex'] as List<dynamic>;
+    } catch (e) {
+      if (mounted && isBackendUnavailableError(e)) {
+        Navigator.pushReplacementNamed(context, '/backend_unavailable');
+      }
+      rethrow;
+    }
   }
 
   Future<void> _refreshPokedex() async {
@@ -203,7 +211,8 @@ class _PokedexScreenState extends State<PokedexScreen> {
                           fontSize: 14,
                         ),
                       const SizedBox(height: 24),
-                      ElevatedButton(
+                      // button to close (pokedex-button type)
+                      /* ElevatedButton( // replaced
                         onPressed: () => Navigator.pop(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryRed,
@@ -213,6 +222,16 @@ class _PokedexScreenState extends State<PokedexScreen> {
                             ),
                           ),
                         ),
+                        child: const Text(
+                          "Stäng",
+                          style: TextStyle(
+                            fontFamily: 'PixelFont',
+                            color: Colors.white,
+                          ),
+                        ),
+                      ), */
+                      PokedexButton(
+                        onPressed: () => Navigator.pop(context),
                         child: const Text(
                           "Stäng",
                           style: TextStyle(

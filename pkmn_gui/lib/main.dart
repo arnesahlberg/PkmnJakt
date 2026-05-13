@@ -10,6 +10,7 @@ import 'screens/profile_screen.dart';
 import 'screens/highscore_page.dart';
 import 'screens/game_statistics_screen.dart';
 import 'screens/manual_login_screen.dart';
+import 'screens/backend_unavailable_screen.dart';
 import 'constants.dart';
 
 // ------------------------------
@@ -168,6 +169,7 @@ class MyApp extends StatelessWidget {
         '/pokemon_found': (_) => const AdminPokemonFoundScreen(),
         '/game_statistics': (_) => const GameStatisticsScreen(),
         '/manual_login': (_) => const ManualLoginScreen(),
+        '/backend_unavailable': (_) => const BackendUnavailableScreen(),
       },
     );
   }

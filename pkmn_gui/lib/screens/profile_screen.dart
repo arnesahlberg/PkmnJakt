@@ -29,7 +29,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (isValid && mounted) {
         final session = Provider.of<UserSession>(context, listen: false);
         try {
-          final typeStats = await ApiService.getUserPokemonByType(session.userId!);
+          final typeStats = await ApiService.getUserPokemonByType(
+            session.userId!,
+          );
           if (mounted) {
             setState(() {
               _typeStats = typeStats;
@@ -37,6 +39,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             });
           }
         } catch (e) {
+          if (mounted && isBackendUnavailableError(e)) {
+            Navigator.pushReplacementNamed(context, '/backend_unavailable');
+            return;
+          }
           if (mounted) {
             setState(() {
               _isLoading = false;
@@ -209,23 +215,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 const SizedBox(height: 16),
                                 ..._typeStats!.entries
                                     .where((entry) => entry.value > 0)
-                                    .map((entry) => Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              TypeBadge(typeName: entry.key),
-                                              Text(
-                                                '${entry.value} st',
-                                                style: const TextStyle(
-                                                  fontFamily: 'PixelFont',
-                                                  fontSize: 14,
-                                                  color: Colors.black87,
-                                                ),
+                                    .map(
+                                      (entry) => Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 4.0,
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            TypeBadge(typeName: entry.key),
+                                            Text(
+                                              '${entry.value} st',
+                                              style: const TextStyle(
+                                                fontFamily: 'PixelFont',
+                                                fontSize: 14,
+                                                color: Colors.black87,
                                               ),
-                                            ],
-                                          ),
-                                        ))
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
                                     .toList(),
                               ],
                             ),

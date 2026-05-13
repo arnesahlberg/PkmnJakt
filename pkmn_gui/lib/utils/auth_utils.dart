@@ -20,10 +20,18 @@ class AuthUtils {
       return false;
     }
 
+    if (session.isExpored()) {
+      session.logout();
+      Future.microtask(() {
+        navigator.pushNamedAndRemoveUntil('/', (route) => false);
+      });
+      return false;
+    }
+
     try {
       final token = session.token;
       final isValid = await ApiService.validateToken(token!);
-      if (!isValid || session.isExpored()) {
+      if (!isValid) {
         session.logout();
         Future.microtask(() {
           navigator.pushNamedAndRemoveUntil('/', (route) => false);
@@ -32,6 +40,16 @@ class AuthUtils {
       }
       return true;
     } catch (e) {
+      if (isBackendUnavailableError(e)) {
+        Future.microtask(() {
+          navigator.pushNamedAndRemoveUntil(
+            '/backend_unavailable',
+            (route) => false,
+          );
+        });
+        return false;
+      }
+
       session.logout();
       Future.microtask(() {
         navigator.pushNamedAndRemoveUntil('/', (route) => false);

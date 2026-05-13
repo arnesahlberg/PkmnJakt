@@ -5,6 +5,7 @@ import '../api_calls.dart';
 import '../constants.dart';
 import '../utils/name_suggestions.dart';
 import '../widgets/common_app_bar.dart';
+import '../widgets/pokedex_button.dart';
 
 class ManualLoginScreen extends StatefulWidget {
   const ManualLoginScreen({super.key});
@@ -13,7 +14,7 @@ class ManualLoginScreen extends StatefulWidget {
 }
 
 class _ManualLoginScreenState extends State<ManualLoginScreen> {
-  bool _isSignUp = true;
+  bool? _isSignUp; // null = mode not yet selected
   bool _isProcessing = false;
 
   final _userIdController = TextEditingController();
@@ -137,7 +138,7 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
       return;
     }
 
-    if (_isSignUp) {
+    if (_isSignUp!) {
       final displayName = _displayNameController.text.trim();
       final confirm = _confirmController.text;
 
@@ -195,6 +196,11 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
         ).login(userId, displayName, encodedToken, validUntil);
         Navigator.pushReplacementNamed(context, '/home');
       } catch (e) {
+        if (!mounted) return;
+        if (isBackendUnavailableError(e)) {
+          Navigator.pushReplacementNamed(context, '/backend_unavailable');
+          return;
+        }
         setState(() => _errorMessage = 'Fel: $e');
       } finally {
         if (mounted) setState(() => _isProcessing = false);
@@ -235,6 +241,11 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
         ).login(userId, name, encodedToken, validUntil);
         Navigator.pushReplacementNamed(context, '/home');
       } catch (e) {
+        if (!mounted) return;
+        if (isBackendUnavailableError(e)) {
+          Navigator.pushReplacementNamed(context, '/backend_unavailable');
+          return;
+        }
         setState(() => _errorMessage = 'Fel: $e');
       } finally {
         if (mounted) setState(() => _isProcessing = false);
@@ -244,8 +255,43 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isSignUp == null) {
+      return Scaffold(
+        appBar: const CommonAppBar(title: 'Pokémonjakt'),
+        body: Container(
+          decoration: AppBoxDecorations.gradientBackground,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Välkommen!',
+                    style: AppTextStyles.titleLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
+                  PokedexButton(
+                    onPressed: () => setState(() => _isSignUp = false),
+                    child: const Text('Logga in igen'),
+                  ),
+                  const SizedBox(height: 16),
+                  PokedexButton(
+                    onPressed: () => setState(() => _isSignUp = true),
+                    child: const Text('Registrera dig'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
-      appBar: CommonAppBar(title: _isSignUp ? 'Registrera' : 'Logga in'),
+      appBar: CommonAppBar(title: _isSignUp! ? 'Registrera' : 'Logga in'),
       body: Stack(
         children: [
           Container(
@@ -270,7 +316,7 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
                     const SizedBox(height: 16),
 
                     // Display name (sign-up only)
-                    if (_isSignUp) ...[
+                    if (_isSignUp!) ...[
                       Row(
                         children: [
                           Expanded(
@@ -309,7 +355,7 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
                     const SizedBox(height: 16),
 
                     // Confirm password (sign-up only)
-                    if (_isSignUp) ...[
+                    if (_isSignUp!) ...[
                       TextField(
                         controller: _confirmController,
                         obscureText: true,
@@ -334,10 +380,9 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
                       ),
 
                     // Submit
-                    ElevatedButton(
-                      style: AppButtonStyles.buttonStyleWide,
-                      onPressed: _isProcessing ? null : _submit,
-                      child: Text(_isSignUp ? 'Skapa konto' : 'Logga in'),
+                    PokedexButton(
+                      onPressed: _isProcessing ? () {} : _submit,
+                      child: Text(_isSignUp! ? 'Skapa konto' : 'Logga in'),
                     ),
                     const SizedBox(height: 24),
 
@@ -346,7 +391,7 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          _isSignUp
+                          _isSignUp!
                               ? 'Har du redan ett konto?'
                               : 'Inget konto ännu?',
                           style: AppTextStyles.bodyMedium,
@@ -354,14 +399,14 @@ class _ManualLoginScreenState extends State<ManualLoginScreen> {
                         TextButton(
                           onPressed:
                               () => setState(() {
-                                _isSignUp = !_isSignUp;
+                                _isSignUp = !_isSignUp!;
                                 _errorMessage = null;
                               }),
                           style: TextButton.styleFrom(
                             foregroundColor: AppColors.primaryRed,
                           ),
                           child: Text(
-                            _isSignUp ? 'Logga in' : 'Registrera dig',
+                            _isSignUp! ? 'Logga in' : 'Registrera dig',
                           ),
                         ),
                       ],
